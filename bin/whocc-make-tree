@@ -1,0 +1,113 @@
+#! /usr/bin/env python3
+# -*- Python -*-
+
+"""
+Makes phylogenetic tree for WHO CC sequences
+"""
+
+import sys
+if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
+import datetime, getpass, socket, traceback
+from pathlib import Path
+sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
+import logging; module_logger = logging.getLogger(__name__)
+
+import seqdb as seqdb_m
+from seqdb import Seqdb, timeit, email
+
+# ----------------------------------------------------------------------
+
+sBaseSeq = {
+    "BVIC": "VICTORIA/830/2013 MDCK2",
+    "BYAM": "CAMBODIA/FSS29374/2014 MDCK1",
+    "H3":   "HAWAII/22/2012 MDCK1",
+    "H1":   "SWITZERLAND/9772556/2013 SIAT1",
+    }
+
+sStartDates = {
+    "BVIC": "20141201",
+    "BYAM": "20141201",
+    "H3":   "20150301",
+    "H1":   "20141201",
+    }
+
+sVirusTypeLineage = {
+    "BVIC": ["B", "VICTORIA"],
+    "BYAM": ["B", "YAMAGATA"],
+    "H3":   ["A(H3N2)", None],
+    "H1":   ["A(H1N1)", None],
+    }
+
+sWorkingDirRoot = Path("/syn/eu/ac/results/whocc-tree")
+
+# ----------------------------------------------------------------------
+
+def main(args):
+    try:
+        working_dir = make_working_dir(args)
+        module_logger.info('Working dir: {}'.format(working_dir))
+        seqdb = seqdb_m.open(Path(args.path_to_seqdb).expanduser())
+        vt, lin = sVirusTypeLineage[args.virus_type.upper()]
+        export_data = seqdb_m.export_from_seqdb(
+            seqdb=seqdb, filename=Path(working_dir, "source.fasta"), output_format="fasta", amino_acids=False, lab=None, virus_type=vt, lineage=lin,
+            gene="HA", start_date=sStartDates[args.virus_type], end_date=None, base_seq=sBaseSeq[args.virus_type], name_format="{seq_id}",
+            aligned=True, encode_name=True, wrap=False, truncate_to_most_common_length=True, hamming_distance_threshold=150, hamming_distance_report=False,
+            sort_by=None, with_hi_name=False, name_match=None)
+        run_id = "{} {}".format(args.virus_type, "bfgs" if args.raxml_bfgs else "no-bfgs")
+        r = seqdb_m.run_raxml_garli(working_dir=working_dir, run_id=run_id, fasta_file=export_data["filename"], base_seq_name=export_data["base_seq"], raxml_bfgs=args.raxml_bfgs, raxml_num_runs=args.raxml_num_runs, garli_num_runs=args.garli_num_runs, garli_attachmentspertaxon=args.garli_attachmentspertaxon, email=args.email, machines=args.machines and args.machines.split(","))
+        if args.email:
+            email.send(to=args.email,
+                       subject="Completed: {} {}".format(Path(sys.argv[0]).name, socket.getfqdn()),
+                       body="{}:{}\n\n{}\n\nScore: {}\nLongest time: {}\nTree {}\n".format(socket.getfqdn(), working_dir, sys.argv, r[" total"]["garli_score"], r[" total"]["longest_time_s"], r[" total"]["tree"]))
+    except Exception as err:
+        if args.email:
+            email.send(to=args.email,
+                       subject="FAILED: {} {}".format(Path(sys.argv[0]).name, socket.getfqdn()),
+                       body="{}:{}\n\n{}\n\n{}".format(socket.getfqdn(), working_dir, sys.argv, traceback.format_exc()))
+        raise
+
+# ----------------------------------------------------------------------
+
+def make_working_dir(args):
+    working_dir = Path(sWorkingDirRoot, "{}-{}-{}-{}-{}".format(datetime.datetime.now().strftime("%Y-%m%d-%H%M"), args.virus_type.lower(), "bfgs" if args.raxml_bfgs else "no-bfgs", args.raxml_num_runs, args.garli_num_runs))
+    try:
+        working_dir.mkdir(parents=True, exist_ok=False)
+    except Exception as err:
+        raise ValueError("Cannot make {}: {}".format(working_dir, err))
+    return working_dir.resolve()
+
+# ----------------------------------------------------------------------
+
+with timeit(sys.argv[0]):
+    try:
+        import argparse
+        parser = argparse.ArgumentParser(description=__doc__)
+        parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
+
+        parser.add_argument('--flu-lineage', action='store', dest='virus_type', required=True, help='Build tree for this virus type/subtype/lineage: BVIC, BYAM, H1, H3.')
+        # parser.add_argument('--gene', action='store', dest='gene', default="", help='HA or NA.')
+        # parser.add_argument('--hamming-distance-threshold', action='store', type=int, dest='hamming_distance_threshold', default=150, help='Select only sequences having hamming distance to the base sequence less than threshold. Use 150 for nucs (H3).')
+
+        parser.add_argument('--raxml-no-bfgs', action='store_false', dest='raxml_bfgs', default=True, help='Disable bfgs in RAxML.')
+        parser.add_argument('--raxml-num-runs', action='store', dest='raxml_num_runs', type=int, default=256, help='Number of runs of RAxML with different random seeds.')
+
+        parser.add_argument('--garli-num-runs', action='store', dest='garli_num_runs', type=int, default=256, help='Number of runs of GARLI with different random seeds.')
+        parser.add_argument('--garli-attachmentspertaxon', action='store', type=int, dest='garli_attachmentspertaxon', default=1000000, help='GARLI: the number of attachment branches evaluated for each taxon to be added to the tree during the creation of an ML stepwise-addition starting tree (when garli is run without raxml step).')
+        parser.add_argument('--garli-genthreshfortopoterm', action='store', type=int, dest='garli_genthreshfortopoterm', default=20000, help='GARLI termination condition: when no new significantly better scoring topology has been encountered in greater than this number of generations, garli stops.')
+
+        parser.add_argument('--db', action='store', dest='path_to_seqdb', default='~/WHO/seqdb.json.xz', help='Path to sequence database.')
+        parser.add_argument('--email', action='store', dest='email', default=getpass.getuser(), help='Email to report status of the tasks running in the cluster.')
+        parser.add_argument('--machines', action='store', dest='machines', default=None, help="Comma separated list: odette,i19,i20,i21,o16,o17") # odette.antigenic-cartography.org
+
+        args = parser.parse_args()
+        logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")
+        exit_code = main(args)
+    except Exception as err:
+        logging.error('{}\n{}'.format(err, traceback.format_exc()))
+        exit_code = 1
+exit(exit_code)
+
+# ======================================================================
+### Local Variables:
+### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+### End:

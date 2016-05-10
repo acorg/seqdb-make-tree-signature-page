@@ -1,0 +1,77 @@
+#! /bin/bash
+
+URL_RAXML="https://github.com/stamatak/standard-RAxML.git"
+URL_GARLI="https://github.com/skepner/garli.git"
+
+# ----------------------------------------------------------------------
+
+err()
+{
+    echo Error, exiting 1>&2
+    exit 2
+}
+
+trap err ERR
+
+# ----------------------------------------------------------------------
+
+case "$(hostname)" in
+    jagd)
+        BIN_DIR=/Users/eu/ac/bin
+        BUILD_DIR_ROOT=/Users/eu/ac
+        MAKEFILE_RAXML=Makefile.AVX.mac
+        OPT=-Ofast
+        NPROC=$(/usr/sbin/sysctl -n hw.logicalcpu)
+        ;;
+    i19)
+        BIN_DIR=/syn/bin
+        BUILD_DIR_ROOT=/syn/eu
+        MAKEFILE_RAXML=Makefile.AVX.gcc
+        OPT=-Ofast
+        NPROC=$(nproc)
+        ;;
+    *)
+        echo "Unsupported host" 1>&2
+        exit 1
+esac
+
+# ----------------------------------------------------------------------
+# RAxML
+# ----------------------------------------------------------------------
+
+BUILD_DIR_RAXML="$BUILD_DIR_ROOT"/raxml
+
+if [ -d "$BUILD_DIR_RAXML" ]; then
+    cd "$BUILD_DIR_RAXML"
+    make -f "$MAKEFILE_RAXML" clean
+    git pull
+else
+    cd "$(dirname $BUILD_DIR_RAXML)"
+    git clone "$URL_RAXML" "$BUILD_DIR_RAXML"
+    cd "$BUILD_DIR_RAXML"
+fi
+
+mv "$MAKEFILE_RAXML" "$MAKEFILE_RAXML".bak
+sed "s/-O2/$OPT/" "$MAKEFILE_RAXML".bak >"$MAKEFILE_RAXML"
+make -j $NPROC -f "$MAKEFILE_RAXML"
+install raxmlHPC-AVX "$BIN_DIR"/raxml
+
+# ----------------------------------------------------------------------
+# GARLI
+# ----------------------------------------------------------------------
+
+BUILD_DIR_GARLI="$BUILD_DIR_ROOT"/garli
+MAKE_DIR_GARLI="$BUILD_DIR_GARLI"/garli/trunk
+
+if [ -d "$BUILD_DIR_GARLI" ]; then
+    cd "$MAKE_DIR_GARLI"
+    # make -f "$MAKEFILE_GARLI" clean
+    git pull
+else
+    cd "$(dirname $BUILD_DIR_GARLI)"
+    git clone "$URL_GARLI" "$BUILD_DIR_GARLI"
+    cd "$MAKE_DIR_GARLI"
+fi
+
+./build2016.sh
+install bin/Garli "$BIN_DIR"/garli

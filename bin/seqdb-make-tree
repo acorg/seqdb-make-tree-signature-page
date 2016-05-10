@@ -1,0 +1,207 @@
+#! /usr/bin/env python3
+# -*- Python -*-
+
+error: BROKEN! (see whocc-make-tree for correct implementation)
+
+"""
+Makes phylogenetic tree
+
+Base seq/outgroups and start date 2016-05-08
+H1pdm: SWITZERLAND/9772556/2013 SIAT1          20141201
+H3   : HAWAII/22/2012 MDCK1                    20150301
+B/Vic: VICTORIA/830/2013 MDCK2                 20141201
+B/Yam: CAMBODIA/FSS29374/2014 MDCK1            20141201
+"""
+
+import sys, re, operator, collections, socket, traceback, pprint, json, getpass, time as time_m
+if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
+from pathlib import Path
+sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
+import logging; module_logger = logging.getLogger(__name__)
+
+from seqdb import Seqdb, fasta as fasta_m, open_file, timeit, email
+from seqdb.raxml import Raxml
+from seqdb.garli import Garli
+
+# ----------------------------------------------------------------------
+
+def main(args):
+    try:
+        working_dir = make_working_dir(Path(args.working_dir[0]))
+        fasta_file, base_seq_name = export_fasta(working_dir, args)
+        r = run_raxml_garli(working_dir, fasta_file, base_seq_name, machines=args.machines and args.machines.split(","), args=args)
+        with Path(working_dir, "result.json").open("w") as f:
+            f.write(json.dumps(r[" best"], indent=2, sort_keys=True, cls=JSONEncoder) + "\n")
+        with Path(working_dir, "result.all.json").open("w") as f:
+            f.write(json.dumps(r, indent=2, sort_keys=True, cls=JSONEncoder) + "\n")
+        if args.email:
+            email.send(to=args.email,
+                       subject="Completed: {} {}".format(Path(sys.argv[0]).name, socket.getfqdn()),
+                       body="{}:{}\n\n{}\n\n{}".format(socket.getfqdn(), working_dir, sys.argv, json.dumps(r, indent=2, sort_keys=True, cls=JSONEncoder)))
+    except Exception as err:
+        if args.email:
+            email.send(to=args.email,
+                       subject="FAILED: {} {}".format(Path(sys.argv[0]).name, socket.getfqdn()),
+                       body="{}:{}\n\n{}\n\n{}".format(socket.getfqdn(), working_dir, sys.argv, traceback.format_exc()))
+        raise
+
+# ----------------------------------------------------------------------
+
+def run_raxml_garli(working_dir, fasta_file, base_seq_name, machines, args):
+    start = time_m.time()
+    bfgs_s = "bfgs" if args.raxml_bfgs else "no-bfgs"
+    if args.base_seq:
+        outgroups = [base_seq_name]
+    else:
+        outgroups = None
+    raxml_output_dir = Path(working_dir, "raxml")
+    raxml = Raxml(email=args.email)
+    raxml_job = raxml.submit_htcondor(num_runs=args.raxml_num_runs, source=fasta_file, output_dir=raxml_output_dir,
+                                      run_id=bfgs_s, bfgs=args.raxml_bfgs, outgroups=outgroups, machines=machines)
+    r_raxml = raxml_job.wait()
+    print(r_raxml[0])
+    with Path(working_dir, "result.raxml.txt").open("w") as f:
+        f.write(r_raxml[0].tabbed_report_header()+ "\n")
+        f.write("\n".join(rr.tabbed_report() for rr in r_raxml) + "\n")
+
+    # --------------------------------------------------
+
+    garli_output_dir = Path(working_dir, "garli")
+    garli = Garli(email=args.email)
+    garli_job = garli.submit_htcondor(num_runs=args.garli_num_runs, source=fasta_file, source_tree=r_raxml[0].tree, output_dir=garli_output_dir,
+                                      run_id=bfgs_s, attachmentspertaxon=args.garli_attachmentspertaxon, machines=machines)
+    r_garli = garli_job.wait()
+    print(r_garli[0])
+    with Path(working_dir, "result.garli.txt").open("w") as f:
+        f.write(r_garli[0].tabbed_report_header()+ "\n")
+        f.write("\n".join(rr.tabbed_report() for rr in r_garli) + "\n")
+
+    r = {
+        " time": time_m.time() - start,
+        " best": vars(r_garli[0]),
+        bfgs_s: {
+            "raxml": [vars(e) for e in r_raxml],
+            "garli": [vars(e) for e in r_garli]
+            },
+        }
+    return r
+
+# ----------------------------------------------------------------------
+
+class JSONEncoder (json.JSONEncoder):
+
+    def default(self, o):
+        return "<" + repr(o) + ">"
+
+# ----------------------------------------------------------------------
+
+# def run_raxml(working_dir, fasta_file, args):
+#     machines_bfgs = ["i19", "i20"]
+#     machines_no_bfgs = ["odette.antigenic-cartography.org", "i21"]
+
+#     raxml_output_dir = Path(working_dir, "raxml")
+#     raxml = Raxml(email=args.email)
+
+#     # r = raxml.run_locally(num_runs=10, source=fasta_file, output_dir=raxml_output_dir, run_id="local-bfgs", bfgs=args.raxml_bfgs)
+#     # print(r)
+#     # r = raxml.run_locally(num_runs=10, source=fasta_file, output_dir=raxml_output_dir, run_id="local-no-bfgs", bfgs=False)
+#     # print(r)
+
+#     raxml_bfgs = raxml.submit_htcondor(num_runs=args.raxml_num_runs, source=fasta_file, output_dir=Path(raxml_output_dir, "bfgs"), run_id="bfgs", bfgs=args.raxml_bfgs, machines=machines_bfgs)
+#     raxml_no_bfgs = raxml.submit_htcondor(num_runs=args.raxml_num_runs, source=fasta_file, output_dir=Path(raxml_output_dir, "no-bfgs"), run_id="no-bfgs", bfgs=False, machines=machines_no_bfgs)
+
+#     r_raxml_bfgs = raxml_bfgs.wait()
+#     r_raxml_no_bfgs = raxml_no_bfgs.wait()
+#     print(r_raxml_bfgs[0])
+#     print(r_raxml_no_bfgs[0])
+
+#     garli_output_dir = Path(working_dir, "garli")
+#     garli = Garli(email=args.email)
+
+#     garli_bfgs = garli.submit_htcondor(num_runs=args.garli_num_runs, source=fasta_file, source_tree=r_raxml_bfgs[0].tree, output_dir=Path(garli_output_dir, "bfgs"), run_id="bfgs",
+#                                        attachmentspertaxon=args.garli_attachmentspertaxon, machines=machines_bfgs)
+#     garli_no_bfgs = garli.submit_htcondor(num_runs=args.garli_num_runs, source=fasta_file, source_tree=r_raxml_no_bfgs[0].tree, output_dir=Path(garli_output_dir, "no-bfgs"), run_id="no_bfgs",
+#                                        attachmentspertaxon=args.garli_attachmentspertaxon, machines=machines_no_bfgs)
+#     r_garli_bfgs = garli_bfgs.wait()
+#     r_garli_no_bfgs = garli_no_bfgs.wait()
+#     print(r_garli_bfgs[0])
+#     print(r_garli_no_bfgs[0])
+
+#     r = {
+#         "bfgs": {
+#             "raxml": [vars(e) for e in r_raxml_bfgs],
+#             "garli": [vars(e) for e in r_garli_bfgs]
+#             },
+#         "no-bfgs": {
+#             "raxml": [vars(e) for e in r_raxml_no_bfgs],
+#             "garli": [vars(e) for e in r_garli_no_bfgs]
+#             },
+#         }
+#     return r
+
+# ----------------------------------------------------------------------
+
+def export_fasta(working_dir, args):
+    seqdb = Seqdb()
+    seqdb.load(filename=str(Path(args.path_to_seqdb).expanduser()))
+    filename = Path(working_dir, "source.fasta")
+    base_seq_name = fasta_m.export_from_seqdb(
+        seqdb=seqdb, filename=filename, output_format="fasta",
+        amino_acids=False, lab=None, virus_type=args.virus_type, lineage=args.lineage,
+        gene=args.gene, start_date=args.start_date, end_date=args.end_date,
+        base_seq=args.base_seq, name_format="{seq_id}",
+        aligned=True, encode_name=True, wrap=False, truncate_to_most_common_length=True,
+        hamming_distance_threshold=args.hamming_distance_threshold, hamming_distance_report=False,
+        sort_by=None, with_hi_name=False, name_match=None)
+    return filename, base_seq_name
+
+# ----------------------------------------------------------------------
+
+def make_working_dir(working_dir):
+    if working_dir.exists() and not working_dir.is_dir():
+        raise ValueError("{} already exists and it is not a directory".format(working_dir))
+    working_dir.mkdir(parents=True, exist_ok=True)
+    return working_dir.resolve()
+
+# ----------------------------------------------------------------------
+
+with timeit(sys.argv[0]):
+    try:
+        import argparse
+        print(sys.argv)
+        parser = argparse.ArgumentParser(description=__doc__)
+        parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
+
+        parser.add_argument('working_dir', nargs=1, help='directory to store working files.')
+
+        parser.add_argument('--flu', action='store', dest='virus_type', required=True, help='Build tree for this virus type/subtype: B, H1, H3, A(H1N1), A(H3N2).')
+        parser.add_argument('--lineage', action='store', dest='lineage', default=None, help='Build tree for this lineage: VICTORIA, YAMAGATA.')
+        parser.add_argument('--gene', action='store', dest='gene', default="", help='HA or NA.')
+        parser.add_argument('--start-date', action='store', dest='start_date', default=None, help='Build tree for antigens isolated on or after that date (YYYYMMDD).')
+        parser.add_argument('--end-date', action='store', dest='end_date', default=None, help='Build tree for antigens isolated before that date (YYYYMMDD).')
+        parser.add_argument('--base-seq', action='store', dest='base_seq', default=None, help='Base sequence to export together with other sequences.')
+        parser.add_argument('--hamming-distance-threshold', action='store', type=int, dest='hamming_distance_threshold', default=150, help='Select only sequences having hamming distance to the base sequence less than threshold. Use 150 for nucs (H3).')
+
+        parser.add_argument('--raxml-no-bfgs', action='store_false', dest='raxml_bfgs', default=True, help='Disable bfgs in RAxML.')
+        parser.add_argument('--raxml-num-runs', action='store', dest='raxml_num_runs', type=int, default=256, help='Number of runs of RAxML with different random seeds.')
+
+        parser.add_argument('--garli-num-runs', action='store', dest='garli_num_runs', type=int, default=256, help='Number of runs of GARLI with different random seeds.')
+        parser.add_argument('--garli-attachmentspertaxon', action='store', type=int, dest='garli_attachmentspertaxon', default=1000000, help='GARLI: the number of attachment branches evaluated for each taxon to be added to the tree during the creation of an ML stepwise-addition starting tree (when garli is run without raxml step).')
+        parser.add_argument('--garli-genthreshfortopoterm', action='store', type=int, dest='garli_genthreshfortopoterm', default=20000, help='GARLI termination condition: when no new significantly better scoring topology has been encountered in greater than this number of generations, garli stops.')
+
+        parser.add_argument('--db', action='store', dest='path_to_seqdb', default='~/WHO/seqdb.json.xz', help='Path to sequence database.')
+        parser.add_argument('--email', action='store', dest='email', default=getpass.getuser(), help='Email to report status of the tasks running in the cluster.')
+        parser.add_argument('--machines', action='store', dest='machines', default=None, help="Comma separated list: odette,i19,i20,i21,o16,o17") # odette.antigenic-cartography.org
+
+        args = parser.parse_args()
+        logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")
+        exit_code = main(args)
+    except Exception as err:
+        logging.error('{}\n{}'.format(err, traceback.format_exc()))
+        exit_code = 1
+exit(exit_code)
+
+# ======================================================================
+### Local Variables:
+### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+### End:

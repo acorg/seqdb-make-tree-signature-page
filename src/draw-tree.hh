@@ -1,0 +1,55 @@
+#pragma once
+
+#include "draw.hh"
+#include "coloring.hh"
+#include "settings.hh"
+
+// ----------------------------------------------------------------------
+
+class Tree;
+class Node;
+
+// ----------------------------------------------------------------------
+
+class DrawTree
+{
+ public:
+    inline DrawTree() : mColoring(new ColoringBlack()) {}
+//            , mRootEdge(0), mLineColor(0), mLineWidth(1), mNameOffset(0.2) {}
+    inline ~DrawTree() { delete mColoring; }
+
+    DrawTree& prepare(Tree& aTree);
+    inline DrawTree& color_by_continent(bool aColorByContinent) { if (aColorByContinent) { delete mColoring; mColoring = new ColoringByContinent(); } return *this; }
+    inline DrawTree& color_by_pos(int aPos) { if (aPos >= 0) { delete mColoring; mColoring = new ColoringByPos(static_cast<size_t>(aPos)); } return *this; }
+
+    inline const Coloring& coloring() const { return *mColoring; }
+    inline double vertical_step() const { return mVerticalStep; }
+    inline size_t number_of_lines() const { return mNumberOfLines; }
+
+    void draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewport, const SettingsDrawTree& aSettings);
+
+ private:
+    Coloring* mColoring;
+
+      // receive their values in draw()
+    double mWidth;
+    double mHorizontalStep;
+    double mVerticalStep;
+    double mLabelScale;
+    size_t mNumberOfLines;
+
+    Viewport mViewport;         // to avoid passing via draw_node recusrsive calls
+
+    void set_label_scale(Surface& surface, const Tree& aTree, const Viewport& aViewport, const SettingsDrawTree& aSettings);
+    void set_horizontal_step(Surface& surface, const Tree& aTree, const Viewport& aViewport, const SettingsDrawTree& aSettings);
+    double tree_width(Surface& surface, const Node& aNode, const SettingsDrawTree& aSettings, double aEdgeLength = -1.0) const;
+    void draw_node(const Node& aNode, Surface& surface, const Location& aOrigin, const SettingsDrawTree& aSettings, double aEdgeLength = -1.0);
+    void draw_aa_transition(const Node& aNode, Surface& aSurface, const Viewport& aViewport, const SettingsAATransition& aSettings);
+    void draw_grid(Surface& aSurface, const Viewport& aViewport, const SettingsDrawTree& aSettings);
+
+      // to implement clone mColoring
+    DrawTree(const DrawTree&) = default;
+
+}; // class DrawTree
+
+// ----------------------------------------------------------------------
