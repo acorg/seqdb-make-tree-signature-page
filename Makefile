@@ -83,8 +83,12 @@ axe: modules/axe/include/axe.h
 
 pybind11: modules/pybind11/include/pybind11/pybind11.h
 
-modules/axe/include/axe.h modules/pybind11/include/pybind11/pybind11.h: | modules
-	$(call submodule)
+modules/axe/include/axe.h modules/pybind11/include/pybind11/pybind11.h: submodules
+
+.PHONY: submodules
+submodules:
+	git submodule init
+	git submodule update
 
 # ----------------------------------------------------------------------
 
@@ -94,7 +98,7 @@ $(DIST):
 $(BUILD):
 	mkdir -p $(BUILD)
 
-define submodule
-	git submodule init
-	git submodule update
-endef
+# ======================================================================
+### Local Variables:
+### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+### End:
