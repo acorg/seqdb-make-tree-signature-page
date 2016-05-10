@@ -74,21 +74,15 @@ distclean: clean
 
 # ----------------------------------------------------------------------
 
-$(BUILD)/%.o: $(SOURCES_DIR)/%.cc | $(BUILD) axe pybind11
+$(BUILD)/%.o: $(SOURCES_DIR)/%.cc | $(BUILD) $(BUILD)/submodules
 	g++ $(CXXFLAGS) -c -o $@ $<
 
 # ----------------------------------------------------------------------
 
-axe: modules/axe/include/axe.h
-
-pybind11: modules/pybind11/include/pybind11/pybind11.h
-
-modules/axe/include/axe.h modules/pybind11/include/pybind11/pybind11.h: submodules
-
-.PHONY: submodules
-submodules:
+$(BUILD)/submodules: modules/axe/include/axe.h modules/pybind11/include/pybind11/pybind11.h
 	git submodule init
 	git submodule update
+	touch $@
 
 # ----------------------------------------------------------------------
 
