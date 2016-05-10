@@ -5,7 +5,7 @@
 Scans sequences.
 """
 
-import sys, os
+import sys, os, traceback
 if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
@@ -29,7 +29,7 @@ try:
     # parser.add_argument('--pos', action='store', dest='pos', type=int, default=None, help='Report subsequences at given pos.')
     # parser.add_argument('--len', action='store', dest='len', type=int, default=None, help='Report subsequences at given pos with given length.')
     parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
-    parser.add_argument('--db', action='store', dest='path_to_db', default='', help='Path to sequence database (loads db at default location if empty).')
+    parser.add_argument('--db', action='store', dest='path_to_db', required=True, help='Path to sequence database (loads db at default location if empty).')
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")
     exit_code = main(args)
