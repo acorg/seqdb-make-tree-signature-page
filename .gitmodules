@@ -1,0 +1,6 @@
+[submodule "modules/axe"]
+	path = modules/axe
+	url = https://github.com/skepner/axe.git
+[submodule "modules/pybind11"]
+	path = modules/pybind11
+	url = https://github.com/pybind/pybind11.git
