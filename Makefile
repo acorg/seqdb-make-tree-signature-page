@@ -79,7 +79,7 @@ $(BUILD)/%.o: $(SOURCES_DIR)/%.cc | $(BUILD) $(BUILD)/submodules
 
 # ----------------------------------------------------------------------
 
-$(BUILD)/submodules: modules/axe/include/axe.h modules/pybind11/include/pybind11/pybind11.h
+$(BUILD)/submodules:
 	git submodule init
 	git submodule update
 	touch $@
