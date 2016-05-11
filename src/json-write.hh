@@ -162,3 +162,6 @@ namespace jsonw
 } // namespace jsonw
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

@@ -69,3 +69,6 @@ inline bool is_nucleotides(std::string aSequence)
 }
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

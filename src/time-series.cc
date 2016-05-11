@@ -118,3 +118,6 @@ Size TimeSeries::size(Surface& /*aSurface*/, const SettingsTimeSeries& aSettings
 } // TimeSeries::size
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

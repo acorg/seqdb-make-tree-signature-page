@@ -152,3 +152,6 @@ jsonw::IfPrependComma Settings::json(std::string& target, jsonw::IfPrependComma 
 } // Settings::json
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

@@ -143,3 +143,6 @@ void Title::draw(Surface& aSurface, const Viewport& aViewport)
 } // Title::draw
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

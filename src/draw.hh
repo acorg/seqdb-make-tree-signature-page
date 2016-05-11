@@ -307,3 +307,6 @@ inline Size Text::size(Surface& aSurface) const
 } // Text::size
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

@@ -195,3 +195,6 @@ cairo_font_weight_t TextStyle::weight_from_string(std::string source)
 } // TextStyle::weight_from_string
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

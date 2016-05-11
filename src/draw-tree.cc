@@ -177,3 +177,6 @@ double DrawTree::tree_width(Surface& aSurface, const Node& aNode, const Settings
 } // DrawTree::tree_width
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

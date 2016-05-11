@@ -209,6 +209,8 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def("aa_per_pos", &Tree::aa_per_pos)
             .def("find_name", &Tree::find_name, py::arg("name"), py::return_value_policy::reference, py::doc("Leaks memory, use for debugging only!"))
             .def("re_root", static_cast<void (Tree::*)(std::string)>(&Tree::re_root), py::arg("name"))
+            .def("virus_type", &Tree::virus_type)
+            .def("lineage", &Tree::lineage)
             .def("settings", static_cast<Settings& (Tree::*)()>(&Tree::settings), py::return_value_policy::reference)
             ;
 

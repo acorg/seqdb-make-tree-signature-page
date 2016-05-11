@@ -638,3 +638,6 @@ template <typename Value> std::deque<std::vector<SeqdbEntrySeq>> Seqdb::find_ide
 // };
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

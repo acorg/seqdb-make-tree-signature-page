@@ -466,3 +466,6 @@ SeqdbEntrySeq Seqdb::find_by_seq_id(std::string aSeqId) const
 } // Seqdb::find_by_seq_id
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

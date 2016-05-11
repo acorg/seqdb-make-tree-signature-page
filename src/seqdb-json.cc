@@ -93,3 +93,6 @@ void Seqdb::save(std::string filename, size_t indent) const
 } // Seqdb::save
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

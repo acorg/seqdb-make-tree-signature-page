@@ -55,10 +55,21 @@ def main(args):
     parts = seqdb.Show.Title | seqdb.Show.Tree | seqdb.Show.Legend | seqdb.Show.TimeSeries
     if args.show_clades:
         parts |= seqdb.Show.Clades
+
+    virus_type = tree.virus_type()
+    lineage = tree.lineage()
+    if virus_type:
+        title = virus_type
+        if lineage:
+            if lineage in ["VICTORIA", "YAMAGATA"]:
+                lineage = lineage[:3].capitalize()
+            title += "/" + lineage
+    else:
+        title = ""
     signature_page = seqdb.SignaturePage()
     (signature_page
      .select_parts(parts)
-     .title(seqdb.Text(seqdb.Location(0, 10), "B/Yam", 0, 20))
+     .title(seqdb.Text(seqdb.Location(0, 10), title, 0, 20))
      .color_by_continent(args.color_by_continent)
      .color_by_pos(args.color_by_pos - 1)
      .prepare(tree)

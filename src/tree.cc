@@ -275,6 +275,7 @@ void Tree::prepare_for_drawing()
 
 void Tree::match_seqdb(const Seqdb& aSeqdb)
 {
+    std::map<std::string, size_t> virus_types, lineages;
     auto match_name = [&](Node& aNode) {
         const auto entry_seq = aSeqdb.find_by_seq_id(aNode.name);
         if (entry_seq) {
@@ -282,9 +283,14 @@ void Tree::match_seqdb(const Seqdb& aSeqdb)
             aNode.date = entry_seq.entry().date();
             aNode.continent = entry_seq.entry().continent();
             aNode.aa = entry_seq.seq().amino_acids(true);
+            ++virus_types[entry_seq.entry().virus_type()];
+            ++lineages[entry_seq.entry().lineage()];
         }
     };
     iterate_leaf(*this, match_name);
+    auto cmp = [](const auto& a, const auto& b) -> bool { return a.second < b.second; };
+    mVirusType = std::max_element(virus_types.begin(), virus_types.end(), cmp)->first;
+    mLineage = std::max_element(lineages.begin(), lineages.end(), cmp)->first;
 
 } // Tree::match_seqdb
 
@@ -605,3 +611,6 @@ Tree Tree::from_json(std::string data)
 } // Tree::from_json
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

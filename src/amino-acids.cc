@@ -171,3 +171,6 @@ AlignData align(std::string aAminoAcids, Messages& /*aMessages*/)
 } // align
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

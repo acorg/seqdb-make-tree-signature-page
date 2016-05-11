@@ -109,3 +109,6 @@ Size Clades::size(Surface& aSurface, const SettingsClades& aSettings) const
 } // Clades::size
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

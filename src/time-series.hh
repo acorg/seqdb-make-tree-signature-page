@@ -34,3 +34,6 @@ class TimeSeries
 }; // class TimeSeries
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

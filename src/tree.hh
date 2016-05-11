@@ -164,6 +164,8 @@ class Tree : public Node
     std::pair<Date, Date> min_max_date() const;
     std::pair<double, double> min_max_edge() const;
     std::pair<const Node*, const Node*> top_bottom_nodes_of_subtree(std::string branch_id) const;
+    std::string virus_type() const { return mVirusType; }
+    std::string lineage() const { return mLineage; }
 
     using Node::json;
     std::string json(size_t indent) const;
@@ -194,6 +196,8 @@ class Tree : public Node
 
  private:
     Settings mSettings;
+    std::string mVirusType;     // set in match_seqdb
+    std::string mLineage;       // set in match_seqdb
 
     size_t longest_aa() const;
 
@@ -317,3 +321,6 @@ class TreeImage;
 // void tree_to_json(const Tree& aTree, std::string aFilename, std::string aCreator, const TreeImage& aTreeImage);
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:
