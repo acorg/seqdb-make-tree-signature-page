@@ -21,6 +21,7 @@ void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewp
     const auto tre_wh = aTree.width_height();
     mHorizontalStep = aViewport.size.width / tre_wh.first * 0.9;
     mVerticalStep = aViewport.size.height / (tre_wh.second + 2); // +2 to add space at the top and bottom
+    mLineWidth = std::min(aSettings.line_width, mVerticalStep * 0.5);
     set_label_scale(aSurface, aTree, aViewport, aSettings);
     set_horizontal_step(aSurface, aTree, aViewport, aSettings);
 
@@ -38,7 +39,7 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
     const Viewport viewport(Location(aOrigin.x, aOrigin.y + mVerticalStep * aNode.middle()),
                             Size((aEdgeLength < 0.0 ? aNode.edge_length : aEdgeLength) * mHorizontalStep, 0));
 
-    aSurface.line(viewport.origin, viewport.top_right(), aSettings.line_color, aSettings.line_width);
+    aSurface.line(viewport.origin, viewport.top_right(), aSettings.line_color, mLineWidth);
     draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
     if (aNode.is_leaf()) {
         const std::string text = aNode.display_name();
@@ -53,7 +54,7 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
         // if (!aNode.name.empty() && aNode.number_strains > aNumberStrainsThreshold) {
         //     show_branch_annotation(aSurface, aNode.branch_id, aNode.name, aLeft, right, y);
         // }
-        aSurface.line({viewport.right(), aOrigin.y + mVerticalStep * aNode.top}, {viewport.right(), aOrigin.y + mVerticalStep * aNode.bottom}, aSettings.line_color, aSettings.line_width);
+        aSurface.line({viewport.right(), aOrigin.y + mVerticalStep * aNode.top}, {viewport.right(), aOrigin.y + mVerticalStep * aNode.bottom}, aSettings.line_color, mLineWidth);
           // draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
         for (auto node = aNode.subtree.begin(); node != aNode.subtree.end(); ++node) {
             draw_node(*node, aSurface, Location(viewport.right(), aOrigin.y), aSettings);

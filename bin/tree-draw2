@@ -1,0 +1,2 @@
+#! /bin/sh
+$(dirname $0)/tree-draw "$@" "$1".pdf && open "$1".pdf

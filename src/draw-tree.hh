@@ -35,6 +35,7 @@ class DrawTree
     double mWidth;
     double mHorizontalStep;
     double mVerticalStep;
+    double mLineWidth;
     double mLabelScale;
     size_t mNumberOfLines;
 

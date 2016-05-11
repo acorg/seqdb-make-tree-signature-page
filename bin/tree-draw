@@ -37,6 +37,7 @@ def main(args):
     tree.settings().draw_tree.aa_transition.show_empty_left = args.aa_transition_empty_left
 
     surface = seqdb.Surface(args.output[0], 1000, 850)
+    # surface = seqdb.Surface(args.output[0], 600, 800)
 
     # surface.line(seqdb.Location(100, 100), seqdb.Location(300, 200), 0xFFA500, 5, seqdb.LINE_CAP_ROUND)
     # surface.double_arrow(seqdb.Location(100, 200), seqdb.Location(250, 50), 0x80FF00A5, 5, 10)
@@ -57,7 +58,7 @@ def main(args):
     signature_page = seqdb.SignaturePage()
     (signature_page
      .select_parts(parts)
-     .title(seqdb.Text(seqdb.Location(0, 10), "Tree!!", 0, 20))
+     .title(seqdb.Text(seqdb.Location(0, 10), "B/Yam", 0, 20))
      .color_by_continent(args.color_by_continent)
      .color_by_pos(args.color_by_pos - 1)
      .prepare(tree)
