@@ -18,7 +18,7 @@ class AntigenicMaps
 
     AntigenicMaps& prepare(const Tree& aTree, const SettingsAntigenicMaps& aSettings);
     void draw(Surface& aSurface, const Viewport& aViewport, const SettingsAntigenicMaps& aSettings) const;
-    Size size(Surface& aSurface, const SettingsAntigenicMaps& aSettings) const;
+      // Size size(Surface& aSurface, const SettingsAntigenicMaps& aSettings) const;
 
  private:
 

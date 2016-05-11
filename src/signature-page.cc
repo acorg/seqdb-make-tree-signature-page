@@ -126,6 +126,10 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface)
             clades_viewport.origin = Location(left - aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width - clades_viewport.size.width, tree_top);
             left = clades_viewport.origin.x;
         }
+        else {
+            left -= aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width;
+        }
+
         if (mTimeSeries) {
             time_series_viewport.size = Size(mTimeSeries->size(aSurface, aTree.settings().time_series).width, tree_height);
             time_series_viewport.origin = Location(left - aTree.settings().signature_page.time_series_clades_space * canvas_width - time_series_viewport.size.width, tree_top);

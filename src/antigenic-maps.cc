@@ -13,17 +13,22 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const SettingsAntigenic
 
 void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const SettingsAntigenicMaps& aSettings) const
 {
-    aSurface.line(aViewport.origin, aViewport.bottom_right(), 0xFFA500, 3);
+    Viewport map_viewport(aViewport.origin, Size(aViewport.size.width/2, aViewport.size.width/2));
+
+    aSurface.line(map_viewport.origin, map_viewport.top_right(), aSettings.border_color, aSettings.border_width);
+    aSurface.line(map_viewport.origin, map_viewport.bottom_left(), aSettings.border_color, aSettings.border_width);
+    aSurface.line(map_viewport.bottom_right(), map_viewport.top_right(), aSettings.border_color, aSettings.border_width);
+    aSurface.line(map_viewport.bottom_right(), map_viewport.bottom_left(), aSettings.border_color, aSettings.border_width);
 
 } // AntigenicMaps::draw
 
 // ----------------------------------------------------------------------
 
-Size AntigenicMaps::size(Surface& aSurface, const SettingsAntigenicMaps& aSettings) const
-{
-    return Size(0, 0);
+// Size AntigenicMaps::size(Surface& aSurface, const SettingsAntigenicMaps& aSettings) const
+// {
+//     return Size(0, 0);
 
-} // AntigenicMaps::size
+// } // AntigenicMaps::size
 
 // ----------------------------------------------------------------------
 /// Local Variables:

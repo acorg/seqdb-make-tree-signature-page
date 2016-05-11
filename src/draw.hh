@@ -265,6 +265,16 @@ class Surface
 
     Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing = nullptr);
 
+    class PushContext
+    {
+     public:
+        inline PushContext(Surface& aSurface) : mContext(aSurface.mContext) { cairo_save(mContext); }
+        inline ~PushContext() { cairo_restore(mContext); }
+
+     private:
+        cairo_t* mContext;
+    };
+
     // void test();
 
  private:
@@ -278,6 +288,8 @@ class Surface
         {
             cairo_set_source_rgba(mContext, aColor.red(), aColor.green(), aColor.blue(), aColor.alpha());
         }
+
+    friend class PushContext;
 
 }; // class Surface
 

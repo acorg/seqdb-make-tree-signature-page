@@ -184,7 +184,7 @@ class SettingsSignaturePage
 
  public:
     inline SettingsSignaturePage()
-        : outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0), clades_antigenic_maps_space(0) {}
+        : outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0), clades_antigenic_maps_space(0.02) {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
 

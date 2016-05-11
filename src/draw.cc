@@ -21,14 +21,13 @@ void Surface::setup(std::string aFilename, const Size& aCanvasSize)
 
 void Surface::line(const Location& a, const Location& b, Color aColor, double aWidth, cairo_line_cap_t aLineCap)
 {
-    cairo_save(mContext);
+    PushContext pc(*this);
     cairo_set_line_width(mContext, aWidth);
     set_source_rgba(aColor);
     cairo_set_line_cap(mContext, aLineCap);
     cairo_move_to(mContext, a.x, a.y);
     cairo_line_to(mContext, b.x, b.y);
     cairo_stroke(mContext);
-    cairo_restore(mContext);
 
 } // Surface::line
 
@@ -56,7 +55,7 @@ Location Surface::arrow_head(const Location& a, double angle, double sign, Color
     const Location c(b.x + sign * aArrowWidth * std::cos(angle + M_PI_2) * 0.5, b.y + sign * aArrowWidth * std::sin(angle + M_PI_2) * 0.5);
     const Location d(b.x + sign * aArrowWidth * std::cos(angle - M_PI_2) * 0.5, b.y + sign * aArrowWidth * std::sin(angle - M_PI_2) * 0.5);
 
-    cairo_save(mContext);
+    PushContext pc(*this);
     set_source_rgba(aColor);
     cairo_set_line_join(mContext, CAIRO_LINE_JOIN_MITER);
     cairo_move_to(mContext, a.x, a.y);
@@ -64,7 +63,6 @@ Location Surface::arrow_head(const Location& a, double angle, double sign, Color
     cairo_line_to(mContext, d.x, d.y);
     cairo_close_path(mContext);
     cairo_fill(mContext);
-    cairo_restore(mContext);
 
     return b;
 
@@ -74,13 +72,12 @@ Location Surface::arrow_head(const Location& a, double angle, double sign, Color
 
 void Surface::text(const Location& a, std::string aText, Color aColor, double aSize, const TextStyle& aTextStyle, double aRotation)
 {
-    cairo_save(mContext);
+    PushContext pc(*this);
     prepare_for_text(aSize, aTextStyle);
     cairo_move_to(mContext, a.x, a.y);
     cairo_rotate(mContext, aRotation);
     set_source_rgba(aColor);
     cairo_show_text(mContext, aText.c_str());
-    cairo_restore(mContext);
 
 } // Surface::text
 
@@ -104,12 +101,11 @@ void Surface::prepare_for_text(double aSize, const TextStyle& aTextStyle)
 
 Size Surface::text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing)
 {
-    cairo_save(mContext);
+    PushContext pc(*this);
     prepare_for_text(aSize, aTextStyle);
     cairo_text_extents_t text_extents;
     cairo_text_extents(mContext, aText.c_str(), &text_extents);
       // std::cout << "text_extents y_bearing:" << text_extents.y_bearing << " height:" << text_extents.height << " y_advance:" << text_extents.y_advance << std::endl;
-    cairo_restore(mContext);
     if (x_bearing != nullptr)
         *x_bearing = text_extents.x_bearing;
     return {text_extents.x_advance, - text_extents.y_bearing};
