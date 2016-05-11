@@ -36,7 +36,7 @@ def main(args):
     tree.settings().draw_tree.aa_transition.show_node_for_left_line = args.aa_transition_left_line
     tree.settings().draw_tree.aa_transition.show_empty_left = args.aa_transition_empty_left
 
-    surface = seqdb.Surface(args.output[0], 1000, 850)
+    surface = seqdb.Surface(args.output[0], 1422, 800)
     # surface = seqdb.Surface(args.output[0], 600, 800)
 
     # surface.line(seqdb.Location(100, 100), seqdb.Location(300, 200), 0xFFA500, 5, seqdb.LINE_CAP_ROUND)
@@ -52,7 +52,7 @@ def main(args):
     #  .color_by_pos(args.color_by_pos - 1)
     #  .draw(tree, surface, seqdb.Viewport(seqdb.Location(10, 10), seqdb.Size(680, 830))))
 
-    parts = seqdb.Show.Title | seqdb.Show.Tree | seqdb.Show.Legend | seqdb.Show.TimeSeries
+    parts = seqdb.Show.Title | seqdb.Show.Tree | seqdb.Show.Legend | seqdb.Show.TimeSeries | seqdb.Show.AntigenicMaps
     if args.show_clades:
         parts |= seqdb.Show.Clades
 

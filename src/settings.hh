@@ -173,8 +173,9 @@ class SettingsSignaturePage
                 auto r_outer_padding = jsonr::object_double_non_negative_value("outer_padding", mSettings.outer_padding);
                 auto r_tree_time_series_space = jsonr::object_double_non_negative_value("tree_time_series_space", mSettings.tree_time_series_space);
                 auto r_time_series_clades_space = jsonr::object_double_non_negative_value("time_series_clades_space", mSettings.time_series_clades_space);
+                auto r_clades_antigenic_maps_space = jsonr::object_double_non_negative_value("clades_antigenic_maps_space", mSettings.clades_antigenic_maps_space);
                 auto r_comment = jsonr::object_string_ignore_value("?");
-                return (jsonr::skey("signature_page") > jsonr::object(r_outer_padding | r_tree_time_series_space | r_time_series_clades_space | r_comment))(i1, i2);
+                return (jsonr::skey("signature_page") > jsonr::object(r_outer_padding | r_tree_time_series_space | r_time_series_clades_space | r_clades_antigenic_maps_space | r_comment))(i1, i2);
             }
 
           private:
@@ -183,7 +184,7 @@ class SettingsSignaturePage
 
  public:
     inline SettingsSignaturePage()
-        : outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0) {}
+        : outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0), clades_antigenic_maps_space(0) {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
 
@@ -191,7 +192,8 @@ class SettingsSignaturePage
 
     double outer_padding;             // relative to the canvas width
     double tree_time_series_space;    // relative to the canvas width
-    double time_series_clades_space;    // relative to the canvas width
+    double time_series_clades_space;  // relative to the canvas width
+    double clades_antigenic_maps_space; // relative to the canvas width
 
 }; // class SettingsSignaturePage
 
@@ -380,9 +382,42 @@ class SettingsClades
     double separator_width;
     std::vector<SettingsClade> per_clade;
 
-    SettingsClade* current_clade; // bad solution but no idea how to make it better in the current design
-
 }; // class SettingsClades
+
+// ----------------------------------------------------------------------
+
+class SettingsAntigenicMaps
+{
+ private:
+    class json_parser_t AXE_RULE
+        {
+          public:
+            inline json_parser_t(SettingsAntigenicMaps& aSettings) : mSettings(aSettings) {}
+
+            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
+            {
+                auto r_border_width = jsonr::object_double_non_negative_value("border_width", mSettings.border_width);
+                auto r_border_color = jsonr::object_string_value("border_color", mSettings.border_color);
+                auto r_comment = jsonr::object_string_ignore_value("?");
+                return (jsonr::skey("clades") > jsonr::object(r_border_width | r_border_color | r_comment))(i1, i2);
+            }
+
+          private:
+            SettingsAntigenicMaps& mSettings;
+        };
+
+ public:
+    inline SettingsAntigenicMaps()
+        : border_width(1), border_color(0) {}
+
+    jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
+
+    inline auto json_parser() { return json_parser_t(*this); }
+
+    double border_width;
+    Color border_color;
+
+}; // class SettingsAntigenicMaps
 
 // ----------------------------------------------------------------------
 
@@ -401,7 +436,8 @@ class Settings
                   | mSettings.legend.json_parser()
                   | mSettings.signature_page.json_parser()
                   | mSettings.time_series.json_parser()
-                  | mSettings.clades.json_parser())
+                  | mSettings.clades.json_parser()
+                  | mSettings.antigenic_maps.json_parser())
                 )(i1, i2);
             }
 
@@ -421,6 +457,7 @@ class Settings
     SettingsLegend legend;
     SettingsTimeSeries time_series;
     SettingsClades clades;
+    SettingsAntigenicMaps antigenic_maps;
 
 }; // class Settings
 

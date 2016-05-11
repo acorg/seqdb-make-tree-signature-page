@@ -15,7 +15,7 @@ SOURCES_DIR = src
 SEQDB_SOURCES = seqdb.cc seqdb-json.cc seqdb-py.cc amino-acids.cc clades.cc \
 		tree.cc tree-import.cc newick.cc settings.cc \
 		draw.cc coloring.cc \
-		signature-page.cc draw-tree.cc time-series.cc draw-clades.cc \
+		signature-page.cc draw-tree.cc time-series.cc draw-clades.cc antigenic-maps.cc \
 		read-file.cc xz.cc
 
 # ----------------------------------------------------------------------

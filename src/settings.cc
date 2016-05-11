@@ -40,6 +40,7 @@ jsonw::IfPrependComma SettingsSignaturePage::json(std::string& target, jsonw::If
     comma = jsonw::json(target, comma, "outer_padding", outer_padding, indent, prefix);
     comma = jsonw::json(target, comma, "tree_time_series_space", tree_time_series_space, indent, prefix);
     comma = jsonw::json(target, comma, "time_series_clades_space", time_series_clades_space, indent, prefix);
+    comma = jsonw::json(target, comma, "clades_antigenic_maps_space", clades_antigenic_maps_space, indent, prefix);
     comma = jsonw::json(target, comma, "?", "outer_padding: size of space around the image, fraction of canvas width, default: 0.01; tree_time_series_space: fraction of canvas width", indent, prefix);
     return  jsonw::json_end(target, '}', indent, prefix);
 
@@ -139,6 +140,18 @@ jsonw::IfPrependComma SettingsClades::json(std::string& target, jsonw::IfPrepend
 
 // ----------------------------------------------------------------------
 
+jsonw::IfPrependComma SettingsAntigenicMaps::json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
+{
+    comma = jsonw::json_begin(target, comma, '{', indent, prefix);
+    comma = jsonw::json(target, comma, "border_width", border_width, indent, prefix);
+    comma = jsonw::json(target, comma, "border_color", border_color, indent, prefix);
+      // comma = jsonw::json(target, comma, "?", "", indent, prefix);
+    return  jsonw::json_end(target, '}', indent, prefix);
+
+} // SettingsAntigenicMaps::json
+
+// ----------------------------------------------------------------------
+
 jsonw::IfPrependComma Settings::json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
 {
     comma = jsonw::json_begin(target, comma, '{', indent, prefix);
@@ -147,6 +160,7 @@ jsonw::IfPrependComma Settings::json(std::string& target, jsonw::IfPrependComma 
     comma = jsonw::json(target, comma, "legend", legend, indent, prefix);
     comma = jsonw::json(target, comma, "time_series", time_series, indent, prefix);
     comma = jsonw::json(target, comma, "clades", clades, indent, prefix);
+    comma = jsonw::json(target, comma, "antigenic_maps", antigenic_maps, indent, prefix);
     return  jsonw::json_end(target, '}', indent, prefix);
 
 } // Settings::json

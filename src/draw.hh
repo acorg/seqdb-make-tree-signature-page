@@ -94,9 +94,10 @@ inline Size operator * (const Size& a, double v)
 class Viewport
 {
  public:
-    inline Viewport() {}
+    inline Viewport() : origin(0, 0), size(0, 0) {}
     inline Viewport(const Location& a, const Size& s) : origin(a), size(s) {}
     inline Viewport(const Location& a, const Location& b) : origin(a), size(b - a) {}
+    inline void set(const Location& a, const Size& s) { origin = a; size = s; }
     inline double right() const { return origin.x + size.width; }
     inline double bottom() const { return origin.y + size.height; }
     inline Location top_right() const { return origin + Size(size.width, 0); }

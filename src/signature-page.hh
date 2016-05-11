@@ -9,6 +9,7 @@ class DrawTree;
 class Legend;
 class TimeSeries;
 class Clades;
+class AntigenicMaps;
 class SettingsSignaturePage;
 
 class Surface;
@@ -39,6 +40,7 @@ class SignaturePage
     Legend* mLegend;
     TimeSeries* mTimeSeries;
     Clades* mClades;
+    AntigenicMaps* mAntigenicMaps;
 
       // to implement clone all m pointers
     SignaturePage(const SignaturePage&) = default;
