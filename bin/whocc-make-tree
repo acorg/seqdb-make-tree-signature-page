@@ -54,7 +54,7 @@ def main(args):
             aligned=True, encode_name=True, wrap=False, truncate_to_most_common_length=True, hamming_distance_threshold=150, hamming_distance_report=False,
             sort_by=None, with_hi_name=False, name_match=None)
         run_id = "{} {}".format(args.virus_type, "bfgs" if args.raxml_bfgs else "no-bfgs")
-        r = seqdb_m.run_raxml_garli(working_dir=working_dir, run_id=run_id, fasta_file=export_data["filename"], base_seq_name=export_data["base_seq"], raxml_bfgs=args.raxml_bfgs, raxml_num_runs=args.raxml_num_runs, garli_num_runs=args.garli_num_runs, garli_attachmentspertaxon=args.garli_attachmentspertaxon, email=args.email, machines=args.machines and args.machines.split(","))
+        r = seqdb_m.run_raxml_all_garli(working_dir=working_dir, run_id=run_id, fasta_file=export_data["filename"], base_seq_name=export_data["base_seq"], raxml_bfgs=args.raxml_bfgs, raxml_num_runs=args.raxml_num_runs, garli_num_runs=args.garli_num_runs, garli_attachmentspertaxon=args.garli_attachmentspertaxon, email=args.email, machines=args.machines and args.machines.split(","))
         if args.email:
             email.send(to=args.email,
                        subject="Completed: {} {}".format(Path(sys.argv[0]).name, socket.getfqdn()),

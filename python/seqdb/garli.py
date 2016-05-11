@@ -33,7 +33,11 @@ class GarliResult:
 class GarliResults:
 
     def __init__(self, results):
-        self.results = sorted(results, key=operator.attrgetter("score"))
+        self.results = sorted(results, key=operator.attrgetter("score")) if results else []
+        self.longest_time = max(self.results, key=operator.attrgetter("time")).time if results else 0
+
+    def recompute(self):
+        self.results.sort(key=operator.attrgetter("score"))
         self.longest_time = max(self.results, key=operator.attrgetter("time")).time
 
     def longest_time_str(self):
