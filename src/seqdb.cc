@@ -447,7 +447,7 @@ SeqdbEntrySeq Seqdb::find_by_seq_id(std::string aSeqId) const
     else {                  // hi-name
         std::smatch found;
         if (std::regex_search(aSeqId, found, sReYearSpace)) {
-            const auto entry = find_by_name(std::string(aSeqId, 0, static_cast<std::string::size_type>(found.position(0)) + 6));
+            const auto entry = find_by_name(std::string(aSeqId, 0, static_cast<std::string::size_type>(found.position(0) + found.length(0)) - 1));
             if (entry != nullptr) {
                 for (auto seq = entry->begin_seq(); seq != entry->end_seq(); ++seq) {
                     if (seq->hi_name_present(aSeqId)) {

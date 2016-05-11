@@ -7,7 +7,6 @@
 #include <regex>
 #include <iterator>
 #include <deque>
-#include <regex>
 
 #include "messages.hh"
 #include "json-write.hh"
@@ -481,7 +480,7 @@ class Seqdb
 
  private:
     std::vector<SeqdbEntry> mEntries;
-    const std::regex sReYearSpace = std::regex("[0-9]/[12][0-9][0-9][0-9] ");
+    const std::regex sReYearSpace = std::regex("/[12][0-9][0-9][0-9] ");
 
     inline std::vector<SeqdbEntry>::iterator find_insertion_place(std::string aName)
         {
