@@ -124,7 +124,7 @@ def run_garli_multi(working_dir, run_id, fasta_file, trees, garli_num_runs, garl
                 run_id=run_id + "." + no_s, attachmentspertaxon=garli_attachmentspertaxon, machines=machines))
     r_garli = GarliResults(None)
     for job in jobs:
-        r_job = garli_job.wait()
+        r_job = job.wait()
         r_garli.results.extend(r_job.results)
     r_garli.recompute()
     module_logger.info('GARLI (multi {}) {}'.format(len(jobs), r_garli.report_best()))
