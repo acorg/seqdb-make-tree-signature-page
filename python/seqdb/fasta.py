@@ -80,6 +80,10 @@ def export_from_seqdb(seqdb, filename, output_format, amino_acids, lab, virus_ty
         else:
             raise ValueError("Unrecognized sort_by argument")
 
+    if start_date is not None:
+        module_logger.info('Start date: ' + start_date)
+    if end_date is not None:
+        module_logger.info('End date:   ' + end_date)
     module_logger.info('{} sequences to export'.format(len(sequences)))
 
     # base seq is always the first one in the file, regardless of sorting, to ease specifying the outgroup for GARLI
