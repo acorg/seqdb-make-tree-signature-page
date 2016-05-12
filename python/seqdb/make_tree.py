@@ -83,7 +83,7 @@ def run_raxml_all_garli(working_dir, run_id, fasta_file, base_seq_name, raxml_bf
 
 # ----------------------------------------------------------------------
 
-def run_raxml(working_dir, run_id, fasta_file, raxml_bfgs, raxml_num_runs, email, machines):
+def run_raxml(working_dir, run_id, fasta_file, base_seq_name, raxml_bfgs, raxml_num_runs, email, machines):
     raxml_output_dir = Path(working_dir, "raxml")
     raxml = Raxml(email=email)
     raxml_job = raxml.submit_htcondor(num_runs=raxml_num_runs, source=fasta_file, output_dir=raxml_output_dir,
