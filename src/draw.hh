@@ -259,9 +259,23 @@ class Surface
     const Size& canvas_size() const { return mCanvasSize; }
 
     void line(const Location& a, const Location& b, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    void rectangle(const Location& a, const Size& s, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    void rectangle_filled(const Location& a, const Size& s, Color aOutlineColor, double aWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    void square_filled(const Location& aCenter, double aSide, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    void triangle_filled(const Location& aCenter, double aSide, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    void circle_filled(const Location& aCenter, double aDiameter, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor);
     void double_arrow(const Location& a, const Location& b, Color aColor, double aLineWidth, double aArrowWidth);
     void text(const Location& a, std::string aText, Color aColor, double aSize, const TextStyle& aTextStyle = TextStyle(), double aRotation = 0);
     inline void text(const Text& aText, const Viewport& aViewport) { aText.draw(*this, aViewport); }
+
+      // Sets the cairo clip region to viewport, viewport top left
+      // corner will have coordinates (0, 0), viewport top right
+      // corner will have coordinates (0, aWidthScale), drawing
+      // outside the viewport will not be possible. Returns the ratio
+      // of the new scal to the old scale, i.e. to draw a line of some
+      // width in the new region you need to draw the line of
+      // width*ratio.
+    double set_clip_region(const Viewport& aViewport, double aWidthScale);
 
     Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing = nullptr);
 
