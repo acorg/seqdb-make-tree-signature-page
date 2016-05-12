@@ -98,7 +98,7 @@ def run_raxml(working_dir, run_id, fasta_file, base_seq_name, raxml_bfgs, raxml_
 
 # ----------------------------------------------------------------------
 
-def run_garli(working_dir, run_id, fasta_file, base_seq_name, tree, garli_num_runs, garli_attachmentspertaxon, email, machines):
+def run_garli(working_dir, run_id, fasta_file, tree, garli_num_runs, garli_attachmentspertaxon, email, machines):
     garli_output_dir = Path(working_dir, "garli")
     garli = Garli(email=email)
     garli_job = garli.submit_htcondor(num_runs=garli_num_runs, source=fasta_file, source_tree=tree, output_dir=garli_output_dir,
@@ -113,7 +113,7 @@ def run_garli(working_dir, run_id, fasta_file, base_seq_name, tree, garli_num_ru
 
 # ----------------------------------------------------------------------
 
-def run_garli_multi(working_dir, run_id, fasta_file, base_seq_name, trees, garli_num_runs, garli_attachmentspertaxon, email, machines):
+def run_garli_multi(working_dir, run_id, fasta_file, trees, garli_num_runs, garli_attachmentspertaxon, email, machines):
     jobs = []
     for no, tree in enumerate(trees, start=1):
         no_s = "{:03d}".format(no)
