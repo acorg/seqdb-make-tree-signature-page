@@ -52,9 +52,15 @@ def main(args):
     #  .color_by_pos(args.color_by_pos - 1)
     #  .draw(tree, surface, seqdb.Viewport(seqdb.Location(10, 10), seqdb.Size(680, 830))))
 
-    parts = seqdb.Show.Title | seqdb.Show.Tree | seqdb.Show.Legend | seqdb.Show.TimeSeries | seqdb.Show.AntigenicMaps
+    parts = seqdb.Show.Title | seqdb.Show.Tree | seqdb.Show.Legend | seqdb.Show.TimeSeries
     if args.show_clades:
         parts |= seqdb.Show.Clades
+
+    if args.chart:
+        chart = seqdb.import_chart(args.chart)
+        parts |= seqdb.Show.AntigenicMaps
+    else:
+        chart = None
 
     virus_type = tree.virus_type()
     lineage = tree.lineage()
@@ -96,6 +102,8 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('--show-aa-transition-empty-left', action='store_true', dest='aa_transition_empty_left', default=False, help='Show AA transition labels for labels with an empty left part.')
         parser.add_argument('--grid', action='store', type=int, dest='grid_step', default=0, help='Show grid with the provided step (number of strains per cell).')
         parser.add_argument('--report-aa-per-pos', action='store_true', dest='report_aa_per_pos', default=False, help='Print to stdout list of AAs found at each pos.')
+
+        parser.add_argument('--chart', action='store', dest='chart', default=None, help='Chart (in sdb format) to use for antigenic maps.')
 
         parser.add_argument('--db', action='store', dest='path_to_seqdb', default=None, help='Path to sequence database (to match tree leaves with seqdb entries).')
         # parser.add_argument('--email', action='store', dest='email', default="eu@antigenic-cartography.org", help='Email to report status of the tasks running in the cluster.')

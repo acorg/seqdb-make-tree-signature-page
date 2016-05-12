@@ -11,7 +11,7 @@ Tree import_tree(std::string buffer)
     Tree tree;
     if (buffer == "-")
         buffer = read_stdin();
-    else if (file_exists(buffer))
+    else // if (file_exists(buffer))
         buffer = read_file(buffer);
     if (xz_compressed(buffer))
         buffer = xz_decompress(buffer);

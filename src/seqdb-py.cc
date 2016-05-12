@@ -21,6 +21,7 @@ namespace py = pybind11;
 #include "draw-tree.hh"
 #include "signature-page.hh"
 #include "settings.hh"
+#include "chart.hh"
 
 // ----------------------------------------------------------------------
 
@@ -215,6 +216,15 @@ PYBIND11_PLUGIN(seqdb_backend)
             ;
 
     m.def("import_tree", &import_tree, py::arg("data"), py::doc("Imports tree from newick or json string/file."));
+
+      // ----------------------------------------------------------------------
+      // Chart
+      // ----------------------------------------------------------------------
+
+    py::class_<Chart>(m, "Chart")
+            ;
+
+    m.def("import_chart", &import_chart, py::arg("data"), py::doc("Imports chart from a buffer or file in the sdb format."));
 
       // ----------------------------------------------------------------------
       // Drawing
