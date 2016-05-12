@@ -78,7 +78,7 @@ def run_raxml_all_garli(working_dir, run_id, fasta_file, base_seq_name, raxml_bf
     """Run RAxML raxml_num_runs times, take all the results and run GARLI garli_num_runs times starting with each result."""
     run_id = run_id.replace(' ', '-').replace('/', '-') # raxml cannot handle spaces and slashes in run-id
     r_raxml = run_raxml(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, base_seq_name=base_seq_name, raxml_bfgs=raxml_bfgs, raxml_num_runs=raxml_num_runs, email=email, machines=machines)
-    r_garli = run_garli_multi(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, tree=[r.tree for r in r_raxml.results], garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, email=email, machines=machines)
+    r_garli = run_garli_multi(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, trees=[r.tree for r in r_raxml.results], garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, email=email, machines=machines)
     return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli)
 
 # ----------------------------------------------------------------------
