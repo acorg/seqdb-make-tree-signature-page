@@ -8,7 +8,7 @@ import logging; module_logger = logging.getLogger(__name__)
 import json
 from pathlib import Path
 from .raxml import Raxml, RaxmlResult
-from .garli import Garli
+from .garli import Garli, GarliResults
 
 # ======================================================================
 
@@ -118,10 +118,11 @@ def run_garli_multi(working_dir, run_id, fasta_file, trees, garli_num_runs, garl
     for no, tree in enumerate(trees, start=1):
         no_s = "{:03d}".format(no)
         garli_output_dir = Path(working_dir, "garli", no_s)
-        garli = Garli(email=email)
-        jobs.append(garli.submit_htcondor(num_runs=garli_num_runs, source=fasta_file, source_tree=tree, output_dir=garli_output_dir,
-                                          run_id=run_id + "." + no_s, attachmentspertaxon=garli_attachmentspertaxon, machines=machines))
-    r_garli = garli.GarliResults(None)
+        jobs.append(
+            Garli(email=email).submit_htcondor(
+                num_runs=garli_num_runs, source=fasta_file, source_tree=tree, output_dir=garli_output_dir,
+                run_id=run_id + "." + no_s, attachmentspertaxon=garli_attachmentspertaxon, machines=machines))
+    r_garli = GarliResults(None)
     for job in jobs:
         r_job = garli_job.wait()
         r_garli.results.extend(r_job.results)
