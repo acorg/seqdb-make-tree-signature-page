@@ -116,16 +116,17 @@ def run_garli(working_dir, run_id, fasta_file, base_seq_name, tree, garli_num_ru
 def run_garli_multi(working_dir, run_id, fasta_file, base_seq_name, trees, garli_num_runs, garli_attachmentspertaxon, email, machines):
     jobs = []
     for no, tree in enumerate(trees, start=1):
-        garli_output_dir = Path(working_dir, "garli", str(no))
+        no_s = "{:03d}".format(no)
+        garli_output_dir = Path(working_dir, "garli", no_s)
         garli = Garli(email=email)
         jobs.append(garli.submit_htcondor(num_runs=garli_num_runs, source=fasta_file, source_tree=tree, output_dir=garli_output_dir,
-                                          run_id=run_id + "." + str(no), attachmentspertaxon=garli_attachmentspertaxon, machines=machines))
+                                          run_id=run_id + "." + no_s, attachmentspertaxon=garli_attachmentspertaxon, machines=machines))
     r_garli = garli.GarliResults(None)
     for job in jobs:
         r_job = garli_job.wait()
         r_garli.results.extend(r_job.results)
     r_garli.recompute()
-    module_logger.info('GARLI {}'.format(r_garli.report_best()))
+    module_logger.info('GARLI (multi {}) {}'.format(len(jobs), r_garli.report_best()))
     with Path(working_dir, "result.garli.txt").open("w") as f:
         f.write("Longest time: " + r_garli.longest_time_str()+ "\n\n")
         f.write(r_garli.tabbed_report_header()+ "\n")
