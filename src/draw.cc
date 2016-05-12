@@ -33,6 +33,26 @@ void Surface::line(const Location& a, const Location& b, Color aColor, double aW
 
 // ----------------------------------------------------------------------
 
+void Surface::grid(const Viewport& aViewport, double aStep, Color aLineColor, double aLineWidth)
+{
+    PushContext pc(*this);
+    cairo_set_line_width(mContext, aLineWidth);
+    set_source_rgba(aLineColor);
+    cairo_set_line_cap(mContext, CAIRO_LINE_CAP_BUTT);
+    for (double x = aViewport.origin.x + aStep; x < aViewport.right(); x += aStep) {
+        cairo_move_to(mContext, x, aViewport.origin.y);
+        cairo_line_to(mContext, x, aViewport.bottom());
+    }
+    for (double y = aViewport.origin.y + aStep; y < aViewport.bottom(); y += aStep) {
+        cairo_move_to(mContext, aViewport.origin.x, y);
+        cairo_line_to(mContext, aViewport.right(), y);
+    }
+    cairo_stroke(mContext);
+
+} // Surface::grid
+
+// ----------------------------------------------------------------------
+
 void Surface::rectangle(const Location& a, const Size& s, Color aColor, double aWidth, cairo_line_cap_t aLineCap)
 {
     PushContext pc(*this);

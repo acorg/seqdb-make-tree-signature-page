@@ -24,7 +24,7 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Set
     aSurface.line(Location(0, 0), Location(1.5, 1), 0xFF0000, scale);
     aSurface.line(Location(0, 0), Location(1, 1.5), 0xFF00A5, scale);
     aSurface.rectangle(Location(0.1, 0.1), Size(0.8, 0.8), 0xA5FF00, scale);
-    aSurface.rectangle_filled(Location(0.05, 0.2), Size(0.1, 0.1), 0xA5FF00, scale, 0x80FFA500);
+      // aSurface.rectangle_filled(Location(0.05, 0.2), Size(0.1, 0.1), 0xA5FF00, scale, 0x80FFA500);
     aSurface.square_filled(Location(0.3, 0.3), 0.1, 0.5, M_PI_2 / 3, 0x000000, scale, 0x808080);
     aSurface.square_filled(Location(0.3, 0.5), 0.1, 0.5, 0.0, 0x000000, scale, 0x808080);
     aSurface.circle_filled(Location(0.5, 0.3), 0.1, 0.5, M_PI_2 / 3, 0x000000, scale, 0xA0A0FF);
@@ -33,6 +33,8 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Set
     aSurface.triangle_filled(Location(0.7, 0.3), 0.1, 0.5, M_PI_2 / 3, 0x000000, scale, 0xA0FFA0);
     aSurface.triangle_filled(Location(0.7, 0.5), 0.1, 2.0, 0.0, 0x000000, scale, 0x80FF80);
     aSurface.triangle_filled(Location(0.7, 0.7), 0.1, 1.0, 0.0, 0x000000, scale, 0xE0FFE0);
+
+    aSurface.grid(Viewport(Location(0, 0), Size(1, 1)), 0.2, 0x8000FF00, scale);
 
 } // AntigenicMaps::draw
 

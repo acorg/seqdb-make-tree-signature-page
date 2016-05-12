@@ -267,6 +267,7 @@ class Surface
     void double_arrow(const Location& a, const Location& b, Color aColor, double aLineWidth, double aArrowWidth);
     void text(const Location& a, std::string aText, Color aColor, double aSize, const TextStyle& aTextStyle = TextStyle(), double aRotation = 0);
     inline void text(const Text& aText, const Viewport& aViewport) { aText.draw(*this, aViewport); }
+    void grid(const Viewport& aViewport, double aStep, Color aLineColor, double aLineWidth);
 
       // Sets the cairo clip region to viewport, viewport top left
       // corner will have coordinates (0, 0), viewport top right
