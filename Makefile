@@ -36,7 +36,7 @@ PYTHON_CONFIG = python$(PYTHON_VERSION)-config
 PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 
 # -fvisibility=hidden and -flto make resulting lib smaller (pybind11)
-OPTIMIZATION = -O3 -fvisibility=hidden -flto
+#OPTIMIZATION = -O3 -fvisibility=hidden -flto
 CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
 LDFLAGS =
 TEST_LDLIBS = $$(pkg-config --libs liblzma)

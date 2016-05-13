@@ -3,6 +3,14 @@
 
 // ----------------------------------------------------------------------
 
+Surface::Surface(std::string aFilename, double aWidth, double aHeight)
+    : mContext(nullptr)
+{
+    setup(aFilename, {aWidth, aHeight});
+}
+
+// ----------------------------------------------------------------------
+
 void Surface::setup(std::string aFilename, const Size& aCanvasSize)
 {
     auto surface = cairo_pdf_surface_create(aFilename.c_str(), aCanvasSize.width, aCanvasSize.height);

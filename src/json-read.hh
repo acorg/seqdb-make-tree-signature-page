@@ -336,7 +336,7 @@ namespace jsonr
       private:
         const char* mKey;
         Value& mTarget;
-    };
+    }; // class object_value_t<> AXE_RULE
 
     template <typename Value> inline auto object_value(const char* aKey, Value& aTarget) { return object_value_t<Value>(aKey, aTarget); }
 
@@ -348,16 +348,26 @@ namespace jsonr
       // ----------------------------------------------------------------------
       // ----------------------------------------------------------------------
 
-    inline auto version(std::string expected_version)
+    class version AXE_RULE
     {
-        auto validator = [=](auto b, auto e) {
-            const std::string version_extracted(b , e);
-            if (version_extracted != expected_version) {
-                throw JsonParsingError(std::string("Unsupported version: \"") + version_extracted + "\", expected: \"" + expected_version + "\"");
-            }
-        };
-        return skey("  version") > doublequotes > (string_content >> axe::e_ref(validator)) > doublequotes;
-    }
+     public:
+        inline version(std::string expected_version) : mExpected(expected_version) {}
+
+        template<class Iterator> inline auto operator()(Iterator i1, Iterator i2) const
+        {
+            auto validator = [this](auto b, auto e) {
+                const std::string version_extracted(b , e);
+                if (version_extracted != mExpected) {
+                    throw JsonParsingError(std::string("Unsupported version: \"") + version_extracted + "\", expected: \"" + mExpected + "\"");
+                }
+            };
+            return (skey("  version") > doublequotes > (string_content >> axe::e_ref(validator)) > doublequotes)(i1, i2);
+        }
+
+     private:
+        std::string mExpected;
+
+    }; // class version AXE_RULE
 
 } // namespace jsonr
 

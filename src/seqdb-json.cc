@@ -58,7 +58,7 @@ jsonw::IfPrependComma SeqdbEntry::json(std::string& target, jsonw::IfPrependComm
 
 void Seqdb::from_json(std::string data)
 {
-    std::string expected_version = "sequence-database-v2";
+    const std::string expected_version = "sequence-database-v2";
     auto parse_db = jsonr::object(jsonr::version(expected_version) | jsonr::object_array_value("data", mEntries));
     try {
         parse_db(std::begin(data), std::end(data));
