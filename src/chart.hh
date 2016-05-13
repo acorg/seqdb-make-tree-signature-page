@@ -4,6 +4,24 @@
 
 // ----------------------------------------------------------------------
 
+class Point
+{
+ public:
+    inline Point () : antigen(true), egg(false), reassortant(false), reference(false) {}
+
+    std::string name;
+    std::vector<double> coordinates;
+    std::string lab_id;
+    bool antigen;
+    bool egg;
+    bool reassortant;
+    bool reference;
+      // vaccine
+
+}; // class Point
+
+// ----------------------------------------------------------------------
+
 class ChartInfo
 {
  public:
@@ -16,7 +34,7 @@ class ChartInfo
     std::string name;
     std::string rbc_species;
 
-}; // ChartInfo
+}; // class ChartInfo
 
 // ----------------------------------------------------------------------
 
