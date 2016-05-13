@@ -175,6 +175,8 @@ class Tree : public Node
     void match_seqdb(const Seqdb& aSeqdb);
     void clade_setup();         // updates mSettings.clades with clade data from tree
 
+    std::vector<std::string> names() const;
+
       // aa transitions
     void make_aa_transitions();
     void make_aa_transitions(const std::vector<size_t>& aPositions);

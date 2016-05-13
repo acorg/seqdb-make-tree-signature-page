@@ -212,6 +212,7 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def("re_root", static_cast<void (Tree::*)(std::string)>(&Tree::re_root), py::arg("name"))
             .def("virus_type", &Tree::virus_type)
             .def("lineage", &Tree::lineage)
+            .def("names", &Tree::names)
             .def("settings", static_cast<Settings& (Tree::*)()>(&Tree::settings), py::return_value_policy::reference)
             ;
 

@@ -45,7 +45,9 @@ namespace jsonr
 
     inline auto r_bool(bool& target)
     {
-        return ((axe::r_str("true") >> axe::e_ref([&](auto, auto) { target = true; })) | (axe::r_str("false") >> axe::e_ref([&](auto, auto) { target = false; }))) | axe::r_fail("true or false expected");
+        auto yes = axe::e_ref([&](auto, auto) { target = true; });
+        auto no = axe::e_ref([&](auto, auto) { target = false; });
+        return (axe::r_str("true") >> yes) | (axe::r_str("1") >> yes) | (axe::r_str("false") >> no) | (axe::r_str("0") >> no) | axe::r_fail("true or 1 or false or 0 expected");
     };
 
     inline auto r_string(std::string& target)

@@ -307,6 +307,19 @@ void Tree::clade_setup()
 
 // ----------------------------------------------------------------------
 
+std::vector<std::string> Tree::names() const
+{
+    std::vector<std::string> names;
+    auto get_name = [&](const Node& aNode) {
+        names.push_back(aNode.name);
+    };
+    iterate_leaf(*this, get_name);
+    return names;
+
+} // Tree::names
+
+// ----------------------------------------------------------------------
+
 void Tree::make_aa_transitions(const std::vector<size_t>& aPositions)
 {
     compute_cumulative_edge_length();

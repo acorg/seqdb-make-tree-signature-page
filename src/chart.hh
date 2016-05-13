@@ -1,13 +1,24 @@
 #pragma once
 
 #include "json-read.hh"
+#include "draw.hh"
 
 // ----------------------------------------------------------------------
 
 class Point
 {
+ private:
+    class json_parser_t AXE_RULE
+        {
+          public:
+            inline json_parser_t(Point& aPoint) : mPoint(aPoint) {}
+            axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const;
+          private:
+            Point& mPoint;
+        };
+
  public:
-    inline Point () : antigen(true), egg(false), reassortant(false), reference(false) {}
+    inline Point () : antigen(true), egg(false), reassortant(false), reference(false), vaccine(false), vaccine_fill_color(0xFFC0CB), vaccine_outline_color(0), vaccine_aspect(0.5) {}
 
     std::string name;
     std::vector<double> coordinates;
@@ -16,7 +27,12 @@ class Point
     bool egg;
     bool reassortant;
     bool reference;
-      // vaccine
+    bool vaccine;
+    Color vaccine_fill_color;
+    Color vaccine_outline_color;
+    double vaccine_aspect;
+
+    inline auto json_parser() { return json_parser_t(*this); }
 
 }; // class Point
 
@@ -48,7 +64,7 @@ class Chart
  private:
     double mStress;
     ChartInfo mInfo;
-      // mPoints;
+    std::vector<Point> mPoints;
     std::string mMinimumColumnBasis;
     std::vector<double> mColumnBases;
 
