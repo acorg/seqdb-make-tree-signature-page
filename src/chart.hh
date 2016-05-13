@@ -4,6 +4,22 @@
 
 // ----------------------------------------------------------------------
 
+class ChartInfo
+{
+ public:
+    inline ChartInfo() {}
+
+    std::string date;
+    std::string lab;
+    std::string virus_type;
+    std::string lineage;
+    std::string name;
+    std::string rbc_species;
+
+}; // ChartInfo
+
+// ----------------------------------------------------------------------
+
 class Chart
 {
  public:
@@ -13,7 +29,7 @@ class Chart
 
  private:
     double mStress;
-      // mInfo;
+    ChartInfo mInfo;
       // mPoints;
     std::string mMinimumColumnBasis;
       // mColumnBases;

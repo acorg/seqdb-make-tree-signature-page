@@ -25,6 +25,28 @@ Chart import_chart(std::string buffer)
 
 // ----------------------------------------------------------------------
 
+class json_parser_ChartInfo AXE_RULE
+{
+  public:
+    inline json_parser_ChartInfo(ChartInfo& aChartInfo) : mChartInfo(aChartInfo) {}
+
+    inline axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const
+    {
+        return (jsonr::skey("info") > jsonr::object(
+              jsonr::object_value("date", mChartInfo.date)
+            | jsonr::object_value("lab", mChartInfo.lab)
+            | jsonr::object_value("virus_type", mChartInfo.virus_type)
+            | jsonr::object_value("lineage", mChartInfo.lineage)
+            | jsonr::object_value("name", mChartInfo.name)
+            | jsonr::object_value("rbc_species", mChartInfo.rbc_species)
+            | jsonr::object_string_ignore_value("?")
+              ))(i1, i2);
+    }
+
+  private:
+    ChartInfo& mChartInfo;
+};
+
 constexpr const char* SDB_VERSION = "acmacs-sdb-v1";
 
 Chart Chart::from_json(std::string data)
@@ -35,6 +57,7 @@ Chart Chart::from_json(std::string data)
       | jsonr::object_string_ignore_value(" created")
       | jsonr::object_string_ignore_value("?points")
           // | chart.mInfo.json_parser()
+      | json_parser_ChartInfo(chart.mInfo)
       | jsonr::object_value("minimum_column_basis", chart.mMinimumColumnBasis)
           // | chart.mPoints.json_parser()
       | jsonr::object_value("stress", chart.mStress)
