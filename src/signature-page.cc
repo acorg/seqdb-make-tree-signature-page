@@ -89,7 +89,7 @@ SignaturePage& SignaturePage::prepare(Tree& aTree)
 
 // ----------------------------------------------------------------------
 
-void SignaturePage::draw(const Tree& aTree, Surface& aSurface)
+void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aChart)
 {
     const double canvas_width = aSurface.canvas_size().width;
     const double padding = canvas_width * aTree.settings().signature_page.outer_padding;
@@ -153,7 +153,7 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface)
             mClades->draw(aSurface, clades_viewport, time_series_viewport, *mDrawTree, aTree.settings().clades);
         }
         if (mAntigenicMaps) {
-            mAntigenicMaps->draw(aSurface, antigenic_maps_viewport, aTree.settings().antigenic_maps);
+            mAntigenicMaps->draw(aSurface, antigenic_maps_viewport, aChart, aTree.settings().antigenic_maps);
         }
     }
 

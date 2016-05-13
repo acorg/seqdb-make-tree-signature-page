@@ -8,6 +8,7 @@
 class Surface;
 class Viewport;
 class Tree;
+class Chart;
 
 // ----------------------------------------------------------------------
 
@@ -17,7 +18,7 @@ class AntigenicMaps
     inline AntigenicMaps() {}
 
     AntigenicMaps& prepare(const Tree& aTree, const SettingsAntigenicMaps& aSettings);
-    void draw(Surface& aSurface, const Viewport& aViewport, const SettingsAntigenicMaps& aSettings) const;
+    void draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const SettingsAntigenicMaps& aSettings) const;
       // Size size(Surface& aSurface, const SettingsAntigenicMaps& aSettings) const;
 
  private:

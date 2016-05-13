@@ -15,6 +15,7 @@ class SettingsSignaturePage;
 class Surface;
 class Tree;
 class Node;
+class Chart;
 
 // ----------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ class SignaturePage
     SignaturePage& color_by_continent(bool aColorByContinent);
     SignaturePage& color_by_pos(int aPos);
     SignaturePage& prepare(Tree& aTree);
-    void draw(const Tree& aTree, Surface& aSurface);
+    void draw(const Tree& aTree, Surface& aSurface, const Chart* aChart);
 
  private:
     int mParts;

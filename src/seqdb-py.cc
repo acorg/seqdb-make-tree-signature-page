@@ -324,7 +324,7 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def("color_by_continent", &SignaturePage::color_by_continent, py::arg("color_by_continent"), py::return_value_policy::take_ownership)
             .def("color_by_pos", &SignaturePage::color_by_pos, py::arg("pos"), py::return_value_policy::take_ownership)
             .def("prepare", &SignaturePage::prepare, py::arg("tree"), py::return_value_policy::take_ownership)
-            .def("draw", &SignaturePage::draw, py::arg("tree"), py::arg("surface"))
+            .def("draw", &SignaturePage::draw, py::arg("tree"), py::arg("surface"), py::arg("chart") = nullptr)
             ;
 
       // ----------------------------------------------------------------------
