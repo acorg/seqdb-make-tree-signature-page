@@ -112,7 +112,14 @@ namespace jsonr
     {
         auto extractor = [this](auto it1, auto it2) { mTarget.emplace_back(it1, it2); };
         auto item = doublequotes > (string_content >> axe::e_ref(extractor)) > doublequotes;
-        return axe::r_named(array_begin > ~(item & *(comma > item) ) > array_end, "jsonr::array")(i1, i2);
+        return axe::r_named(array_begin > ~(item & *(comma > item) ) > array_end, "jsonr::array<std::string>")(i1, i2);
+    }
+
+    template <> template<class Iterator> inline axe::result<Iterator> array_t<double>::operator()(Iterator i1, Iterator i2) const
+    {
+        auto extractor = [this](auto it1, auto it2) { mTarget.push_back(std::stod(std::string(it1, it2))); };
+        auto item = axe::r_double() >> axe::e_ref(extractor);
+        return axe::r_named(array_begin > ~(item & *(comma > item) ) > array_end, "jsonr::array<double>")(i1, i2);
     }
 
     template <typename ArrayItem> inline auto array(std::vector<ArrayItem>& aTarget) { return array_t<ArrayItem>(aTarget); }

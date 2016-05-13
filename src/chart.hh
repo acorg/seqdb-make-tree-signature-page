@@ -32,7 +32,7 @@ class Chart
     ChartInfo mInfo;
       // mPoints;
     std::string mMinimumColumnBasis;
-      // mColumnBases;
+    std::vector<double> mColumnBases;
 
 }; // class Chart
 

@@ -61,7 +61,7 @@ Chart Chart::from_json(std::string data)
       | jsonr::object_value("minimum_column_basis", chart.mMinimumColumnBasis)
           // | chart.mPoints.json_parser()
       | jsonr::object_value("stress", chart.mStress)
-          // | chart.mColumnBases.json_parser()
+      | jsonr::object_value("column_bases", chart.mColumnBases)
         );
     try {
         parse_chart(std::begin(data), std::end(data));
