@@ -47,6 +47,26 @@ class json_parser_ChartInfo AXE_RULE
     ChartInfo& mChartInfo;
 };
 
+class json_parser_PointVaccine AXE_RULE
+{
+  public:
+    inline json_parser_PointVaccine(Point& aPoint) : mPoint(aPoint) {}
+
+    inline axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const
+    {
+        auto set_vaccine = axe::e_ref([&](auto, auto) { mPoint.vaccine = true; });
+        return (jsonr::skey("v") > (jsonr::object(
+              jsonr::object_value("aspect", mPoint.vaccine_aspect)
+            | jsonr::object_string_value("fill_color", mPoint.vaccine_fill_color)
+            | jsonr::object_string_value("outline_color", mPoint.vaccine_outline_color)
+            | jsonr::object_string_ignore_value("?")
+              ) >> set_vaccine))(i1, i2);
+    }
+
+  private:
+    Point& mPoint;
+};
+
 class json_parser_PointAttributes AXE_RULE
 {
   public:
@@ -61,6 +81,7 @@ class json_parser_PointAttributes AXE_RULE
             | jsonr::object_value("R", mPoint.reference)
             | jsonr::skey("t") > point_type
             | jsonr::object_value("e", mPoint.egg)
+            | json_parser_PointVaccine(mPoint)
             | jsonr::object_string_ignore_value("?")
               ))(i1, i2);
     }
@@ -69,36 +90,15 @@ class json_parser_PointAttributes AXE_RULE
     Point& mPoint;
 };
 
-class json_parser_PointVaccine AXE_RULE
-{
-  public:
-    inline json_parser_PointVaccine(Point& aPoint) : mPoint(aPoint) {}
-
-    inline axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const
-    {
-        auto set_vaccine = axe::e_ref([&](auto, auto) { mPoint.vaccine = true; });
-        return (jsonr::skey("v") > (jsonr::object(
-              jsonr::object_value("aspect", mPoint.vaccine_aspect)
-            // | jsonr::object_string_value("fill_color", mPoint.vaccine_fill_color)
-            // | jsonr::object_string_value("outline_color", mPoint.vaccine_outline_color)
-            | jsonr::object_string_ignore_value("?")
-              ) >> set_vaccine))(i1, i2);
-    }
-
-  private:
-    Point& mPoint;
-};
-
 axe::result<std::string::iterator> Point::json_parser_t::operator()(std::string::iterator i1, std::string::iterator i2) const
 {
-    return jsonr::object(
+    return jsonr::object(axe::r_named(
           jsonr::object_value("N", mPoint.name)
         | jsonr::object_value("c", mPoint.coordinates)
         | jsonr::object_value("l", mPoint.lab_id)
         | json_parser_PointAttributes(mPoint)
-        | json_parser_PointVaccine(mPoint)
         | jsonr::object_string_ignore_value("?")
-          )(i1, i2);
+          , "point"))(i1, i2);
 }
 
 constexpr const char* SDB_VERSION = "acmacs-sdb-v1";

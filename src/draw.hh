@@ -147,16 +147,16 @@ class Color
 
     inline void from_string(std::string aColor)
         {
-            if ((aColor.size() == 7 || aColor.size() == 9) && aColor[0] == '#') {
-                try {
-                    mColor = static_cast<uint32_t>(std::stoul(std::string(aColor, 1), nullptr, 16));
-                }
-                catch (std::exception& err) {
-                    throw std::invalid_argument("cannot read Color from " + aColor + ": " + err.what());
-                }
+            if (aColor[0] != '#')
+                throw std::invalid_argument("cannot read Color from " + aColor + ": first symbol must be # got " + std::string(1, aColor[0]));
+            if (aColor.size() != 7 && aColor.size() != 9)
+                throw std::invalid_argument("cannot read Color from " + aColor + ": invalid string length, must be 7 or 9 but got " + std::to_string(aColor.size()));
+            try {
+                mColor = static_cast<uint32_t>(std::stoul(std::string(aColor, 1), nullptr, 16));
             }
-            else
-                throw std::invalid_argument("cannot read Color from " + aColor);
+            catch (std::exception& err) {
+                throw std::invalid_argument("cannot read Color from " + aColor + ": " + err.what());
+            }
         }
 
  private:
