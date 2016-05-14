@@ -79,7 +79,7 @@ def main(args):
      .color_by_continent(args.color_by_continent)
      .color_by_pos(args.color_by_pos - 1)
      .prepare(tree)
-     .draw(tree, surface))
+     .draw(tree, surface, chart))
 
 # ----------------------------------------------------------------------
 

@@ -21,7 +21,7 @@ class Point
     inline Point () : antigen(true), egg(false), reassortant(false), reference(false), vaccine(false), vaccine_fill_color(0xFFC0CB), vaccine_outline_color(0), vaccine_aspect(0.5) {}
 
     std::string name;
-    std::vector<double> coordinates;
+    Location coordinates;
     std::string lab_id;
     bool antigen;
     bool egg;
@@ -59,6 +59,8 @@ class Chart
  public:
     inline Chart() : mStress(-1) {}
 
+    const Viewport& viewport() const { return mViewport; }
+
     static Chart from_json(std::string data);
 
  private:
@@ -67,6 +69,10 @@ class Chart
     std::vector<Point> mPoints;
     std::string mMinimumColumnBasis;
     std::vector<double> mColumnBases;
+
+    Viewport mViewport;
+
+    void preprocess();
 
 }; // class Chart
 

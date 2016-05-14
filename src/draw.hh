@@ -6,6 +6,7 @@
 #include <utility>
 #include <string>
 #include <stdexcept>
+#include <cmath>
 // #include <functional>
 
 #include "cairo.hh"
@@ -37,7 +38,12 @@ class Location
     inline Location(double aX, double aY) : x(aX), y(aY) {}
     double x, y;
 
-    std::string to_string() const { return "Location(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
+    inline Location& operator -= (const Location& a) { x -= a.x; y -= a.y; return *this; }
+    inline std::string to_string() const { return "Location(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
+
+    inline void min(const Location& a) { x = std::min(x, a.x); y = std::min(y, a.y); }
+    inline void max(const Location& a) { x = std::max(x, a.x); y = std::max(y, a.y); }
+    static inline Location center_of(const Location& a, const Location& b) { return {(a.x + b.x) / 2.0, (a.y + b.y) / 2.0}; }
 
 }; // class Location
 
@@ -48,6 +54,7 @@ class Size
  public:
     inline Size() : width(0), height(0) {}
     inline Size(double aWidth, double aHeight) : width(aWidth), height(aHeight) {}
+    inline Size(const Location& a, const Location& b) : width(std::abs(a.x - b.x)), height(std::abs(a.y - b.y)) {}
     double width, height;
 
     inline std::string to_string() const { return "Size(" + std::to_string(width) + ", " + std::to_string(height) + ")"; }
@@ -97,12 +104,33 @@ class Viewport
     inline Viewport() : origin(0, 0), size(0, 0) {}
     inline Viewport(const Location& a, const Size& s) : origin(a), size(s) {}
     inline Viewport(const Location& a, const Location& b) : origin(a), size(b - a) {}
+
     inline void set(const Location& a, const Size& s) { origin = a; size = s; }
+    inline void set(const Location& a, const Location& b) { origin = a; size = b - a; }
+    inline void zoom(double scale) { const Size new_size = size * scale; origin = center() - new_size * 0.5; size = new_size; }
+
+      // make viewport a square by extending the smaller side from center
+    inline void square()
+        {
+            if (size.width < size.height) {
+                origin.x -= (size.height - size.width) / 2;
+                size.width = size.height;
+            }
+            else {
+                origin.y -= (size.width - size.height) / 2;
+                size.height = size.width;
+            }
+        }
+
+      // zoom out viewport to make width a whole number)
+    inline void whole_width() { zoom(std::ceil(size.width) / size.width); }
+
     inline double right() const { return origin.x + size.width; }
     inline double bottom() const { return origin.y + size.height; }
     inline Location top_right() const { return origin + Size(size.width, 0); }
     inline Location bottom_right() const { return origin + size; }
     inline Location bottom_left() const { return origin + Size(0, size.height); }
+    inline Location center() const { return origin + size * 0.5; }
 
     Location origin;
     Size size;
@@ -259,6 +287,7 @@ class Surface
 
     void line(const Location& a, const Location& b, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
     void rectangle(const Location& a, const Size& s, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    inline void rectangle(const Viewport& v, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT) { rectangle(v.origin, v.size, aColor, aWidth, aLineCap); }
     void rectangle_filled(const Location& a, const Size& s, Color aOutlineColor, double aWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
     void square_filled(const Location& aCenter, double aSide, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
     void triangle_filled(const Location& aCenter, double aSide, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);

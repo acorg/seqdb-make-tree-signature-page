@@ -90,11 +90,27 @@ class json_parser_PointAttributes AXE_RULE
     Point& mPoint;
 };
 
+class json_parser_Location AXE_RULE
+{
+  public:
+    inline json_parser_Location(Location& aLocation) : mLocation(aLocation) {}
+
+    inline axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const
+    {
+        using namespace jsonr;
+        return (skey("c") > array_begin > r_double(mLocation.x) > comma > r_double(mLocation.y) > array_end)(i1, i2);
+    }
+
+  private:
+    Location& mLocation;
+};
+
 axe::result<std::string::iterator> Point::json_parser_t::operator()(std::string::iterator i1, std::string::iterator i2) const
 {
     return jsonr::object(axe::r_named(
           jsonr::object_value("N", mPoint.name)
-        | jsonr::object_value("c", mPoint.coordinates)
+            // | jsonr::object_value("c", mPoint.coordinates)
+        | json_parser_Location(mPoint.coordinates)
         | jsonr::object_value("l", mPoint.lab_id)
         | json_parser_PointAttributes(mPoint)
         | jsonr::object_string_ignore_value("?")
@@ -122,8 +138,32 @@ Chart Chart::from_json(std::string data)
     catch (axe::failure<char>& err) {
         throw jsonr::JsonParsingError(err.message());
     }
+    chart.preprocess();
     return chart;
 
 } // Chart::from_json
+
+// ----------------------------------------------------------------------
+
+void Chart::preprocess()
+{
+      // Calculate viewport for all points
+    Location tl(1e10, 1e10), br(-1e10, -1e10);
+    for (const auto& p: mPoints) {
+        tl.min(p.coordinates);
+        br.max(p.coordinates);
+    }
+    const Location center = Location::center_of(tl, br);
+    for (auto& p: mPoints) {
+        p.coordinates -= center;
+    }
+    tl -= center;
+    br -= center;
+    mViewport.set(tl, br);
+    mViewport.square();
+      // mViewport.zoom(settings);
+    mViewport.whole_width();
+
+} // Chart::preprocess
 
 // ----------------------------------------------------------------------

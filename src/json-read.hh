@@ -55,6 +55,16 @@ namespace jsonr
         return doublequotes > (string_content >> target) > doublequotes;
     };
 
+    inline auto r_double(double& target)
+    {
+        return axe::r_double() >> axe::e_ref([&target](auto b, auto e) {target = std::stod(std::string(b, e)); });
+    };
+
+    inline auto r_double(std::vector<double>& target)
+    {
+        return axe::r_double() >> axe::e_ref([&target](auto b, auto e) {target.push_back(std::stod(std::string(b, e))); });
+    };
+
       // ----------------------------------------------------------------------
 
     template <typename Item> class object_t AXE_RULE
@@ -119,8 +129,7 @@ namespace jsonr
 
     template <> template<class Iterator> inline axe::result<Iterator> array_t<double>::operator()(Iterator i1, Iterator i2) const
     {
-        auto extractor = [this](auto it1, auto it2) { mTarget.push_back(std::stod(std::string(it1, it2))); };
-        auto item = axe::r_double() >> axe::e_ref(extractor);
+        auto item = r_double(mTarget);
         return axe::r_named(array_begin > ~(item & *(comma > item) ) > array_end, "jsonr::array<double>")(i1, i2);
     }
 
@@ -133,7 +142,7 @@ namespace jsonr
       //inline auto value(std::vector<std::string>& aTarget) { return array(aTarget); }
     inline auto value(int& aTarget) { return axe::r_decimal(aTarget); }
     inline auto value(size_t& aTarget) { return axe::r_udecimal(aTarget); }
-    inline auto value(double& aTarget) { return axe::r_double(aTarget); }
+    inline auto value(double& aTarget) { return r_double(aTarget); }
     inline auto value(std::string& aTarget) { return r_string(aTarget); }
     inline auto value(bool& aTarget) { return r_bool(aTarget); }
 

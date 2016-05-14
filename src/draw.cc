@@ -47,11 +47,11 @@ void Surface::grid(const Viewport& aViewport, double aStep, Color aLineColor, do
     cairo_set_line_width(mContext, aLineWidth);
     set_source_rgba(aLineColor);
     cairo_set_line_cap(mContext, CAIRO_LINE_CAP_BUTT);
-    for (double x = aViewport.origin.x + aStep; x < aViewport.right(); x += aStep) {
+    for (double x = aViewport.origin.x; x < aViewport.right(); x += aStep) {
         cairo_move_to(mContext, x, aViewport.origin.y);
         cairo_line_to(mContext, x, aViewport.bottom());
     }
-    for (double y = aViewport.origin.y + aStep; y < aViewport.bottom(); y += aStep) {
+    for (double y = aViewport.origin.y; y < aViewport.bottom(); y += aStep) {
         cairo_move_to(mContext, aViewport.origin.x, y);
         cairo_line_to(mContext, aViewport.right(), y);
     }
@@ -228,12 +228,14 @@ Size Surface::text_size(std::string aText, double aSize, const TextStyle& aTextS
 
 double Surface::set_clip_region(const Viewport& aViewport, double aWidthScale)
 {
-    cairo_translate(mContext, aViewport.origin.x, aViewport.origin.y);
+    const auto center = aViewport.center();
+    cairo_translate(mContext, center.x, center.y);
     const double scale = aViewport.size.width / aWidthScale;
     cairo_scale(mContext, scale, scale);
     cairo_reset_clip(mContext);
     cairo_new_path(mContext);
-    cairo_rectangle(mContext, 0, 0, aWidthScale, aViewport.size.height / scale);
+    const double y_d = aViewport.size.height / scale;
+    cairo_rectangle(mContext, - aWidthScale / 2, - y_d / 2, aWidthScale, y_d);
     cairo_clip(mContext);
     return 1.0 / scale;
 
