@@ -78,7 +78,7 @@ def main(args):
 # ----------------------------------------------------------------------
 
 def make_working_dir(args):
-    working_dir = Path(sWorkingDirRoot, "{}-{}-{}-{}-{}".format(datetime.datetime.now().strftime("%Y-%m%d-%H%M"), args.virus_type.lower(), "bfgs" if args.raxml_bfgs else "no-bfgs", args.raxml_num_runs, args.garli_num_runs))
+    working_dir = Path(sWorkingDirRoot, args.virus_type.lower(), "{}-{}-r{}-{}-g{}".format(datetime.datetime.now().strftime("%Y-%m%d-%H%M"), "bfgs" if args.raxml_bfgs else "no-bfgs", args.raxml_num_runs, args.mode, args.garli_num_runs))
     try:
         working_dir.mkdir(parents=True, exist_ok=False)
     except Exception as err:

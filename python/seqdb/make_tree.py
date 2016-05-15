@@ -106,8 +106,8 @@ def run_garli(working_dir, run_id, fasta_file, tree, garli_num_runs, garli_attac
     r_garli = garli_job.wait()
     module_logger.info('GARLI {}'.format(r_garli.report_best()))
     with Path(working_dir, "result.garli.txt").open("w") as f:
-        f.write("Longest time: " + r_garli.longest_time_str()+ "\n\n")
-        f.write(r_garli.tabbed_report_header()+ "\n")
+        f.write("Longest time: " + r_garli.longest_time_str() + "\n\n")
+        f.write(r_garli.tabbed_report_header() + "\n")
         f.write("\n".join(rr.tabbed_report() for rr in r_garli.results) + "\n")
     return r_garli
 
@@ -129,8 +129,8 @@ def run_garli_multi(working_dir, run_id, fasta_file, trees, garli_num_runs, garl
     r_garli.recompute()
     module_logger.info('GARLI (multi {}) {}'.format(len(jobs), r_garli.report_best()))
     with Path(working_dir, "result.garli.txt").open("w") as f:
-        f.write("Longest time: " + r_garli.longest_time_str()+ "\n\n")
-        f.write(r_garli.tabbed_report_header()+ "\n")
+        f.write("Longest time: " + r_garli.longest_time_str() + "\n\n")
+        f.write(r_garli.tabbed_report_header() + "\n")
         f.write("\n".join(rr.tabbed_report() for rr in r_garli.results) + "\n")
     return r_garli
 
@@ -143,8 +143,14 @@ def make_results(working_dir, r_raxml, r_garli):
 
     r_best = vars(r_garli.results[0])
     r_best["longest_time"] = longest_time
+    r_best["longest_time_s"] = longest_time_s
     with Path(working_dir, "result.best.json").open("w") as f:
         f.write(json.dumps(r_best, indent=2, sort_keys=True, cls=JSONEncoder) + "\n")
+
+    with Path(working_dir, "result.all.txt").open("w") as f:
+        f.write("Overall time: " + longest_time_s + "\n")
+        f.write("GARLI score : " + r_best["score"] + "\n")
+        f.write("Tree        : " + r_best["tree"] + "\n")
 
     r = {
         " total": {
