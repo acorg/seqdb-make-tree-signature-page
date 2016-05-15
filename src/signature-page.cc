@@ -6,6 +6,7 @@
 #include "tree.hh"
 #include "antigenic-maps.hh"
 #include "settings.hh"
+#include "chart.hh"
 
 // ----------------------------------------------------------------------
 
@@ -69,7 +70,7 @@ SignaturePage& SignaturePage::color_by_pos(int aPos)
 
 // ----------------------------------------------------------------------
 
-SignaturePage& SignaturePage::prepare(Tree& aTree)
+SignaturePage& SignaturePage::prepare(Tree& aTree, Chart* aChart)
 {
     if (mDrawTree) {
         mDrawTree->prepare(aTree);
@@ -80,8 +81,12 @@ SignaturePage& SignaturePage::prepare(Tree& aTree)
             mTimeSeries->prepare(aTree, aTree.settings().time_series);
         if (mClades)
             mClades->prepare(aTree, aTree.settings().clades);
-        if (mAntigenicMaps)
+        if (mAntigenicMaps) {
+            if (aChart == nullptr)
+                throw std::runtime_error("Antigenic maps part requested but no chart provided to SignaturePage.prepare");
+            aChart->preprocess(aTree.settings().antigenic_maps);
             mAntigenicMaps->prepare(aTree, aTree.settings().antigenic_maps);
+        }
     }
     return *this;
 

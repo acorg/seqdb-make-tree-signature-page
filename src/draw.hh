@@ -145,7 +145,7 @@ class Color
 {
  public:
     inline Color() : mColor(0xFF00FF) {}
-    template <typename Uint, typename std::enable_if<std::is_integral<Uint>::value>::type* = nullptr> inline Color(Uint aColor) : mColor(static_cast<uint32_t>(aColor)) {}
+    template <typename Uint, typename std::enable_if<std::is_integral<Uint>::value>::type* = nullptr> constexpr inline Color(Uint aColor) : mColor(static_cast<uint32_t>(aColor)) {}
     inline Color(std::string aColor) { from_string(aColor); }
       // inline Color(const Color&) = default;
       // inline Color& operator=(const Color& aSrc) = default;
@@ -191,6 +191,10 @@ class Color
     uint32_t mColor; // 4 bytes, most->least significant: transparency-red-green-blue, 0x00FF0000 - opaque red, 0xFF000000 - fully transparent
 
 }; // class Color
+
+constexpr const Color BLACK = 0;
+constexpr const Color GREY = 0xA0A0A0;
+constexpr const Color TRANSPARENT = 0xFF000000;
 
 // ----------------------------------------------------------------------
 

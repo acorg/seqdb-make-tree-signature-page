@@ -361,8 +361,8 @@ class SettingsClades
 
  public:
     inline SettingsClades()
-        : slot_width(5), arrow_color(0), arrow_extra(0.5), arrow_width(3), line_width(1),
-          label_color(0), label_size(10), separator_color(0x808080), separator_width(0.2) {}
+        : slot_width(5), arrow_color(BLACK), arrow_extra(0.5), arrow_width(3), line_width(1),
+          label_color(0), label_size(10), separator_color(GREY), separator_width(0.2) {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
 
@@ -396,10 +396,31 @@ class SettingsAntigenicMaps
 
             template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
             {
-                auto r_border_width = jsonr::object_double_non_negative_value("border_width", mSettings.border_width);
-                auto r_border_color = jsonr::object_string_value("border_color", mSettings.border_color);
-                auto r_comment = jsonr::object_string_ignore_value("?");
-                return (jsonr::skey("clades") > jsonr::object(r_border_width | r_border_color | r_comment))(i1, i2);
+                using namespace jsonr;
+                return (jsonr::skey("clades") > jsonr::object(
+                      object_double_non_negative_value("border_width", mSettings.border_width)
+                    | object_string_value("border_color", mSettings.border_color)
+                    | object_double_non_negative_value("grid_line_width", mSettings.grid_line_width)
+                    | object_string_value("grid_color", mSettings.grid_color)
+                    | object_value("map_zoom", mSettings.map_zoom)
+                    | object_value("serum_scale", mSettings.serum_scale)
+                    | object_value("reference_antigen_scale", mSettings.reference_antigen_scale)
+                    | object_value("test_antigen_scale", mSettings.test_antigen_scale)
+                    | object_value("vaccine_antigen_scale", mSettings.vaccine_antigen_scale)
+                    | object_value("tracked_antigen_scale", mSettings.tracked_antigen_scale)
+                    | object_value("serum_outline_width", mSettings.serum_outline_width)
+                    | object_value("reference_antigen_outline_width", mSettings.reference_antigen_outline_width)
+                    | object_value("test_antigen_outline_width", mSettings.test_antigen_outline_width)
+                    | object_value("vaccine_antigen_outline_width", mSettings.vaccine_antigen_outline_width)
+                    | object_value("tracked_antigen_outline_width", mSettings.tracked_antigen_outline_width)
+                    | object_string_value("serum_outline_color", mSettings.serum_outline_color)
+                    | object_string_value("reference_antigen_outline_color", mSettings.reference_antigen_outline_color)
+                    | object_string_value("test_antigen_outline_color", mSettings.test_antigen_outline_color)
+                    | object_string_value("test_antigen_fill_color", mSettings.test_antigen_fill_color)
+                    | object_string_value("vaccine_antigen_outline_color", mSettings.vaccine_antigen_outline_color)
+                    | object_string_value("tracked_antigen_outline_color", mSettings.tracked_antigen_outline_color)
+                    | object_string_ignore_value("?")
+                      ))(i1, i2);
             }
 
           private:
@@ -408,14 +429,22 @@ class SettingsAntigenicMaps
 
  public:
     inline SettingsAntigenicMaps()
-        : border_width(1), border_color(0) {}
+        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), map_zoom(1.1),
+          serum_scale(5), reference_antigen_scale(8), test_antigen_scale(5), vaccine_antigen_scale(15), tracked_antigen_scale(8),
+          serum_outline_width(1), reference_antigen_outline_width(1), test_antigen_outline_width(1), vaccine_antigen_outline_width(1), tracked_antigen_outline_width(1),
+          serum_outline_color(GREY), reference_antigen_outline_color(GREY), test_antigen_outline_color(GREY), test_antigen_fill_color(0x00FF00), vaccine_antigen_outline_color(GREY), tracked_antigen_outline_color(GREY)
+        {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
 
     inline auto json_parser() { return json_parser_t(*this); }
 
-    double border_width;
-    Color border_color;
+    double border_width, grid_line_width;
+    Color border_color, grid_color;
+    double map_zoom;
+    double serum_scale, reference_antigen_scale, test_antigen_scale, vaccine_antigen_scale, tracked_antigen_scale;
+    double serum_outline_width, reference_antigen_outline_width, test_antigen_outline_width, vaccine_antigen_outline_width, tracked_antigen_outline_width;
+    Color serum_outline_color, reference_antigen_outline_color, test_antigen_outline_color, test_antigen_fill_color, vaccine_antigen_outline_color, tracked_antigen_outline_color;
 
 }; // class SettingsAntigenicMaps
 

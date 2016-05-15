@@ -145,6 +145,25 @@ jsonw::IfPrependComma SettingsAntigenicMaps::json(std::string& target, jsonw::If
     comma = jsonw::json_begin(target, comma, '{', indent, prefix);
     comma = jsonw::json(target, comma, "border_width", border_width, indent, prefix);
     comma = jsonw::json(target, comma, "border_color", border_color, indent, prefix);
+    comma = jsonw::json(target, comma, "grid_line_width", grid_line_width, indent, prefix);
+    comma = jsonw::json(target, comma, "grid_color", grid_color, indent, prefix);
+    comma = jsonw::json(target, comma, "map_zoom", map_zoom, indent, prefix);
+    comma = jsonw::json(target, comma, "serum_scale", serum_scale, indent, prefix);
+    comma = jsonw::json(target, comma, "reference_antigen_scale", reference_antigen_scale, indent, prefix);
+    comma = jsonw::json(target, comma, "test_antigen_scale", test_antigen_scale, indent, prefix);
+    comma = jsonw::json(target, comma, "vaccine_antigen_scale", vaccine_antigen_scale, indent, prefix);
+    comma = jsonw::json(target, comma, "tracked_antigen_scale", tracked_antigen_scale, indent, prefix);
+    comma = jsonw::json(target, comma, "serum_outline_width", serum_outline_width, indent, prefix);
+    comma = jsonw::json(target, comma, "reference_antigen_outline_width", reference_antigen_outline_width, indent, prefix);
+    comma = jsonw::json(target, comma, "test_antigen_outline_width", test_antigen_outline_width, indent, prefix);
+    comma = jsonw::json(target, comma, "vaccine_antigen_outline_width", vaccine_antigen_outline_width, indent, prefix);
+    comma = jsonw::json(target, comma, "tracked_antigen_outline_width", tracked_antigen_outline_width, indent, prefix);
+    comma = jsonw::json(target, comma, "serum_outline_color", serum_outline_color, indent, prefix);
+    comma = jsonw::json(target, comma, "reference_antigen_outline_color", reference_antigen_outline_color, indent, prefix);
+    comma = jsonw::json(target, comma, "test_antigen_outline_color", test_antigen_outline_color, indent, prefix);
+    comma = jsonw::json(target, comma, "test_antigen_fill_color", test_antigen_fill_color, indent, prefix);
+    comma = jsonw::json(target, comma, "vaccine_antigen_outline_color", vaccine_antigen_outline_color, indent, prefix);
+    comma = jsonw::json(target, comma, "tracked_antigen_outline_color", tracked_antigen_outline_color, indent, prefix);
       // comma = jsonw::json(target, comma, "?", "", indent, prefix);
     return  jsonw::json_end(target, '}', indent, prefix);
 

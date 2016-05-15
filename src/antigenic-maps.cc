@@ -25,10 +25,12 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
     const auto chart_viewport = aChart->viewport();
     const double scale = aSurface.set_clip_region(map_viewport, chart_viewport.size.width);
     std::cerr << "map scale " << scale << std::endl;
-    aSurface.grid(chart_viewport, 1, 0x8000FF00, scale / 2);
+    aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
 
-    aSurface.circle_filled(Location(0, 0), scale * 5, 1.0, 0.0, 0xFF0000, scale * 0.5, 0xE0E0FF);
-    aSurface.circle_filled(Location(1, 1), scale * 10, 1.0, 0.0, 0x000000, scale * 0.5, 0xE0E0FF);
+    aChart->draw(aSurface, scale, aSettings);
+
+    // aSurface.circle_filled(Location(0, 0), scale * 5, 1.0, 0.0, 0xFF0000, scale * 0.5, 0xE0E0FF);
+    // aSurface.circle_filled(Location(1, 1), scale * 10, 1.0, 0.0, 0x000000, scale * 0.5, 0xE0E0FF);
 
     // aSurface.line(Location(0, 0), Location(1.5, 1), 0xFF0000, scale);
     // aSurface.line(Location(0, 0), Location(1, 1.5), 0xFF00A5, scale);

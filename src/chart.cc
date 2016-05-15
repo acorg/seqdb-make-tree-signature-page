@@ -3,6 +3,7 @@
 #include "chart.hh"
 #include "read-file.hh"
 #include "xz.hh"
+#include "settings.hh"
 
 // ----------------------------------------------------------------------
 
@@ -138,14 +139,13 @@ Chart Chart::from_json(std::string data)
     catch (axe::failure<char>& err) {
         throw jsonr::JsonParsingError(err.message());
     }
-    chart.preprocess();
     return chart;
 
 } // Chart::from_json
 
 // ----------------------------------------------------------------------
 
-void Chart::preprocess()
+void Chart::preprocess(const SettingsAntigenicMaps& aSettings)
 {
       // Calculate viewport for all points
     Location tl(1e10, 1e10), br(-1e10, -1e10);
@@ -161,9 +161,73 @@ void Chart::preprocess()
     br -= center;
     mViewport.set(tl, br);
     mViewport.square();
-      // mViewport.zoom(settings);
+    mViewport.zoom(aSettings.map_zoom);
     mViewport.whole_width();
 
+    mDrawPoints.resize(mPoints.size(), nullptr);
+    for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
+        const auto& p = mPoints[point_no];
+        if (p.antigen) {
+            if (p.reference) {
+                mDrawPoints[point_no] = &mDrawReferenceAntigen;
+            }
+            else {
+                mDrawPoints[point_no] = &mDrawTestAntigen;
+            }
+        }
+        else {
+            mDrawPoints[point_no] = &mDrawSerum;
+        }
+    }
+
 } // Chart::preprocess
+
+// ----------------------------------------------------------------------
+
+void Chart::draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+{
+    size_t drawn = 0;
+    for (size_t level = 0; level < 10 && drawn < mDrawPoints.size(); ++level) {
+        for (size_t point_no = 0; point_no < mDrawPoints.size(); ++point_no) {
+            if (mDrawPoints[point_no]->level() == level) {
+                mDrawPoints[point_no]->draw(aSurface, mPoints[point_no], aObjectScale, aSettings);
+                ++drawn;
+            }
+        }
+    }
+    if (drawn != mDrawPoints.size())
+        std::cerr << "Warning: " << drawn << " points of " << mDrawPoints.size() << " were drawn" << std::endl;
+
+} // Chart::draw
+
+// ----------------------------------------------------------------------
+
+void DrawSerum::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+{
+    const double size = aSettings.serum_scale * aObjectScale;
+    aSurface.rectangle_filled(aPoint.coordinates, {size, size}, aSettings.serum_outline_color,
+                              aSettings.serum_outline_width * aObjectScale, TRANSPARENT);
+
+} // DrawSerum::draw
+
+// ----------------------------------------------------------------------
+
+void DrawReferenceAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+{
+    const double aspect = aPoint.egg ? 0.5 : 1.0;
+    aSurface.circle_filled(aPoint.coordinates, aSettings.reference_antigen_scale * aObjectScale, aspect, 0, aSettings.reference_antigen_outline_color,
+                              aSettings.reference_antigen_outline_width * aObjectScale, TRANSPARENT);
+
+} // DrawReferenceAntigen::draw
+
+// ----------------------------------------------------------------------
+
+void DrawTestAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+{
+    const double aspect = aPoint.egg ? 0.5 : 1.0;
+    aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect, 0, aSettings.test_antigen_outline_color,
+                              aSettings.test_antigen_outline_width * aObjectScale, aSettings.test_antigen_fill_color);
+
+} // DrawTestAntigen::draw
 
 // ----------------------------------------------------------------------

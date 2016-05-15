@@ -31,7 +31,7 @@ class SignaturePage
     SignaturePage& title(const Text& aTitle);
     SignaturePage& color_by_continent(bool aColorByContinent);
     SignaturePage& color_by_pos(int aPos);
-    SignaturePage& prepare(Tree& aTree);
+    SignaturePage& prepare(Tree& aTree, Chart* aChart);
     void draw(const Tree& aTree, Surface& aSurface, const Chart* aChart);
 
  private:

@@ -5,6 +5,46 @@
 
 // ----------------------------------------------------------------------
 
+class Point;
+class SettingsAntigenicMaps;
+
+// ----------------------------------------------------------------------
+
+class DrawPoint
+{
+ public:
+    inline DrawPoint() = default;
+    inline DrawPoint(const DrawPoint&) = default;
+    inline DrawPoint(DrawPoint&&) = default;
+    inline virtual ~DrawPoint() = default;
+    inline DrawPoint& operator=(const DrawPoint&) = default;
+    virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const = 0;
+    virtual size_t level() const = 0;
+};
+
+class DrawSerum : public DrawPoint
+{
+ public:
+    virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
+    virtual inline size_t level() const { return 1; }
+};
+
+class DrawReferenceAntigen : public DrawPoint
+{
+ public:
+    virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
+    virtual inline size_t level() const { return 2; }
+};
+
+class DrawTestAntigen : public DrawPoint
+{
+ public:
+    virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
+    virtual inline size_t level() const { return 3; }
+};
+
+// ----------------------------------------------------------------------
+
 class Point
 {
  private:
@@ -59,7 +99,10 @@ class Chart
  public:
     inline Chart() : mStress(-1) {}
 
+    void preprocess(const SettingsAntigenicMaps& aSettings);
+
     const Viewport& viewport() const { return mViewport; }
+    void draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
 
     static Chart from_json(std::string data);
 
@@ -70,9 +113,12 @@ class Chart
     std::string mMinimumColumnBasis;
     std::vector<double> mColumnBases;
 
-    Viewport mViewport;
+    std::vector<const DrawPoint*> mDrawPoints;
+    DrawSerum mDrawSerum;
+    DrawReferenceAntigen mDrawReferenceAntigen;
+    DrawTestAntigen mDrawTestAntigen;
 
-    void preprocess();
+    Viewport mViewport;
 
 }; // class Chart
 
