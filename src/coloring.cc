@@ -141,9 +141,14 @@ class ColoringByPosLegend : public Legend
     virtual void draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& aSettings) const
         {
             const auto label_size = aSurface.text_size("W", aSettings.font_size, aSettings.style);
+            auto x = aViewport.origin.x;
             auto y = aViewport.origin.y + label_size.height;
+            const std::string title = std::to_string(mColoring.pos());
+            aSurface.text({x, y}, title, BLACK, aSettings.font_size, aSettings.style);
+            x += (aSurface.text_size(title, aSettings.font_size, aSettings.style).width - label_size.width) / 2;
+            y += label_size.height * aSettings.interline;
             for (auto& label_color: mColoring.aa_color()) {
-                aSurface.text({aViewport.origin.x, y}, std::string(1, label_color.first), label_color.second, aSettings.font_size, aSettings.style);
+                aSurface.text({x, y}, std::string(1, label_color.first), label_color.second, aSettings.font_size, aSettings.style);
                 y += label_size.height * aSettings.interline;
             }
         }
@@ -151,7 +156,7 @@ class ColoringByPosLegend : public Legend
     virtual Size size(Surface& aSurface, const SettingsLegend& aSettings) const
         {
             const auto label_size = aSurface.text_size("W", aSettings.font_size, aSettings.style);
-            return {label_size.width, label_size.height * aSettings.interline * mColoring.aa_color().size()};
+            return {label_size.width, label_size.height * aSettings.interline * (mColoring.aa_color().size() + 1)};
         }
 
  private:
