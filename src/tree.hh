@@ -133,9 +133,9 @@ class Node
 
       // aa transitions
     AA_Transitions aa_transitions;
-    double cumulative_edge_length;
+    mutable double cumulative_edge_length;
     void remove_aa_transition(size_t aPos, char aRight, bool aDescentUponRemoval); // recursively
-    void compute_cumulative_edge_length(double initial_edge_length = 0);
+    void compute_cumulative_edge_length(double initial_edge_length = 0) const;
 
       // for ladderizing
     double ladderize_max_edge_length;

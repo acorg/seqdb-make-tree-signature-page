@@ -199,6 +199,9 @@ PYBIND11_PLUGIN(seqdb_backend)
 
     py::class_<Node>(m, "Node")
             .def("ladderize", &Node::ladderize)
+            .def_readonly("name", &Node::name)
+            .def_readonly("edge_length", &Node::edge_length)
+            .def_readonly("cumulative_edge_length", &Node::cumulative_edge_length)
             ;
 
     py::class_<Tree>(m, "Tree", py::base<Node>())
@@ -213,6 +216,7 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def("virus_type", &Tree::virus_type)
             .def("lineage", &Tree::lineage)
             .def("names", &Tree::names)
+            .def("leaf_nodes_sorted_by_cumulative_edge_length", &Tree::leaf_nodes_sorted_by_cumulative_edge_length, py::return_value_policy::reference, py::doc("Leaks memory, use for debugging only!"))
             .def("settings", static_cast<Settings& (Tree::*)()>(&Tree::settings), py::return_value_policy::reference)
             ;
 

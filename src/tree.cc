@@ -322,7 +322,6 @@ std::vector<std::string> Tree::names() const
 
 void Tree::make_aa_transitions(const std::vector<size_t>& aPositions)
 {
-    compute_cumulative_edge_length();
     std::vector<const Node*> leaf_nodes = leaf_nodes_sorted_by_cumulative_edge_length();
 
       // ?reset aa_transition for all nodes?
@@ -439,7 +438,7 @@ std::vector<std::map<char, size_t>> Tree::aa_per_pos() const
 
 // ----------------------------------------------------------------------
 
-void Node::compute_cumulative_edge_length(double initial_edge_length)
+void Node::compute_cumulative_edge_length(double initial_edge_length) const
 {
     cumulative_edge_length = initial_edge_length + edge_length;
     if (!is_leaf()) {
@@ -454,6 +453,7 @@ void Node::compute_cumulative_edge_length(double initial_edge_length)
 
 std::vector<const Node*> Tree::leaf_nodes_sorted_by_cumulative_edge_length() const
 {
+    compute_cumulative_edge_length();
     std::vector<const Node*> leaf_nodes;
     auto add_to_list = [&](const Node& aNode) -> void { leaf_nodes.push_back(&aNode); };
     iterate_leaf(*this, add_to_list);

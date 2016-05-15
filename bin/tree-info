@@ -24,7 +24,10 @@ def main(args):
         tree.ladderize()
     if args.command[0] == "list":
         # list names in the tree
-        print("\n".join(tree.names()))
+        if args.cumulative_edge_length:
+            print("\n".join("{:14.12f} {}".format(node.cumulative_edge_length, node.name) for node in tree.leaf_nodes_sorted_by_cumulative_edge_length()))
+        else:
+            print("\n".join(tree.names()))
     else:
         raise ValueError("Unrecognized command: " + args.command[0])
 
@@ -38,6 +41,8 @@ with seqdb.timeit(sys.argv[0]):
 
         parser.add_argument('input', nargs=1, help='source tree.')
         parser.add_argument('command', nargs=1, help='command to execute: list.')
+
+        parser.add_argument('--cumulative-edge-length', action='store_true', dest='cumulative_edge_length', default=False, help='Report cumulative_edge_length and sort by it.')
 
         parser.add_argument('--db', action='store', dest='path_to_seqdb', default=None, help='Path to sequence database (to match tree leaves with seqdb entries).')
         # parser.add_argument('--email', action='store', dest='email', default="eu@antigenic-cartography.org", help='Email to report status of the tasks running in the cluster.')
