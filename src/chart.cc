@@ -80,7 +80,7 @@ class json_parser_PointAttributes AXE_RULE
         return (jsonr::skey("a") > jsonr::object(
               jsonr::object_value("r", mPoint.reassortant)
             | jsonr::object_value("R", mPoint.reference)
-            | jsonr::skey("t") > point_type
+            | (jsonr::skey("t") > point_type)
             | jsonr::object_value("e", mPoint.egg)
             | json_parser_PointVaccine(mPoint)
             | jsonr::object_string_ignore_value("?")
@@ -170,7 +170,7 @@ void Chart::preprocess(const SettingsAntigenicMaps& aSettings)
 
 // ----------------------------------------------------------------------
 
-void Chart::draw_points_reset(const SettingsAntigenicMaps& aSettings)
+void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/)
 {
     mDrawPoints.resize(mPoints.size(), nullptr);
     for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {

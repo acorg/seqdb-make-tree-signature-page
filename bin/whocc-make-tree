@@ -59,8 +59,8 @@ def main(args):
         export_data = seqdb_m.export_from_seqdb(
             seqdb=seqdb, filename=Path(working_dir, "source.fasta"), output_format="fasta", amino_acids=False, lab=None, virus_type=vt, lineage=lin,
             gene="HA",
-            start_date=args.start_date or sStartDates[args.virus_type], end_date=args.end_date,
-            base_seq=sBaseSeq[args.virus_type], name_format="{seq_id}",
+            start_date=args.start_date or sStartDates[args.virus_type.upper()], end_date=args.end_date,
+            base_seq=sBaseSeq[args.virus_type.upper()], name_format="{seq_id}",
             aligned=True, encode_name=True, wrap=False, truncate_to_most_common_length=True, hamming_distance_threshold=150, hamming_distance_report=False,
             sort_by=None, with_hi_name=False, name_match=None)
         r = f(working_dir=working_dir, run_id=run_id, fasta_file=export_data["filename"], base_seq_name=export_data["base_seq"], raxml_bfgs=args.raxml_bfgs, raxml_num_runs=args.raxml_num_runs, garli_num_runs=args.garli_num_runs, garli_attachmentspertaxon=args.garli_attachmentspertaxon, email=args.email, machines=args.machines and args.machines.split(","))
