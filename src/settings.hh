@@ -403,6 +403,8 @@ class SettingsAntigenicMaps
                     | object_double_non_negative_value("grid_line_width", mSettings.grid_line_width)
                     | object_string_value("grid_color", mSettings.grid_color)
                     | object_value("map_zoom", mSettings.map_zoom)
+                    | object_value("egg_antigen_aspect", mSettings.egg_antigen_aspect)
+                    | object_value("reassortant_rotation", mSettings.reassortant_rotation)
                     | object_value("serum_scale", mSettings.serum_scale)
                     | object_value("reference_antigen_scale", mSettings.reference_antigen_scale)
                     | object_value("test_antigen_scale", mSettings.test_antigen_scale)
@@ -431,8 +433,9 @@ class SettingsAntigenicMaps
     inline SettingsAntigenicMaps()
         : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), map_zoom(1.1),
           serum_scale(5), reference_antigen_scale(8), test_antigen_scale(5), vaccine_antigen_scale(15), tracked_antigen_scale(8),
-          serum_outline_width(1), reference_antigen_outline_width(1), test_antigen_outline_width(1), vaccine_antigen_outline_width(1), tracked_antigen_outline_width(1),
-          serum_outline_color(GREY), reference_antigen_outline_color(GREY), test_antigen_outline_color(GREY), test_antigen_fill_color(0x00FF00), vaccine_antigen_outline_color(GREY), tracked_antigen_outline_color(GREY)
+          serum_outline_width(0.5), reference_antigen_outline_width(0.5), test_antigen_outline_width(0.5), vaccine_antigen_outline_width(0.5), tracked_antigen_outline_width(0.5),
+          serum_outline_color(GREY), reference_antigen_outline_color(GREY), test_antigen_outline_color(GREY), test_antigen_fill_color(0x00C000), vaccine_antigen_outline_color(BLACK), tracked_antigen_outline_color(GREY),
+          egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0)
         {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
@@ -445,6 +448,7 @@ class SettingsAntigenicMaps
     double serum_scale, reference_antigen_scale, test_antigen_scale, vaccine_antigen_scale, tracked_antigen_scale;
     double serum_outline_width, reference_antigen_outline_width, test_antigen_outline_width, vaccine_antigen_outline_width, tracked_antigen_outline_width;
     Color serum_outline_color, reference_antigen_outline_color, test_antigen_outline_color, test_antigen_fill_color, vaccine_antigen_outline_color, tracked_antigen_outline_color;
+    double egg_antigen_aspect, reassortant_rotation;
 
 }; // class SettingsAntigenicMaps
 

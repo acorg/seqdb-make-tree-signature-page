@@ -20,6 +20,8 @@ class DrawPoint
     inline DrawPoint& operator=(const DrawPoint&) = default;
     virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const = 0;
     virtual size_t level() const = 0;
+    virtual inline double aspect(const Point&, const SettingsAntigenicMaps&) const { return 1.0; }
+    virtual double rotation(const Point& aPoint, const SettingsAntigenicMaps& aSettings) const;
 };
 
 class DrawSerum : public DrawPoint
@@ -29,18 +31,38 @@ class DrawSerum : public DrawPoint
     virtual inline size_t level() const { return 1; }
 };
 
-class DrawReferenceAntigen : public DrawPoint
+class DrawAntigen : public DrawPoint
+{
+ public:
+    virtual double aspect(const Point& aPoint, const SettingsAntigenicMaps& aSettings) const;
+};
+
+class DrawReferenceAntigen : public DrawAntigen
 {
  public:
     virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
     virtual inline size_t level() const { return 2; }
 };
 
-class DrawTestAntigen : public DrawPoint
+class DrawTestAntigen : public DrawAntigen
 {
  public:
     virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
     virtual inline size_t level() const { return 3; }
+};
+
+class DrawTrackedAntigen : public DrawAntigen
+{
+ public:
+    virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
+    virtual inline size_t level() const { return 5; }
+};
+
+class DrawVaccineAntigen : public DrawAntigen
+{
+ public:
+    virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
+    virtual inline size_t level() const { return 9; }
 };
 
 // ----------------------------------------------------------------------
@@ -100,6 +122,7 @@ class Chart
     inline Chart() : mStress(-1) {}
 
     void preprocess(const SettingsAntigenicMaps& aSettings);
+    void draw_points_reset(const SettingsAntigenicMaps& aSettings);
 
     const Viewport& viewport() const { return mViewport; }
     void draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
@@ -117,6 +140,8 @@ class Chart
     DrawSerum mDrawSerum;
     DrawReferenceAntigen mDrawReferenceAntigen;
     DrawTestAntigen mDrawTestAntigen;
+    DrawTrackedAntigen mDrawTrackedAntigen;
+    DrawVaccineAntigen mDrawVaccineAntigen;
 
     Viewport mViewport;
 
