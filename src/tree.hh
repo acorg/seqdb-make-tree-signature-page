@@ -35,6 +35,24 @@ class AA_Transition
 
 class AA_Transitions : public std::vector<AA_Transition>
 {
+ private:
+    class json_parser_t AXE_RULE
+        {
+          public:
+            inline json_parser_t(AA_Transitions& a) : mAA_Transitions(a) {}
+
+            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
+            {
+                  // AA_Transitions ignored! they will be re-calculated.
+                using namespace jsonr;
+                auto item = object(object_string_ignore_value("t") | object_string_ignore_value("n"));
+                return (array_begin > ~(item & *(comma > item) ) > array_end)(i1, i2);
+            }
+
+          private:
+            AA_Transitions& mAA_Transitions;
+        };
+
  public:
     inline void add(size_t aPos, char aRight) { emplace_back(aPos, aRight); }
 
@@ -65,6 +83,15 @@ class AA_Transitions : public std::vector<AA_Transition>
             return found == end() ? nullptr : &*found;
         }
 
+    inline operator bool() const
+        {
+            return std::any_of(begin(), end(), [](const auto& a) -> bool { return !a.empty_left() && !a.left_right_same(); });
+        }
+
+      // serialize
+    jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
+    inline auto json_parser() { return json_parser_t(*this); }
+
 }; // class AA_Transitions
 
 // ----------------------------------------------------------------------
@@ -79,17 +106,20 @@ class Node
 
             template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
             {
-                auto r_subtree = jsonr::object_value("subtree", mNode.subtree);
-                auto r_branch_id = jsonr::object_value("id", mNode.branch_id);
-                auto r_clades = jsonr::object_value("clades", mNode.clades);
-                auto r_continent = jsonr::object_value("continent", mNode.continent);
-                auto r_edge_length = jsonr::object_value("edge_length", mNode.edge_length);
-                auto r_name = jsonr::object_value("name", mNode.name);
-                auto r_number_strains = jsonr::object_value("number_strains", mNode.number_strains);
-                auto r_aa = jsonr::object_value("aa", mNode.aa);
-                auto r_date = jsonr::object_string_value("date", mNode.date);
-                auto r_comment = jsonr::object_string_ignore_value("?");
-                return jsonr::object(r_subtree | r_branch_id | r_clades | r_continent | r_edge_length | r_name | r_number_strains | r_aa | r_date | r_comment)(i1, i2);
+                using namespace jsonr;
+                return object(
+                    object_value("subtree", mNode.subtree)
+                  | object_value("id", mNode.branch_id)
+                  | object_value("clades", mNode.clades)
+                  | object_value("continent", mNode.continent)
+                  | object_value("edge_length", mNode.edge_length)
+                  | object_value("name", mNode.name)
+                  | object_value("number_strains", mNode.number_strains)
+                  | (skey("aa_transitions") > mNode.aa_transitions.json_parser()) // must be before "aa"!
+                  | object_value("aa", mNode.aa)
+                  | object_string_value("date", mNode.date)
+                  | object_string_ignore_value("?")
+                    )(i1, i2);
             }
 
           private:
@@ -325,16 +355,6 @@ inline const Node& find_last_leaf(const Node& aNode)
 {
     return aNode.is_leaf() ? aNode : find_last_leaf(aNode.subtree.back());
 }
-
-// ----------------------------------------------------------------------
-
-class TreeImage;
-
-
-// json dump_to_json(const Node& aNode);
-// void load_from_json(Node& aNode, const json& j);
-// void tree_from_json(Tree& aTree, std::string aSource, TreeImage& aTreeImage);
-// void tree_to_json(const Tree& aTree, std::string aFilename, std::string aCreator, const TreeImage& aTreeImage);
 
 // ----------------------------------------------------------------------
 /// Local Variables:

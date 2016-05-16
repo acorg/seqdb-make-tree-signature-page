@@ -1,0 +1,5 @@
+#! /bin/bash
+source="$1"
+source=${source%.xz}
+target=${source%.*}.json.xz
+$(dirname $0)/tree-import "$@" "$target" && e "$target"

@@ -1,2 +1,5 @@
-#! /bin/sh
-$(dirname $0)/tree-draw "$@" "$1".pdf && open "$1".pdf
+#! /bin/bash
+source="$1"
+source=${source%.xz}
+target=${source%.*}.pdf
+$(dirname $0)/tree-draw "$@" "$target" && open "$target"

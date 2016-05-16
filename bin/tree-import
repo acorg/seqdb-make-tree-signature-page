@@ -14,14 +14,12 @@ from seqdb import open_file
 
 def main(args):
     tree = seqdb.import_tree(args.input[0])
-    if args.path_to_seqdb:
-        seq_db = seqdb.Seqdb()
-        seq_db.load(filename=args.path_to_seqdb)
-        tree.match_seqdb(seq_db)
-        tree.ladderize()        # must be before clade_setup()
-        tree.clade_setup()
-    else:
-        tree.ladderize()
+    seq_db = seqdb.Seqdb()
+    seq_db.load(filename=args.path_to_seqdb)
+    tree.match_seqdb(seq_db)
+    tree.ladderize()        # must be before clade_setup()
+    tree.clade_setup()
+    tree.make_aa_transitions()
     open_file.write_binary(filename=args.output[0], data=tree.json(indent=1).encode("utf-8"))
 
 # ----------------------------------------------------------------------
@@ -36,7 +34,7 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('input', nargs=1, help='source tree.')
         parser.add_argument('output', nargs=1, help='output tree.')
 
-        parser.add_argument('--db', action='store', dest='path_to_seqdb', default=None, help='Path to sequence database (to match tree leaves with seqdb entries).')
+        parser.add_argument('--db', action='store', dest='path_to_seqdb', required=True, help='Path to sequence database (to match tree leaves with seqdb entries).')
         # parser.add_argument('--email', action='store', dest='email', default="eu@antigenic-cartography.org", help='Email to report status of the tasks running in the cluster.')
 
         args = parser.parse_args()

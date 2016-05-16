@@ -403,7 +403,7 @@ class SettingsAntigenicMaps
             template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
             {
                 using namespace jsonr;
-                return (jsonr::skey("clades") > jsonr::object(
+                return (jsonr::skey("antigenic_maps") > jsonr::object(
                       object_double_non_negative_value("border_width", mSettings.border_width)
                     | object_string_value("border_color", mSettings.border_color)
                     | object_double_non_negative_value("grid_line_width", mSettings.grid_line_width)

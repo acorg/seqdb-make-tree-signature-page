@@ -645,10 +645,34 @@ jsonw::IfPrependComma Node::json(std::string& target, jsonw::IfPrependComma comm
     comma = jsonw::json_if(target, comma, "id", branch_id, indent, prefix);
     comma = jsonw::json_if(target, comma, "name", name, indent, prefix);
     comma = jsonw::json(target, comma, "number_strains", number_strains, indent, prefix);
+    if (aa_transitions) {
+        comma = jsonw::json(target, comma, "?", "aa_transitions is for information only, ignored on reading and re-calculated", indent, prefix);
+        jsonw::json(target, comma, "aa_transitions", indent, prefix);
+        target.append(": ");
+        comma = aa_transitions.json(target, jsonw::NoCommaNoIndent, indent, prefix);
+    }
     comma = jsonw::json_if(target, comma, "subtree", subtree, indent, prefix);
     return jsonw::json_end(target, '}', indent, prefix);
 
 } // Node::json
+
+// ----------------------------------------------------------------------
+
+jsonw::IfPrependComma AA_Transitions::json(std::string& target, jsonw::IfPrependComma comma, size_t /*indent*/, size_t prefix) const
+{
+    comma = json_begin(target, comma, '[', 0, prefix);
+    for (const auto& aat: *this) {
+        if (!aat.empty_left() && !aat.left_right_same()) {
+            comma = json_begin(target, comma, '{', 0, prefix);
+            comma = jsonw::json(target, comma, "t", aat.display_name(), 0, prefix);
+            if (aat.for_left)
+                comma = jsonw::json(target, comma, "n", aat.for_left->branch_id, 0, prefix);
+            comma = jsonw::json_end(target, '}', 0, prefix);
+        }
+    }
+    return jsonw::json_end(target, ']', 0, prefix);
+
+} // AA_Transitions::json
 
 // ----------------------------------------------------------------------
 
