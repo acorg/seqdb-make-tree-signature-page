@@ -25,15 +25,6 @@ class SettingsAATransition
             template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
             {
                 using namespace jsonr;
-                // auto r_size = jsonr::object_value("size", mSettings.size);
-                // auto r_color = jsonr::object_string_value("color", mSettings.color);
-                // auto r_style = jsonr::object_value("style", mSettings.style);
-                // auto r_interline = jsonr::object_value("interline", mSettings.interline);
-                // auto r_show_empty_left = jsonr::object_value("show_empty_left", mSettings.show_empty_left);
-                // auto r_show_node_for_left_line = jsonr::object_value("show_node_for_left_line", mSettings.show_node_for_left_line);
-                // auto r_node_for_left_line_color = jsonr::object_string_value("node_for_left_line_color", mSettings.node_for_left_line_color);
-                // auto r_node_for_left_line_width = jsonr::object_value("node_for_left_line_width", mSettings.node_for_left_line_width);
-                // auto r_comment = jsonr::object_string_ignore_value("?");
                 return (skey(json_name) > object(
                       object_value("size", mSettings.size)
                     | object_string_value("color", mSettings.color)
@@ -41,9 +32,9 @@ class SettingsAATransition
                     | object_value("interline", mSettings.interline)
                     | object_value("show_empty_left", mSettings.show_empty_left)
                     | object_value("show_node_for_left_line", mSettings.show_node_for_left_line)
-                    | object_value("show_on_leaf", mSettings.show_on_leaf)
                     | object_string_value("node_for_left_line_color", mSettings.node_for_left_line_color)
                     | object_value("node_for_left_line_width", mSettings.node_for_left_line_width)
+                    | object_value("number_strains_threshold", mSettings.number_strains_threshold)
                     | object_string_ignore_value("?")
                       ))(i1, i2);
             }
@@ -55,7 +46,8 @@ class SettingsAATransition
  public:
     inline SettingsAATransition()
         : size(8), color(0), style(FontStyle::Monospace), interline(1.2), show_empty_left(false),
-          show_node_for_left_line(false), show_on_leaf(false), node_for_left_line_color(0x00FF00), node_for_left_line_width(1) {}
+          show_node_for_left_line(false), node_for_left_line_color(0x00FF00), node_for_left_line_width(1),
+          number_strains_threshold(20) {}
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
@@ -66,9 +58,9 @@ class SettingsAATransition
             comma = jsonw::json(target, comma, "interline", interline, indent, prefix);
             comma = jsonw::json(target, comma, "show_empty_left", show_empty_left, indent, prefix);
             comma = jsonw::json(target, comma, "show_node_for_left_line", show_node_for_left_line, indent, prefix);
-            comma = jsonw::json(target, comma, "show_on_leaf", show_on_leaf, indent, prefix);
             comma = jsonw::json(target, comma, "node_for_left_line_color", node_for_left_line_color, indent, prefix);
             comma = jsonw::json(target, comma, "node_for_left_line_width", node_for_left_line_width, indent, prefix);
+            comma = jsonw::json(target, comma, "number_strains_threshold", number_strains_threshold, indent, prefix);
             return  jsonw::json_end(target, '}', indent, prefix);
         }
 
@@ -80,9 +72,9 @@ class SettingsAATransition
     double interline;
     bool show_empty_left;
     bool show_node_for_left_line;
-    bool show_on_leaf;
     Color node_for_left_line_color;
     double node_for_left_line_width;
+    size_t number_strains_threshold; // Do not show aa transition label if number_strains (leaf nodes) for the branch is less than this value.
 
 }; // class SettingsAATransition
 

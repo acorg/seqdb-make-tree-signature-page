@@ -15,10 +15,13 @@ Tree import_tree(std::string buffer)
         buffer = read_file(buffer);
     if (xz_compressed(buffer))
         buffer = xz_decompress(buffer);
-    if (buffer[0] == '(')
+    if (buffer[0] == '(') {
         tree = parse_newick(buffer);
-    else if (buffer[0] == '{')
+        tree.preprocess_upon_importing_from_external_format();
+    }
+    else if (buffer[0] == '{') {
         tree = Tree::from_json(buffer);
+    }
     else
         throw std::runtime_error("cannot import tree: unrecognized source format");
     return tree;

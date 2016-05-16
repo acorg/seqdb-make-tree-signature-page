@@ -119,6 +119,47 @@ void Node::ladderize()
 
 // ----------------------------------------------------------------------
 
+void Tree::ladderize()
+{
+    Node::ladderize();
+    set_branch_id();
+
+} // Tree::ladderize
+
+// ----------------------------------------------------------------------
+
+void Tree::preprocess_upon_importing_from_external_format()
+{
+    auto set_number_strains = [](Node& aNode) {
+        aNode.number_strains = 0;
+        for (const auto& subnode: aNode.subtree) {
+            aNode.number_strains += subnode.number_strains;
+        }
+    };
+    iterate_post(*this, set_number_strains);
+
+    set_branch_id();
+
+} // Tree::preprocess_upon_importing_from_external_format
+
+// ----------------------------------------------------------------------
+
+void Tree::set_branch_id()
+{
+    auto set_branch_id = [](Node& aNode) {
+        std::string prefix = aNode.branch_id;
+        if (!prefix.empty())
+            prefix += ":";
+        for (size_t i = 0; i < aNode.subtree.size(); ++i) {
+            aNode.subtree[i].branch_id = prefix + std::to_string(i + 1);
+        }
+    };
+    iterate_pre(*this, set_branch_id);
+
+} // Tree::set_branch_id
+
+// ----------------------------------------------------------------------
+
 void Tree::analyse()
 {
       // set line_no for each name node
@@ -389,6 +430,8 @@ void Tree::make_aa_transitions(const std::vector<size_t>& aPositions)
                 // }
             }
         }
+          // remove transitions having left and right parts the same
+        aNode.aa_transitions.erase(std::remove_if(aNode.aa_transitions.begin(), aNode.aa_transitions.end(), [](auto& e) { return e.left_right_same(); }), aNode.aa_transitions.end());
     };
     iterate_leaf_pre(*this, add_left_part, add_left_part);
 

@@ -67,7 +67,7 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
 
 void DrawTree::draw_aa_transition(const Node& aNode, Surface& aSurface, const Viewport& aViewport, const SettingsAATransition& aSettings)
 {
-    if (!aNode.aa_transitions.empty() && (!aNode.is_leaf() || aSettings.show_on_leaf)) {
+    if (!aNode.aa_transitions.empty() && aNode.number_strains >= aSettings.number_strains_threshold) {
         std::vector<std::pair<std::string, const Node*>> labels;
         for (const auto& aa_transition: aNode.aa_transitions) {
             if (aSettings.show_empty_left || !aa_transition.empty_left()) {
@@ -85,25 +85,16 @@ void DrawTree::draw_aa_transition(const Node& aNode, Surface& aSurface, const Vi
                 const Location label_xy(origin.x + (longest_label_size.width - label_width) / 2, origin.y);
                 aSurface.text(label_xy, label.first, aSettings.color, aSettings.size, aSettings.style);
                 if (aSettings.show_node_for_left_line && label.second) {
-                    aSurface.line(aViewport.origin /* origin - Size(0, longest_label_size.height / 2) */,
+                    aSurface.line(aViewport.origin, // origin - Size(0, longest_label_size.height / 2)
                                   mViewport.origin + Location(mHorizontalStep * label.second->cumulative_edge_length, mVerticalStep * label.second->line_no),
                                   aSettings.node_for_left_line_color, aSettings.node_for_left_line_width);
                 }
                 origin.y += longest_label_size.height * aSettings.interline;
             }
 
-            // for (const auto& aa_transition: aNode.aa_transitions) {
-            //     if (aSettings.show_empty_left || !aa_transition.empty_left()) {
-            //         aSurface.text(origin, aa_transition.display_name(), aSettings.color, aSettings.size, aSettings.style);
-            //         if (aSettings.show_node_for_left_line && aa_transition.for_left) {
-            //             aSurface.line(aViewport.origin /* origin - Size(0, longest_label_size.height / 2) */,
-            //                           mViewport.origin + Location(mHorizontalStep * aa_transition.for_left->cumulative_edge_length, mVerticalStep * aa_transition.for_left->line_no),
-            //                           aSettings.node_for_left_line_color, aSettings.node_for_left_line_width);
-            //         }
-            //           // origin.x += aSurface.text_size(aa_transition.display_name(), aSettings.size, aSettings.style).width + longest_label_size.width;
-            //         origin.y += longest_label_size.height * aSettings.interline;
-            //     }
-            // }
+            std::cout << "AA transitions: ";
+            std::transform(labels.begin(), labels.end(), std::ostream_iterator<std::string>(std::cout, " "), [](const auto& e) -> std::string { return e.first; });
+            std::cout << " --> " << aNode.branch_id << std::endl;
         }
     }
 

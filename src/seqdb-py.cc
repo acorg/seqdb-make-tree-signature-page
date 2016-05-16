@@ -198,7 +198,6 @@ PYBIND11_PLUGIN(seqdb_backend)
       // ----------------------------------------------------------------------
 
     py::class_<Node>(m, "Node")
-            .def("ladderize", &Node::ladderize)
             .def_readonly("name", &Node::name)
             .def_readonly("edge_length", &Node::edge_length)
             .def_readonly("cumulative_edge_length", &Node::cumulative_edge_length)
@@ -206,6 +205,7 @@ PYBIND11_PLUGIN(seqdb_backend)
 
     py::class_<Tree>(m, "Tree", py::base<Node>())
             .def("json", static_cast<std::string (Tree::*)(size_t) const>(&Tree::json), py::arg("indent") = 0)
+            .def("ladderize", &Tree::ladderize)
             .def("match_seqdb", &Tree::match_seqdb, py::arg("seqdb"))
             .def("clade_setup", &Tree::clade_setup)
             .def("make_aa_transitions", static_cast<void (Tree::*)()>(&Tree::make_aa_transitions))
@@ -298,7 +298,7 @@ PYBIND11_PLUGIN(seqdb_backend)
     py::class_<SettingsAATransition>(m, "SettingsAATransition")
             .def_readwrite("show_node_for_left_line", &SettingsAATransition::show_node_for_left_line)
             .def_readwrite("show_empty_left", &SettingsAATransition::show_empty_left)
-            .def_readwrite("show_on_leaf", &SettingsAATransition::show_on_leaf)
+            .def_readwrite("number_strains_threshold", &SettingsAATransition::number_strains_threshold)
             ;
 
       // ----------------------------------------------------------------------

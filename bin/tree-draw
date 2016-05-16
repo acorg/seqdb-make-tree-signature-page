@@ -35,7 +35,10 @@ def main(args):
     tree.settings().draw_tree.grid_step = args.grid_step
     tree.settings().draw_tree.aa_transition.show_node_for_left_line = args.aa_transition_left_line
     tree.settings().draw_tree.aa_transition.show_empty_left = args.aa_transition_empty_left
-    tree.settings().draw_tree.aa_transition.show_on_leaf = args.aa_transition_on_leaf
+    if args.aa_transition_on_leaf:
+        tree.settings().draw_tree.aa_transition.number_strains_threshold = 0
+    else:
+        tree.settings().draw_tree.aa_transition.number_strains_threshold = args.aa_transition_number_strains_threshold
 
     if args.chart:
         surface = seqdb.Surface(args.output[0], 1422, 800)
@@ -104,6 +107,7 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('--show-aa-transition-left-line', action='store_true', dest='aa_transition_left_line', default=False, help='Show line telling how left part of aa transition has been calculated.')
         parser.add_argument('--show-aa-transition-empty-left', action='store_true', dest='aa_transition_empty_left', default=False, help='Show AA transition labels for labels with an empty left part.')
         parser.add_argument('--show-aa-transition-on-leaf', action='store_true', dest='aa_transition_on_leaf', default=False, help='Show AA transition on the leaf branches.')
+        parser.add_argument('--show-aa-transition-min-number-strains', type=int, action='store', dest='aa_transition_number_strains_threshold', default=20, help='Do not show aa transition label if number_strains (leaf nodes) for the branch is less than this value.')
         parser.add_argument('--grid', action='store', type=int, dest='grid_step', default=0, help='Show grid with the provided step (number of strains per cell).')
         parser.add_argument('--report-aa-per-pos', action='store_true', dest='report_aa_per_pos', default=False, help='Print to stdout list of AAs found at each pos.')
 
