@@ -198,7 +198,6 @@ class Node
 class Tree : public Node
 {
  public:
-    void analyse();
     void print(std::ostream& out) const;
     void print_edges(std::ostream& out) const;
     void fix_labels();
@@ -247,6 +246,9 @@ class Tree : public Node
 
     size_t longest_aa() const;
     void set_branch_id();
+    void set_line_no();
+    void set_top_bottom();
+    void init_hz_line_sections();
 
 }; // class Tree
 

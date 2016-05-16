@@ -123,6 +123,9 @@ void Tree::ladderize()
 {
     Node::ladderize();
     set_branch_id();
+    set_line_no();
+    set_top_bottom();
+    init_hz_line_sections();
 
 } // Tree::ladderize
 
@@ -139,6 +142,8 @@ void Tree::preprocess_upon_importing_from_external_format()
     iterate_post(*this, set_number_strains);
 
     set_branch_id();
+    set_line_no();
+    set_top_bottom();
 
 } // Tree::preprocess_upon_importing_from_external_format
 
@@ -160,22 +165,40 @@ void Tree::set_branch_id()
 
 // ----------------------------------------------------------------------
 
-void Tree::analyse()
+void Tree::init_hz_line_sections()
 {
-      // set line_no for each name node
+    if (settings().draw_tree.hz_line_sections.empty()) {
+        const auto first = find_first_leaf(*this);
+        const auto last = find_last_leaf(*this);
+        settings().draw_tree.hz_line_sections.emplace_back(first.name, first.line_no, last.name, last.line_no);
+    }
+
+} // Tree::init_hz_line_sections
+
+// ----------------------------------------------------------------------
+
+void Tree::set_line_no()
+{
     size_t current_line = 0;
     auto set_line_no = [&current_line](Node& aNode) {
         aNode.line_no = current_line;
         ++current_line;
     };
-      // set top and bottom for each subtree node
+    iterate_leaf(*this, set_line_no);
+
+} // Tree::set_line_no
+
+// ----------------------------------------------------------------------
+
+void Tree::set_top_bottom()
+{
     auto set_top_bottom = [](Node& aNode) {
         aNode.top = aNode.subtree.begin()->middle();
         aNode.bottom = aNode.subtree.rbegin()->middle();
     };
-    iterate_leaf_post(*this, set_line_no, set_top_bottom);
+    iterate_post(*this, set_top_bottom);
 
-} // Tree::analyse
+} // Tree::set_top_bottom
 
 // ----------------------------------------------------------------------
 
@@ -339,7 +362,6 @@ void Tree::match_seqdb(const Seqdb& aSeqdb)
 
 void Tree::clade_setup()
 {
-    analyse();
     Clades clades;
     clades.prepare(*this, mSettings.clades);
     mSettings.clades.extract(clades);

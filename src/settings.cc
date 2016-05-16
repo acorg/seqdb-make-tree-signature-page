@@ -11,10 +11,11 @@ jsonw::IfPrependComma SettingsDrawTree::json(std::string& target, jsonw::IfPrepe
     comma = jsonw::json(target, comma, "line_width", line_width, indent, prefix);
     comma = jsonw::json(target, comma, "label_style", label_style, indent, prefix);
     comma = jsonw::json(target, comma, "name_offset", name_offset, indent, prefix);
-    comma = jsonw::json(target, comma, SettingsAATransition::json_name, aa_transition, indent, prefix);
     comma = jsonw::json(target, comma, "grid_step", grid_step, indent, prefix);
     comma = jsonw::json(target, comma, "grid_color", grid_color, indent, prefix);
     comma = jsonw::json(target, comma, "grid_width", grid_width, indent, prefix);
+    comma = jsonw::json(target, comma, HzLineSections::json_name, hz_line_sections, indent, prefix);
+    comma = jsonw::json(target, comma, SettingsAATransition::json_name, aa_transition, indent, prefix);
     comma = jsonw::json(target, comma, "?", "grid_step: 0 - off, N - use N*vertical_step as grid cell height", indent, prefix);
     return  jsonw::json_end(target, '}', indent, prefix);
 

@@ -160,6 +160,65 @@ class SettingsAATransition
 
 // ----------------------------------------------------------------------
 
+class HzLineSection
+{
+ private:
+    constexpr static size_t LINE_NOT_SET = static_cast<size_t>(-1);
+
+    class json_parser_t AXE_RULE
+        {
+          public:
+            inline json_parser_t(HzLineSection& aSection) : mSection(aSection) {}
+
+            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
+            {
+                using namespace jsonr;
+                return (object(
+                    object_value("first_name", mSection.first_name)
+                  | object_value("first_line", mSection.first_line)
+                  | object_value("last_name", mSection.last_name)
+                  | object_value("last_line", mSection.last_line)
+                  | object_string_ignore_value("?")
+                    ))(i1, i2);
+            }
+
+          private:
+            HzLineSection& mSection;
+        };
+
+ public:
+    inline HzLineSection() : first_line(LINE_NOT_SET), last_line(LINE_NOT_SET) {}
+    inline HzLineSection(std::string aFirstName, size_t aFirstLine, std::string aLastName, size_t aLastLine)
+        : first_name(aFirstName), last_name(aLastName), first_line(aFirstLine), last_line(aLastLine) {}
+
+    inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
+        {
+            comma = jsonw::json_begin(target, comma, '{', indent, prefix);
+            comma = jsonw::json_if(target, comma, "first_name", first_name, 0, prefix);
+            if (first_line != LINE_NOT_SET)
+                comma = jsonw::json(target, comma, "first_line", first_line, 0, prefix);
+            comma = jsonw::json(target, comma, "last_name", last_name, 0, prefix);
+            if (last_line != LINE_NOT_SET)
+                comma = jsonw::json(target, comma, "last_line", last_line, 0, prefix);
+            return  jsonw::json_end(target, '}', 0, prefix);
+        }
+
+    inline auto json_parser() { return json_parser_t(*this); }
+
+    std::string first_name, last_name;
+    size_t first_line, last_line;
+
+}; // class HzLineSection
+
+class HzLineSections : public std::vector<HzLineSection>
+{
+ public:
+    static constexpr const char* json_name = "hz_line_sections";
+
+}; // class HzLineSections
+
+// ----------------------------------------------------------------------
+
 class SettingsDrawTree
 {
  private:
@@ -170,17 +229,20 @@ class SettingsDrawTree
 
             template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
             {
-                auto r_root_edge = jsonr::object_double_non_negative_value("root_edge", mSettings.root_edge);
-                auto r_line_color = jsonr::object_string_value("line_color", mSettings.line_color);
-                auto r_line_width = jsonr::object_double_non_negative_value("line_width", mSettings.line_width);
-                auto r_name_offset = jsonr::object_double_value("name_offset", mSettings.name_offset);
-                auto r_label_style = jsonr::object_value("label_style", mSettings.label_style);
-                auto r_aa_transition = mSettings.aa_transition.json_parser();
-                auto r_grid_step = jsonr::object_value("grid_step", mSettings.grid_step);
-                auto r_grid_color = jsonr::object_string_value("grid_color", mSettings.grid_color);
-                auto r_grid_width = jsonr::object_double_non_negative_value("grid_width", mSettings.grid_width);
-                auto r_comment = jsonr::object_string_ignore_value("?");
-                return (jsonr::skey("tree") > jsonr::object(r_root_edge | r_line_color | r_line_width | r_name_offset | r_label_style | r_aa_transition | r_grid_step | r_grid_color | r_grid_width | r_comment))(i1, i2);
+                using namespace jsonr;
+                return (skey("tree") > object(
+                    object_double_non_negative_value("root_edge", mSettings.root_edge)
+                  | object_string_value("line_color", mSettings.line_color)
+                  | object_double_non_negative_value("line_width", mSettings.line_width)
+                  | object_double_value("name_offset", mSettings.name_offset)
+                  | object_value("label_style", mSettings.label_style)
+                  | mSettings.aa_transition.json_parser()
+                  | object_value("grid_step", mSettings.grid_step)
+                  | object_string_value("grid_color", mSettings.grid_color)
+                  | object_double_non_negative_value("grid_width", mSettings.grid_width)
+                  | object_value(HzLineSections::json_name, mSettings.hz_line_sections)
+                  | object_string_ignore_value("?")
+                    ))(i1, i2);
             }
 
           private:
@@ -204,6 +266,7 @@ class SettingsDrawTree
     size_t grid_step;           // 0 - no grid, N - use N*vertical_step as grid cell height
     Color grid_color;
     double grid_width;
+    HzLineSections hz_line_sections;
 
 }; // class SettingsDrawTree
 
