@@ -35,9 +35,12 @@ def main(args):
     tree.settings().draw_tree.grid_step = args.grid_step
     tree.settings().draw_tree.aa_transition.show_node_for_left_line = args.aa_transition_left_line
     tree.settings().draw_tree.aa_transition.show_empty_left = args.aa_transition_empty_left
+    tree.settings().draw_tree.aa_transition.show_on_leaf = args.aa_transition_on_leaf
 
-    surface = seqdb.Surface(args.output[0], 1422, 800)
-    # surface = seqdb.Surface(args.output[0], 600, 800)
+    if args.chart:
+        surface = seqdb.Surface(args.output[0], 1422, 800)
+    else:
+        surface = seqdb.Surface(args.output[0], 600, 850)
 
     # surface.line(seqdb.Location(100, 100), seqdb.Location(300, 200), 0xFFA500, 5, seqdb.LINE_CAP_ROUND)
     # surface.double_arrow(seqdb.Location(100, 200), seqdb.Location(250, 50), 0x80FF00A5, 5, 10)
@@ -100,6 +103,7 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('--no-clades', action='store_false', dest='show_clades', default=True, help='Do not show clades.')
         parser.add_argument('--show-aa-transition-left-line', action='store_true', dest='aa_transition_left_line', default=False, help='Show line telling how left part of aa transition has been calculated.')
         parser.add_argument('--show-aa-transition-empty-left', action='store_true', dest='aa_transition_empty_left', default=False, help='Show AA transition labels for labels with an empty left part.')
+        parser.add_argument('--show-aa-transition-on-leaf', action='store_true', dest='aa_transition_on_leaf', default=False, help='Show AA transition on the leaf branches.')
         parser.add_argument('--grid', action='store', type=int, dest='grid_step', default=0, help='Show grid with the provided step (number of strains per cell).')
         parser.add_argument('--report-aa-per-pos', action='store_true', dest='report_aa_per_pos', default=False, help='Print to stdout list of AAs found at each pos.')
 

@@ -143,7 +143,7 @@ class ColoringByPosLegend : public Legend
             const auto label_size = aSurface.text_size("W", aSettings.font_size, aSettings.style);
             auto x = aViewport.origin.x;
             auto y = aViewport.origin.y + label_size.height;
-            const std::string title = std::to_string(mColoring.pos());
+            const std::string title = std::to_string(mColoring.pos() + 1);
             aSurface.text({x, y}, title, BLACK, aSettings.font_size, aSettings.style);
             x += (aSurface.text_size(title, aSettings.font_size, aSettings.style).width - label_size.width) / 2;
             y += label_size.height * aSettings.interline;

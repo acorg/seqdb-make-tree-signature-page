@@ -298,6 +298,7 @@ PYBIND11_PLUGIN(seqdb_backend)
     py::class_<SettingsAATransition>(m, "SettingsAATransition")
             .def_readwrite("show_node_for_left_line", &SettingsAATransition::show_node_for_left_line)
             .def_readwrite("show_empty_left", &SettingsAATransition::show_empty_left)
+            .def_readwrite("show_on_leaf", &SettingsAATransition::show_on_leaf)
             ;
 
       // ----------------------------------------------------------------------
