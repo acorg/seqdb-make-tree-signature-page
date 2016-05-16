@@ -69,22 +69,23 @@ void DrawTree::draw_aa_transition(const Node& aNode, Surface& aSurface, const Vi
 {
     if (!aNode.aa_transitions.empty() && aNode.number_strains >= aSettings.number_strains_threshold) {
         auto labels = aNode.aa_transitions.make_labels(aSettings.show_empty_left);
+        auto branch_settings = aSettings.for_branch(aNode.branch_id);
         if (!labels.empty()) {
             const auto longest_label = std::max_element(labels.begin(), labels.end(), [](const auto& a, const auto& b) { return a.first.size() < b.first.size(); });
-            const auto longest_label_size = aSurface.text_size(longest_label->first, aSettings.data.size, aSettings.data.style);
+            const auto longest_label_size = aSurface.text_size(longest_label->first, branch_settings.size, branch_settings.style);
             const Size offset(aViewport.size.width > longest_label_size.width ? (aViewport.size.width - longest_label_size.width) / 2 : (aViewport.size.width - longest_label_size.width),
-                              longest_label_size.height * aSettings.data.interline);
+                              longest_label_size.height * branch_settings.interline);
             Location origin(aViewport.origin + offset);
             for (const auto& label: labels) {
-                const auto label_width = aSurface.text_size(label.first, aSettings.data.size, aSettings.data.style).width;
+                const auto label_width = aSurface.text_size(label.first, branch_settings.size, branch_settings.style).width;
                 const Location label_xy(origin.x + (longest_label_size.width - label_width) / 2, origin.y);
-                aSurface.text(label_xy, label.first, aSettings.data.color, aSettings.data.size, aSettings.data.style);
+                aSurface.text(label_xy, label.first, branch_settings.color, branch_settings.size, branch_settings.style);
                 if (aSettings.show_node_for_left_line && label.second) {
                     aSurface.line(aViewport.origin, // origin - Size(0, longest_label_size.height / 2)
                                   mViewport.origin + Location(mHorizontalStep * label.second->cumulative_edge_length, mVerticalStep * label.second->line_no),
                                   aSettings.node_for_left_line_color, aSettings.node_for_left_line_width);
                 }
-                origin.y += longest_label_size.height * aSettings.data.interline;
+                origin.y += longest_label_size.height * branch_settings.interline;
             }
 
             std::cout << "AA transitions: ";

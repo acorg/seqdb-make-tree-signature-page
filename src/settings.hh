@@ -36,6 +36,8 @@ class SettingsAATransition
                     | object_string_value("node_for_left_line_color", mSettings.node_for_left_line_color)
                     | object_value("node_for_left_line_width", mSettings.node_for_left_line_width)
                     | object_value("number_strains_threshold", mSettings.number_strains_threshold)
+                    | object_string_ignore_value("?per_branch")
+                    | object_value("per_branch", mSettings.per_branch)
                     | object_string_ignore_value("?")
                       ))(i1, i2);
             }
@@ -48,8 +50,8 @@ class SettingsAATransition
     class TransitionData
     {
      public:
-        inline TransitionData() : size(8), color(0), style(FontStyle::Monospace), interline(1.2) {}
-        inline TransitionData(std::string aBranchId, std::vector<std::string>&& aLabels) : TransitionData() { branch_id = aBranchId; labels = std::move(aLabels); }
+        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style(FontStyle::Monospace), interline(empty ? -1 : 1.2) {}
+        inline TransitionData(std::string aBranchId, std::vector<std::string>&& aLabels) : TransitionData(true) { branch_id = aBranchId; labels = std::move(aLabels); }
 
         double size;
         Color color;
@@ -58,6 +60,19 @@ class SettingsAATransition
         std::string branch_id;
         std::vector<std::string> labels;
 
+        inline void update(const TransitionData& source)
+            {
+                if (source.size >= 0)
+                    size = source.size;
+                if (source.color != COLOR_NOT_SET)
+                    color = source.color;
+                style = source.style;
+                if (source.interline > 0)
+                    interline = source.interline;
+                if (!source.labels.empty())
+                    labels = source.labels;
+            }
+
         inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
             {
                 comma = jsonw::json_begin(target, comma, '{', indent, prefix);
@@ -65,9 +80,34 @@ class SettingsAATransition
                 comma = jsonw::json(target, comma, "labels", labels, 0, prefix);
                 return  jsonw::json_end(target, '}', 0, prefix);
             }
+
+        class json_parser_t AXE_RULE
+            {
+              public:
+                inline json_parser_t(TransitionData& aData) : mData(aData) {}
+
+                template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
+                {
+                    using namespace jsonr;
+                    return (object(
+                        object_value("size", mData.size)
+                      | object_string_value("color", mData.color)
+                      | object_value("style", mData.style)
+                      | object_value("interline", mData.interline)
+                      | object_value("branch_id", mData.branch_id)
+                      | object_value("labels", mData.labels)
+                      | object_string_ignore_value("?")
+                        ))(i1, i2);
+                }
+
+              private:
+                TransitionData& mData;
+            };
+
+        inline auto json_parser() { return json_parser_t(*this); }
     };
 
-    inline SettingsAATransition() : show_empty_left(false), show_node_for_left_line(false), node_for_left_line_color(0x00FF00), node_for_left_line_width(1), number_strains_threshold(20) {}
+    inline SettingsAATransition() : data(false), show_empty_left(false), show_node_for_left_line(false), node_for_left_line_color(0x00FF00), node_for_left_line_width(1), number_strains_threshold(20) {}
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
@@ -97,6 +137,15 @@ class SettingsAATransition
                 std::transform(aLabels.begin(), aLabels.end(), std::back_inserter(labels), [](const auto& e) -> std::string { return e.first; });
                 per_branch.emplace_back(branch_id, std::move(labels));
             }
+        }
+
+    inline TransitionData for_branch(std::string aBranchId) const
+        {
+            TransitionData r = data;
+            const auto for_branch = find_if(per_branch.begin(), per_branch.end(), [&aBranchId](const auto& e) { return e.branch_id == aBranchId; });
+            if (for_branch != per_branch.end())
+                r.update(*for_branch);
+            return r;
         }
 
     TransitionData data;

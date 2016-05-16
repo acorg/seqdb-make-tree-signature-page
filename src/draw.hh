@@ -152,8 +152,8 @@ class Color
     template <typename Uint, typename std::enable_if<std::is_integral<Uint>::value>::type* = nullptr> inline Color& operator=(Uint aColor) { mColor = static_cast<uint32_t>(aColor); return *this; }
     inline Color& operator=(std::string aColor) { from_string(aColor); return *this; }
 
-    // inline bool operator == (const Color& aColor) const { return mColor == aColor.mColor; }
-    // inline bool operator != (const Color& aColor) const { return ! operator==(aColor); }
+    inline bool operator == (const Color& aColor) const { return mColor == aColor.mColor; }
+    inline bool operator != (const Color& aColor) const { return ! operator==(aColor); }
 
     inline double alpha() const { return double(0xFF - ((mColor >> 24) & 0xFF)) / 255.0; }
     inline double red() const { return double((mColor >> 16) & 0xFF) / 255.0; }
@@ -195,6 +195,7 @@ class Color
 constexpr const Color BLACK = 0;
 constexpr const Color GREY = 0xA0A0A0;
 constexpr const Color TRANSPARENT = 0xFF000000;
+constexpr const Color COLOR_NOT_SET = 0xFFFFFFFF;
 
 // ----------------------------------------------------------------------
 
