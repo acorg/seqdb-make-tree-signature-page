@@ -8,6 +8,7 @@
 // ----------------------------------------------------------------------
 
 class Clades;
+class Node;
 
 // ----------------------------------------------------------------------
 
@@ -26,10 +27,10 @@ class SettingsAATransition
             {
                 using namespace jsonr;
                 return (skey(json_name) > object(
-                      object_value("size", mSettings.size)
-                    | object_string_value("color", mSettings.color)
-                    | object_value("style", mSettings.style)
-                    | object_value("interline", mSettings.interline)
+                      object_value("size", mSettings.data.size)
+                    | object_string_value("color", mSettings.data.color)
+                    | object_value("style", mSettings.data.style)
+                    | object_value("interline", mSettings.data.interline)
                     | object_value("show_empty_left", mSettings.show_empty_left)
                     | object_value("show_node_for_left_line", mSettings.show_node_for_left_line)
                     | object_string_value("node_for_left_line_color", mSettings.node_for_left_line_color)
@@ -44,18 +45,41 @@ class SettingsAATransition
         };
 
  public:
-    inline SettingsAATransition()
-        : size(8), color(0), style(FontStyle::Monospace), interline(1.2), show_empty_left(false),
-          show_node_for_left_line(false), node_for_left_line_color(0x00FF00), node_for_left_line_width(1),
-          number_strains_threshold(20) {}
+    class TransitionData
+    {
+     public:
+        inline TransitionData() : size(8), color(0), style(FontStyle::Monospace), interline(1.2) {}
+        inline TransitionData(std::string aBranchId, std::vector<std::string>&& aLabels) : TransitionData() { branch_id = aBranchId; labels = std::move(aLabels); }
+
+        double size;
+        Color color;
+        TextStyle style;
+        double interline;
+        std::string branch_id;
+        std::vector<std::string> labels;
+
+        inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
+            {
+                comma = jsonw::json_begin(target, comma, '{', indent, prefix);
+                comma = jsonw::json(target, comma, "branch_id", branch_id, 0, prefix);
+                comma = jsonw::json(target, comma, "labels", labels, 0, prefix);
+                return  jsonw::json_end(target, '}', 0, prefix);
+            }
+    };
+
+    inline SettingsAATransition() : show_empty_left(false), show_node_for_left_line(false), node_for_left_line_color(0x00FF00), node_for_left_line_width(1), number_strains_threshold(20) {}
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
             comma = jsonw::json_begin(target, comma, '{', indent, prefix);
-            comma = jsonw::json(target, comma, "size", size, indent, prefix);
-            comma = jsonw::json(target, comma, "color", color, indent, prefix);
-            comma = jsonw::json(target, comma, "style", style, indent, prefix);
-            comma = jsonw::json(target, comma, "interline", interline, indent, prefix);
+            comma = jsonw::json(target, comma, "size", data.size, indent, prefix);
+            comma = jsonw::json(target, comma, "color", data.color, indent, prefix);
+            comma = jsonw::json(target, comma, "style", data.style, indent, prefix);
+            comma = jsonw::json(target, comma, "interline", data.interline, indent, prefix);
+            if (!per_branch.empty()) {
+                comma = jsonw::json(target, comma, "?per_branch", "add size, color, style, interline, if different from the default listed above.", indent, prefix);
+                comma = jsonw::json(target, comma, "per_branch", per_branch, indent, prefix);
+            }
             comma = jsonw::json(target, comma, "show_empty_left", show_empty_left, indent, prefix);
             comma = jsonw::json(target, comma, "show_node_for_left_line", show_node_for_left_line, indent, prefix);
             comma = jsonw::json(target, comma, "node_for_left_line_color", node_for_left_line_color, indent, prefix);
@@ -66,10 +90,17 @@ class SettingsAATransition
 
     inline auto json_parser() { return json_parser_t(*this); }
 
-    double size;
-    Color color;
-    TextStyle style;
-    double interline;
+    inline void add(std::string branch_id, const std::vector<std::pair<std::string, const Node*>>& aLabels)
+        {
+            if (!std::any_of(per_branch.begin(), per_branch.end(), [&branch_id](const auto& e) { return branch_id == e.branch_id; })) {
+                std::vector<std::string> labels;
+                std::transform(aLabels.begin(), aLabels.end(), std::back_inserter(labels), [](const auto& e) -> std::string { return e.first; });
+                per_branch.emplace_back(branch_id, std::move(labels));
+            }
+        }
+
+    TransitionData data;
+    std::vector<TransitionData> per_branch;
     bool show_empty_left;
     bool show_node_for_left_line;
     Color node_for_left_line_color;

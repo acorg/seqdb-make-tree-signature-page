@@ -68,28 +68,23 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
 void DrawTree::draw_aa_transition(const Node& aNode, Surface& aSurface, const Viewport& aViewport, const SettingsAATransition& aSettings)
 {
     if (!aNode.aa_transitions.empty() && aNode.number_strains >= aSettings.number_strains_threshold) {
-        std::vector<std::pair<std::string, const Node*>> labels;
-        for (const auto& aa_transition: aNode.aa_transitions) {
-            if (aSettings.show_empty_left || !aa_transition.empty_left()) {
-                labels.push_back(std::make_pair(aa_transition.display_name(), aa_transition.for_left));
-            }
-        }
+        auto labels = aNode.aa_transitions.make_labels(aSettings.show_empty_left);
         if (!labels.empty()) {
             const auto longest_label = std::max_element(labels.begin(), labels.end(), [](const auto& a, const auto& b) { return a.first.size() < b.first.size(); });
-            const auto longest_label_size = aSurface.text_size(longest_label->first, aSettings.size, aSettings.style);
+            const auto longest_label_size = aSurface.text_size(longest_label->first, aSettings.data.size, aSettings.data.style);
             const Size offset(aViewport.size.width > longest_label_size.width ? (aViewport.size.width - longest_label_size.width) / 2 : (aViewport.size.width - longest_label_size.width),
-                              longest_label_size.height * aSettings.interline);
+                              longest_label_size.height * aSettings.data.interline);
             Location origin(aViewport.origin + offset);
             for (const auto& label: labels) {
-                const auto label_width = aSurface.text_size(label.first, aSettings.size, aSettings.style).width;
+                const auto label_width = aSurface.text_size(label.first, aSettings.data.size, aSettings.data.style).width;
                 const Location label_xy(origin.x + (longest_label_size.width - label_width) / 2, origin.y);
-                aSurface.text(label_xy, label.first, aSettings.color, aSettings.size, aSettings.style);
+                aSurface.text(label_xy, label.first, aSettings.data.color, aSettings.data.size, aSettings.data.style);
                 if (aSettings.show_node_for_left_line && label.second) {
                     aSurface.line(aViewport.origin, // origin - Size(0, longest_label_size.height / 2)
                                   mViewport.origin + Location(mHorizontalStep * label.second->cumulative_edge_length, mVerticalStep * label.second->line_no),
                                   aSettings.node_for_left_line_color, aSettings.node_for_left_line_width);
                 }
-                origin.y += longest_label_size.height * aSettings.interline;
+                origin.y += longest_label_size.height * aSettings.data.interline;
             }
 
             std::cout << "AA transitions: ";
@@ -107,7 +102,7 @@ void DrawTree::draw_grid(Surface& aSurface, const Viewport& aViewport, const Set
     if (aSettings.grid_step) {
         const auto grid_step = aSettings.grid_step * mVerticalStep;
         const auto font_size = grid_step * 0.4;
-        const auto style = aSettings.aa_transition.style;
+        const auto style = aSettings.aa_transition.data.style;
         const auto tsize = aSurface.text_size("8888", font_size, style);
         const auto right = aViewport.right() - tsize.width;
         const auto left = aViewport.right() - tsize.width * 2;

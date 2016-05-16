@@ -88,6 +88,17 @@ class AA_Transitions : public std::vector<AA_Transition>
             return std::any_of(begin(), end(), [](const auto& a) -> bool { return !a.empty_left() && !a.left_right_same(); });
         }
 
+    inline std::vector<std::pair<std::string, const Node*>> make_labels(bool show_empty_left = false) const
+        {
+            std::vector<std::pair<std::string, const Node*>> labels;
+            for (const auto& aa_transition: *this) {
+                if (show_empty_left || !aa_transition.empty_left()) {
+                    labels.push_back(std::make_pair(aa_transition.display_name(), aa_transition.for_left));
+                }
+            }
+            return labels;
+        }
+
       // serialize
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
     inline auto json_parser() { return json_parser_t(*this); }

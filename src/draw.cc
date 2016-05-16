@@ -245,6 +245,7 @@ double Surface::set_clip_region(const Viewport& aViewport, double aWidthScale)
 
 jsonw::IfPrependComma TextStyle::json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
 {
+    indent = 0;                 // store in the single line
     comma = json_begin(target, comma, '{', indent, prefix);
     switch (font_style()) {
       case FontStyle::Default:
@@ -273,7 +274,7 @@ jsonw::IfPrependComma TextStyle::json(std::string& target, jsonw::IfPrependComma
           comma = jsonw::json(target, comma, "weight", "bold", indent, prefix);
           break;
     }
-    comma = jsonw::json(target, comma, "?", "font: default monospace; slant: normal italic oblique; weight: normal bold", indent, prefix);
+      // comma = jsonw::json(target, comma, "?", "font: default monospace; slant: normal italic oblique; weight: normal bold", indent, prefix);
     return jsonw::json_end(target, '}', indent, prefix);
 
 } // TextStyle::json

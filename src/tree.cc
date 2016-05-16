@@ -430,8 +430,14 @@ void Tree::make_aa_transitions(const std::vector<size_t>& aPositions)
                 // }
             }
         }
+
           // remove transitions having left and right parts the same
         aNode.aa_transitions.erase(std::remove_if(aNode.aa_transitions.begin(), aNode.aa_transitions.end(), [](auto& e) { return e.left_right_same(); }), aNode.aa_transitions.end());
+
+          // add transition labels information to settings
+        if (aNode.aa_transitions) {
+            settings().draw_tree.aa_transition.add(aNode.branch_id, aNode.aa_transitions.make_labels());
+        }
     };
     iterate_leaf_pre(*this, add_left_part, add_left_part);
 
