@@ -6,6 +6,7 @@
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
 import re, subprocess, random, operator, time as time_m, datetime
+from . import json
 from .timeit import timeit
 
 # ----------------------------------------------------------------------
@@ -33,6 +34,9 @@ class RaxmlResult:
     def tabbed_report(self):
         return "{:10.4f} {:>8s} {:10.4f} {:10.4f} {}".format(self.score, self.time_str(self.time), self.start_scores[0], self.start_scores[1], str(self.tree))
 
+    def json(self):
+        return vars(self)
+
     @classmethod
     def time_str(cls, time):
         s = str(datetime.timedelta(seconds=time))
@@ -58,9 +62,22 @@ class RaxmlResults:
     def report_best(self):
         return "{} {} {}".format(self.results[0].score, self.longest_time_str(), self.best_tree())
 
+    def make_txt(self, filepath :Path):
+        with filepath.open("w") as f:
+            f.write("Longest time: " + self.longest_time_str()+ "\n\n")
+            f.write(self.tabbed_report_header()+ "\n")
+            f.write("\n".join(rr.tabbed_report() for rr in self.results) + "\n")
+
+    def make_json(self, filepath :Path):
+        json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results})
+
     @classmethod
     def tabbed_report_header(cls):
         return "{:^10s} {:^8s} {:^10s} {:^10s} {}".format("score", "time", "startscore", "endscore", "tree")
+
+    @classmethod
+    def import_from(cls, source_dir):
+        return RaxmlResults(Raxml.get_result(source_dir, ".".join(tree.parts[-1].split(".")[1:])) for tree in source_dir.glob("RAxML_bestTree.*"))
 
 # ----------------------------------------------------------------------
 
@@ -162,6 +179,15 @@ class Raxml:
 
     def _random_seed(self):
         return self.random_gen.randint(1, 0xFFFFFFFF)
+
+# ----------------------------------------------------------------------
+
+def postprocess(target_dir, source_dir):
+    results = RaxmlResults.import_from(source_dir)
+    module_logger.info('RAxML {}'.format(results.report_best()))
+    results.make_txt(Path(target_dir, "result.raxml.txt"))
+    results.make_json(Path(target_dir, "result.raxml.json"))
+    return results
 
 # ======================================================================
 ### Local Variables:

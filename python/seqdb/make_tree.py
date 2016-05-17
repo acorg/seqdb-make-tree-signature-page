@@ -5,8 +5,8 @@
 # ======================================================================
 
 import logging; module_logger = logging.getLogger(__name__)
-import json
 from pathlib import Path
+from . import json
 from .raxml import Raxml, RaxmlResult
 from .garli import Garli, GarliResults
 
@@ -55,7 +55,7 @@ def run_raxml_best_garli(working_dir, run_id, fasta_file, base_seq_name, raxml_b
     # r_best = vars(r_garli.results[0])
     # r_best["longest_time"] = longest_time
     # with Path(working_dir, "result.best.json").open("w") as f:
-    #     f.write(json.dumps(r_best, indent=2, sort_keys=True, cls=JSONEncoder) + "\n")
+    #     f.write(json.dumps(r_best) + "\n")
 
     # r = {
     #     " total": {
@@ -68,7 +68,7 @@ def run_raxml_best_garli(working_dir, run_id, fasta_file, base_seq_name, raxml_b
     #     "raxml": [vars(r) for r in r_raxml.results],
     #     }
     # with Path(working_dir, "result.all.json").open("w") as f:
-    #     f.write(json.dumps(r, indent=2, sort_keys=True, cls=JSONEncoder) + "\n")
+    #     f.write(json.dumps(r) + "\n")
 
     # return r
 
@@ -90,10 +90,8 @@ def run_raxml(working_dir, run_id, fasta_file, base_seq_name, raxml_bfgs, raxml_
                                       run_id=run_id, bfgs=raxml_bfgs, outgroups=[base_seq_name], machines=machines)
     r_raxml = raxml_job.wait()
     module_logger.info('RAxML {}'.format(r_raxml.report_best()))
-    with Path(working_dir, "result.raxml.txt").open("w") as f:
-        f.write("Longest time: " + r_raxml.longest_time_str()+ "\n\n")
-        f.write(r_raxml.tabbed_report_header()+ "\n")
-        f.write("\n".join(rr.tabbed_report() for rr in r_raxml.results) + "\n")
+    r_raxml.make_txt(Path(working_dir, "result.raxml.txt"))
+    r_raxml.make_json(Path(working_dir, "result.raxml.json"))
     return r_raxml
 
 # ----------------------------------------------------------------------
@@ -105,10 +103,8 @@ def run_garli(working_dir, run_id, fasta_file, tree, garli_num_runs, garli_attac
                                       run_id=run_id, attachmentspertaxon=garli_attachmentspertaxon, machines=machines)
     r_garli = garli_job.wait()
     module_logger.info('GARLI {}'.format(r_garli.report_best()))
-    with Path(working_dir, "result.garli.txt").open("w") as f:
-        f.write("Longest time: " + r_garli.longest_time_str() + "\n\n")
-        f.write(r_garli.tabbed_report_header() + "\n")
-        f.write("\n".join(rr.tabbed_report() for rr in r_garli.results) + "\n")
+    r_garli.make_txt(Path(working_dir, "result.garli.txt"))
+    r_garli.make_json(Path(working_dir, "result.garli.json"))
     return r_garli
 
 # ----------------------------------------------------------------------
@@ -128,10 +124,8 @@ def run_garli_multi(working_dir, run_id, fasta_file, trees, garli_num_runs, garl
         r_garli.results.extend(r_job.results)
     r_garli.recompute()
     module_logger.info('GARLI (multi {}) {}'.format(len(jobs), r_garli.report_best()))
-    with Path(working_dir, "result.garli.txt").open("w") as f:
-        f.write("Longest time: " + r_garli.longest_time_str() + "\n\n")
-        f.write(r_garli.tabbed_report_header() + "\n")
-        f.write("\n".join(rr.tabbed_report() for rr in r_garli.results) + "\n")
+    r_garli.make_txt(Path(working_dir, "result.garli.txt"))
+    r_garli.make_json(Path(working_dir, "result.garli.json"))
     return r_garli
 
 # ----------------------------------------------------------------------
@@ -144,13 +138,12 @@ def make_results(working_dir, r_raxml, r_garli):
     r_best = vars(r_garli.results[0])
     r_best["longest_time"] = longest_time
     r_best["longest_time_s"] = longest_time_s
-    with Path(working_dir, "result.best.json").open("w") as f:
-        f.write(json.dumps(r_best, indent=2, sort_keys=True, cls=JSONEncoder) + "\n")
+    json.dumpf(Path(working_dir, "result.best.json"), r_best)
 
     with Path(working_dir, "result.all.txt").open("w") as f:
         f.write("Overall time: " + longest_time_s + "\n")
-        f.write("GARLI score : " + r_best["score"] + "\n")
-        f.write("Tree        : " + r_best["tree"] + "\n")
+        f.write("GARLI score : " + str(r_best["score"]) + "\n")
+        f.write("Tree        : " + str(r_best["tree"]) + "\n")
 
     r = {
         " total": {
@@ -162,17 +155,11 @@ def make_results(working_dir, r_raxml, r_garli):
         "garli": [vars(r) for r in r_garli.results],
         "raxml": [vars(r) for r in r_raxml.results],
         }
-    with Path(working_dir, "result.all.json").open("w") as f:
-        f.write(json.dumps(r, indent=2, sort_keys=True, cls=JSONEncoder) + "\n")
+    json.dumpf(Path(working_dir, "result.all.json"), r)
 
     return r
 
 # ----------------------------------------------------------------------
-
-class JSONEncoder (json.JSONEncoder):
-
-    def default(self, o):
-        return "<" + repr(o) + ">"
 
 # ======================================================================
 ### Local Variables:

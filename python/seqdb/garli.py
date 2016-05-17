@@ -5,7 +5,7 @@
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
 import re, random, subprocess, time as time_m, operator
-from . import raxml
+from . import raxml, json
 
 # ----------------------------------------------------------------------
 
@@ -28,6 +28,9 @@ class GarliResult:
     def tabbed_report(self):
         return "{:10.4f} {:>8s} {:10.4f} {}".format(self.score, raxml.RaxmlResult.time_str(self.time), self.start_score, str(self.tree))
 
+    def json(self):
+        return vars(self)
+
 # ----------------------------------------------------------------------
 
 class GarliResults:
@@ -49,9 +52,30 @@ class GarliResults:
     def report_best(self):
         return "{} {} {}".format(self.results[0].score, self.longest_time_str(), self.best_tree())
 
+    def make_txt(self, filepath :Path):
+        with filepath.open("w") as f:
+            f.write("Longest time: " + self.longest_time_str()+ "\n\n")
+            f.write(self.tabbed_report_header()+ "\n")
+            f.write("\n".join(rr.tabbed_report() for rr in self.results) + "\n")
+
+    def make_json(self, filepath :Path):
+        json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results})
+
     @classmethod
     def tabbed_report_header(cls):
         return "{:^10s} {:^8s} {:^10s} {}".format("score", "time", "startscore", "tree")
+
+    @classmethod
+    def import_from(cls, source_dir):
+        if Path(source_dir, "001").is_dir():
+            r = GarliResults(None)
+            for subdir in source_dir.glob("*"):
+                if subdir.is_dir():
+                    r.results.extend(Garli.get_result(output_dir=subdir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in subdir.glob("*.best.phy"))
+            r.recompute()
+        else:
+            r = GarliResults(Garli.get_result(output_dir=source_dir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in source_dir.glob("*.best.phy"))
+        return r
 
 # ----------------------------------------------------------------------
 
@@ -156,6 +180,15 @@ class Garli:
 
     def _random_seed(self):
         return self.random_gen.randint(1, 0x7FFFFFFF) # garli accepts 31-bit random number seed
+
+# ----------------------------------------------------------------------
+
+def postprocess(target_dir, source_dir):
+    results = GarliResults.import_from(source_dir)
+    module_logger.info('GARLI {}'.format(results.report_best()))
+    results.make_txt(Path(target_dir, "result.garli.txt"))
+    results.make_json(Path(target_dir, "result.garli.json"))
+    return results
 
 # ----------------------------------------------------------------------
 
