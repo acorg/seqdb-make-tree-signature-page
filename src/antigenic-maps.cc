@@ -23,7 +23,7 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const HzLineSections& a
 void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const
 {
     for (size_t section_no = 0; section_no < mNamesPerMap.size(); ++section_no) {
-        const Viewport map_viewport = viewport_of(aViewport, section_no); //(aViewport.origin, Size(aViewport.size.width/2, aViewport.size.width/2));
+        const Viewport map_viewport = viewport_of(aViewport, section_no, aSections);
 
         Surface::PushContext pc(aSurface);
         aSurface.rectangle(map_viewport, aSettings.border_color, aSettings.border_width);
@@ -60,8 +60,10 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
 
 // ----------------------------------------------------------------------
 
-Viewport AntigenicMaps::viewport_of(const Viewport& aViewport, size_t map_no) const
+Viewport AntigenicMaps::viewport_of(const Viewport& aViewport, size_t map_no, const HzLineSections& aSections) const
 {
+    Size offset(aSections.empty() ? 0.0 : aSections[0].line_width * 2.0, 0);
+
     size_t grid_w, grid_h;
     switch (mNamesPerMap.size()) {
       case 1: grid_w = grid_h = 1; break;
@@ -78,9 +80,10 @@ Viewport AntigenicMaps::viewport_of(const Viewport& aViewport, size_t map_no) co
 
     const size_t cell_x = map_no % grid_w;
     const size_t cell_y = map_no / grid_w;
-    const Size size(aViewport.size.width / grid_w, aViewport.size.width / grid_w);
+    const double cell_size = (aViewport.size.width - offset.width) / grid_w;
+    const Size size(cell_size, cell_size);
     std::cout << cell_x << " " << cell_y << " " << aViewport.origin + Size(size.width * cell_x, size.height * cell_y) << " " << size << std::endl;
-    return Viewport(aViewport.origin + Size(size.width * cell_x, size.height * cell_y), size);
+    return Viewport(aViewport.origin + offset + Size(size.width * cell_x, size.height * cell_y), size);
 
 } // AntigenicMaps::viewport_of
 

@@ -172,6 +172,11 @@ void Chart::preprocess(const SettingsAntigenicMaps& aSettings)
 
     draw_points_reset(aSettings);
 
+    mPrefixName.clear();
+    for (const auto& p: mPoints) {
+        mPrefixName.insert(p.name.substr(0, p.name.find(1, ' ')));
+    }
+
 } // Chart::preprocess
 
 // ----------------------------------------------------------------------
@@ -211,7 +216,9 @@ void Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFill
             mDrawPoints[p->second] = &mDrawTrackedAntigen;
         }
         else {
-            std::cerr << "Error: cannot find chart antigen by name: " << name << std::endl;
+            const std::string prefix(name, 0, name.find(1, ' '));
+            if (mPrefixName.find(prefix) != mPrefixName.end())
+                std::cerr << "Error: cannot find chart antigen by name: " << name << std::endl;
         }
     }
 

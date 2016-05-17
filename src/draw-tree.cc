@@ -222,21 +222,21 @@ DrawHzLines& DrawHzLines::prepare(Tree& aTree, HzLineSections& aSections)
 
 // ----------------------------------------------------------------------
 
-void DrawHzLines::draw(Surface& aSurface, const Viewport& aViewport, const DrawTree& aDrawTree, const HzLineSections& aSections)
+void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMaps, const DrawTree& aDrawTree, const HzLineSections& aSections)
 {
     const auto vertical_step = aDrawTree.vertical_step();
     for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
         const auto& section = aSections[section_no];
         double first_y;
         if (section_no != 0) {
-            first_y = aViewport.origin.y + vertical_step * section.first_line - vertical_step * 0.5;
-            aSurface.line({aViewport.origin.x, first_y}, {aViewport.right(), first_y}, aSections.hz_line_color, aSections.hz_line_width);
+            first_y = aTimeSeries.origin.y + vertical_step * section.first_line - vertical_step * 0.5;
+            aSurface.line({aTimeSeries.origin.x, first_y}, {aTimeSeries.right(), first_y}, aSections.hz_line_color, aSections.hz_line_width);
         }
         else {
-            first_y = aViewport.origin.y;
+            first_y = aTimeSeries.origin.y;
         }
-        double last_y = section_no == (aSections.size() - 1) ? aViewport.bottom() : aViewport.origin.y + vertical_step * section.last_line + vertical_step * 0.5;
-        aSurface.line({aViewport.origin.x, first_y}, {aViewport.origin.x, last_y}, section.color, section.line_width);
+        double last_y = section_no == (aSections.size() - 1) ? aTimeSeries.bottom() : aTimeSeries.origin.y + vertical_step * section.last_line + vertical_step * 0.5;
+        aSurface.line({aAntigenicMaps.origin.x, first_y}, {aAntigenicMaps.origin.x, last_y}, section.color, section.line_width);
     }
 
 } // DrawHzLines::draw

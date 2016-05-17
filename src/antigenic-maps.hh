@@ -24,7 +24,7 @@ class AntigenicMaps
  private:
     std::vector<std::vector<std::string>> mNamesPerMap;
 
-    Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
+    Viewport viewport_of(const Viewport& aViewport, size_t map_no, const HzLineSections& aSections) const;
 
 }; // class AntigenicMaps
 

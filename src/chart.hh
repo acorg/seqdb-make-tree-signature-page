@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "json-read.hh"
 #include "draw.hh"
 
@@ -152,6 +154,8 @@ class Chart
     DrawVaccineAntigen mDrawVaccineAntigen;
 
     Viewport mViewport;
+
+    std::set<std::string> mPrefixName;
 
 }; // class Chart
 

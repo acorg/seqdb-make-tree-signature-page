@@ -194,6 +194,7 @@ class Color
 
 constexpr const Color BLACK = 0;
 constexpr const Color GREY = 0xA0A0A0;
+constexpr const Color LIGHT_GREY = 0xE0E0E0;
 constexpr const Color TRANSPARENT = 0xFF000000;
 constexpr const Color COLOR_NOT_SET = 0xFFFFFFFF;
 
