@@ -25,6 +25,7 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
     for (size_t section_no = 0; section_no < mNamesPerMap.size(); ++section_no) {
         const Viewport map_viewport = viewport_of(aViewport, section_no); //(aViewport.origin, Size(aViewport.size.width/2, aViewport.size.width/2));
 
+        Surface::PushContext pc(aSurface);
         aSurface.rectangle(map_viewport, aSettings.border_color, aSettings.border_width);
 
         const auto chart_viewport = aChart->viewport();
@@ -33,8 +34,9 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
         std::cerr << "map scale " << scale << std::endl;
         aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
 
+        aChart->draw_points_reset(aSettings);
+        aChart->tracked_antigens(mNamesPerMap[section_no], aSections[section_no].color, aSettings);
         aChart->draw(aSurface, scale, aSettings);
-        aSurface.reset_clip_region();
     }
 
       // aSurface.circle_filled(Location(0, 0), scale * 5, 1.0, 0.0, 0xFF0000, scale * 0.5, 0xE0E0FF);

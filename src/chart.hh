@@ -54,8 +54,14 @@ class DrawTestAntigen : public DrawAntigen
 class DrawTrackedAntigen : public DrawAntigen
 {
  public:
+    inline DrawTrackedAntigen() : mColor(0xFFC0CB) {}
+
     virtual void draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
     virtual inline size_t level() const { return 5; }
+    inline void color(Color aColor) { mColor = aColor; }
+
+ private:
+    Color mColor;
 };
 
 class DrawVaccineAntigen : public DrawAntigen
@@ -122,7 +128,8 @@ class Chart
     inline Chart() : mStress(-1) {}
 
     void preprocess(const SettingsAntigenicMaps& aSettings);
-    void draw_points_reset(const SettingsAntigenicMaps& aSettings);
+    void draw_points_reset(const SettingsAntigenicMaps& aSettings) const;
+    void tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const;
 
     const Viewport& viewport() const { return mViewport; }
     void draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
@@ -133,14 +140,15 @@ class Chart
     double mStress;
     ChartInfo mInfo;
     std::vector<Point> mPoints;
+    std::map<std::string, size_t> mPointByName;
     std::string mMinimumColumnBasis;
     std::vector<double> mColumnBases;
 
-    std::vector<const DrawPoint*> mDrawPoints;
+    mutable std::vector<const DrawPoint*> mDrawPoints;
     DrawSerum mDrawSerum;
     DrawReferenceAntigen mDrawReferenceAntigen;
     DrawTestAntigen mDrawTestAntigen;
-    DrawTrackedAntigen mDrawTrackedAntigen;
+    mutable DrawTrackedAntigen mDrawTrackedAntigen;
     DrawVaccineAntigen mDrawVaccineAntigen;
 
     Viewport mViewport;

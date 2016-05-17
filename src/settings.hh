@@ -629,7 +629,7 @@ class SettingsAntigenicMaps
         : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), map_zoom(1.1),
           serum_scale(5), reference_antigen_scale(8), test_antigen_scale(5), vaccine_antigen_scale(15), tracked_antigen_scale(8),
           serum_outline_width(0.5), reference_antigen_outline_width(0.5), test_antigen_outline_width(0.5), vaccine_antigen_outline_width(0.5), tracked_antigen_outline_width(0.5),
-          serum_outline_color(GREY), reference_antigen_outline_color(GREY), test_antigen_outline_color(GREY), test_antigen_fill_color(0x00C000), vaccine_antigen_outline_color(BLACK), tracked_antigen_outline_color(GREY),
+          serum_outline_color(GREY), reference_antigen_outline_color(GREY), test_antigen_outline_color(GREY), test_antigen_fill_color(GREY), vaccine_antigen_outline_color(BLACK), tracked_antigen_outline_color(GREY),
           egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0)
         {}
 

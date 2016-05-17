@@ -164,13 +164,19 @@ void Chart::preprocess(const SettingsAntigenicMaps& aSettings)
     mViewport.zoom(aSettings.map_zoom);
     mViewport.whole_width();
 
+      // build point by name index
+    mPointByName.clear();
+    for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
+        mPointByName[mPoints[point_no].name] = point_no;
+    }
+
     draw_points_reset(aSettings);
 
 } // Chart::preprocess
 
 // ----------------------------------------------------------------------
 
-void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/)
+void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/) const
 {
     mDrawPoints.resize(mPoints.size(), nullptr);
     for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
@@ -192,6 +198,24 @@ void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/)
     }
 
 } // Chart::draw_points_reset
+
+// ----------------------------------------------------------------------
+
+void Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& /*aSettings*/) const
+{
+    mDrawTrackedAntigen.color(aFillColor);
+
+    for (const auto& name: aNames) {
+        const auto p = mPointByName.find(name);
+        if (p != mPointByName.end()) {
+            mDrawPoints[p->second] = &mDrawTrackedAntigen;
+        }
+        else {
+            std::cerr << "Error: cannot find chart antigen by name: " << name << std::endl;
+        }
+    }
+
+} // Chart::tracked_antigens
 
 // ----------------------------------------------------------------------
 
@@ -263,7 +287,7 @@ void DrawTrackedAntigen::draw(Surface& aSurface, const Point& aPoint, double aOb
 {
     aSurface.circle_filled(aPoint.coordinates, aSettings.tracked_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
                            aSettings.tracked_antigen_outline_color,
-                           aSettings.tracked_antigen_outline_width * aObjectScale, 0xFFA500);
+                           aSettings.tracked_antigen_outline_width * aObjectScale, mColor);
 
 } // DrawTrackedAntigen::draw
 
