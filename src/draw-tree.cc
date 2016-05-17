@@ -185,6 +185,63 @@ double DrawTree::tree_width(Surface& aSurface, const Node& aNode, const Settings
 } // DrawTree::tree_width
 
 // ----------------------------------------------------------------------
+
+DrawHzLines& DrawHzLines::prepare(Tree& aTree, HzLineSections& aSections)
+{
+      // find line_no for each section first and last
+    for (auto& section: aSections) {
+        const auto first = aTree.find_name(section.first_name);
+        if (first.empty())
+            throw std::runtime_error("Cannot process hz-line-section: \"" + section.first_name + "\" not found in the tree");
+        section.first_line = first.back()->line_no;
+
+        const auto last = aTree.find_name(section.last_name);
+        if (last.empty())
+            throw std::runtime_error("Cannot process hz-line-section: \"" + section.last_name + "\" not found in the tree");
+        section.last_line = last.back()->line_no;
+    }
+
+    std::sort(aSections.begin(), aSections.end(), [](const auto& a, const auto& b) -> bool { return a.first_line < b.first_line; });
+
+    for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
+        if (section_no == 0) {
+            if (aSections[section_no].first_line != 0)
+                throw std::runtime_error("Cannot process hz-line-section: line_no for the first section is not 0");
+        }
+        else {
+            if (aSections[section_no].first_line != (aSections[section_no - 1].last_line + 1))
+                throw std::runtime_error("Cannot process hz-line-section: there must be no gap or intersection for the section \"" + aSections[section_no - 1].last_name + "\" and \"" + aSections[section_no].first_name + "\"");
+            if (section_no == (aSections.size() - 1) && aSections[section_no].last_line != find_last_leaf(aTree).line_no)
+                throw std::runtime_error("Cannot process hz-line-section: line_no for the last section is not of the last leaf of the tree");
+        }
+    }
+
+    return *this;
+
+} // DrawHzLines::prepare
+
+// ----------------------------------------------------------------------
+
+void DrawHzLines::draw(Surface& aSurface, const Viewport& aViewport, const DrawTree& aDrawTree, const HzLineSections& aSections)
+{
+    const auto vertical_step = aDrawTree.vertical_step();
+    for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
+        const auto& section = aSections[section_no];
+        double first_y;
+        if (section_no != 0) {
+            first_y = aViewport.origin.y + vertical_step * section.first_line - vertical_step * 0.5;
+            aSurface.line({aViewport.origin.x, first_y}, {aViewport.right(), first_y}, aSections.hz_line_color, aSections.hz_line_width);
+        }
+        else {
+            first_y = aViewport.origin.y;
+        }
+        double last_y = section_no == (aSections.size() - 1) ? aViewport.bottom() : aViewport.origin.y + vertical_step * section.last_line + vertical_step * 0.5;
+        aSurface.line({aViewport.origin.x, first_y}, {aViewport.origin.x, last_y}, section.color, section.line_width);
+    }
+
+} // DrawHzLines::draw
+
+// ----------------------------------------------------------------------
 /// Local Variables:
 /// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
 /// End:

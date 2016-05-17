@@ -6,6 +6,7 @@
 
 class Title;
 class DrawTree;
+class DrawHzLines;
 class Legend;
 class TimeSeries;
 class Clades;
@@ -24,7 +25,8 @@ class SignaturePage
  public:
     enum Parts : int { ShowTitle = 1, ShowTree = 2, ShowLegend = 4, ShowTimeSeries = 8, ShowClades = 16, ShowAntigenicMaps = 32 };
 
-    inline SignaturePage() : mParts(ShowTree), mTitle(nullptr), mDrawTree(nullptr), mLegend(nullptr), mTimeSeries(nullptr), mClades(nullptr), mAntigenicMaps(nullptr) {}
+    inline SignaturePage() : mParts(ShowTree), mTitle(nullptr), mDrawTree(nullptr), mLegend(nullptr), mTimeSeries(nullptr), mClades(nullptr),
+                             mAntigenicMaps(nullptr), mDrawHzLines(nullptr) {}
     ~SignaturePage();
 
     SignaturePage& select_parts(int aParts); // use ORed enum Parts above
@@ -42,6 +44,7 @@ class SignaturePage
     TimeSeries* mTimeSeries;
     Clades* mClades;
     AntigenicMaps* mAntigenicMaps;
+    DrawHzLines* mDrawHzLines;
 
       // to implement clone all m pointers
     SignaturePage(const SignaturePage&) = default;

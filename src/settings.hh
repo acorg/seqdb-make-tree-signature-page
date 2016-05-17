@@ -179,6 +179,7 @@ class HzLineSection
                   | object_value("last_name", mSection.last_name)
                   | object_value("last_line", mSection.last_line)
                   | object_string_value("color", mSection.color)
+                  | object_value("line_width", mSection.line_width)
                   | object_string_ignore_value("?")
                     ))(i1, i2);
             }
@@ -188,9 +189,9 @@ class HzLineSection
         };
 
  public:
-    inline HzLineSection() : first_line(LINE_NOT_SET), last_line(LINE_NOT_SET), color(COLOR_NOT_SET) {}
+    inline HzLineSection() : first_line(LINE_NOT_SET), last_line(LINE_NOT_SET), color(COLOR_NOT_SET), line_width(2) {}
     inline HzLineSection(std::string aFirstName, size_t aFirstLine, std::string aLastName, size_t aLastLine, Color aColor = COLOR_NOT_SET)
-        : first_name(aFirstName), last_name(aLastName), first_line(aFirstLine), last_line(aLastLine), color(aColor) {}
+        : first_name(aFirstName), last_name(aLastName), first_line(aFirstLine), last_line(aLastLine), color(aColor), line_width(2) {}
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
@@ -202,6 +203,7 @@ class HzLineSection
             // if (last_line != LINE_NOT_SET)
             //     comma = jsonw::json(target, comma, "last_line", last_line, 0, prefix);
             comma = jsonw::json(target, comma, "color", color, 0, prefix);
+            comma = jsonw::json(target, comma, "line_width", line_width, 0, prefix);
             return  jsonw::json_end(target, '}', 0, prefix);
         }
 
@@ -210,13 +212,53 @@ class HzLineSection
     std::string first_name, last_name;
     size_t first_line, last_line;
     Color color;
+    double line_width;
 
 }; // class HzLineSection
 
 class HzLineSections : public std::vector<HzLineSection>
 {
+ private:
+    constexpr static size_t LINE_NOT_SET = static_cast<size_t>(-1);
+
+    class json_parser_t AXE_RULE
+        {
+          public:
+            inline json_parser_t(HzLineSections& aSections) : mSections(aSections) {}
+
+            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
+            {
+                using namespace jsonr;
+                return (skey(HzLineSections::json_name) > object(
+                    object_value("hz_line_width", mSections.hz_line_width)
+                  | object_string_value("hz_line_color", mSections.hz_line_color)
+                  | object_value(HzLineSections::json_name, static_cast<std::vector<HzLineSection>&>(mSections))
+                  | object_string_ignore_value("?")
+                    ))(i1, i2);
+            }
+
+          private:
+            HzLineSections& mSections;
+        };
+
  public:
     static constexpr const char* json_name = "hz_line_sections";
+
+    inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY) {}
+
+    inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
+        {
+            comma = jsonw::json_begin(target, comma, '{', indent, prefix);
+            comma = jsonw::json(target, comma, "hz_line_width", hz_line_width, indent, prefix);
+            comma = jsonw::json(target, comma, "hz_line_color", hz_line_color, indent, prefix);
+            comma = jsonw::json(target, comma, HzLineSections::json_name, static_cast<const std::vector<HzLineSection>&>(*this), indent, prefix);
+            return  jsonw::json_end(target, '}', indent, prefix);
+        }
+
+    inline auto json_parser() { return json_parser_t(*this); }
+
+    double hz_line_width;
+    Color hz_line_color;
 
 }; // class HzLineSections
 
@@ -243,7 +285,7 @@ class SettingsDrawTree
                   | object_value("grid_step", mSettings.grid_step)
                   | object_string_value("grid_color", mSettings.grid_color)
                   | object_double_non_negative_value("grid_width", mSettings.grid_width)
-                  | object_value(HzLineSections::json_name, mSettings.hz_line_sections)
+                  | mSettings.hz_line_sections.json_parser()
                   | object_string_ignore_value("?")
                     ))(i1, i2);
             }
@@ -254,7 +296,8 @@ class SettingsDrawTree
 
  public:
     inline SettingsDrawTree()
-        : root_edge(0), line_color(0), line_width(1), label_style(), name_offset(0.2), grid_step(0), grid_color(0x80000000), grid_width(0.3) {}
+        : root_edge(0), line_color(0), line_width(1), label_style(), name_offset(0.2), grid_step(0), grid_color(0x80000000), grid_width(0.3)
+           {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
 
@@ -336,7 +379,7 @@ class SettingsSignaturePage
 
  public:
     inline SettingsSignaturePage()
-        : outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0), clades_antigenic_maps_space(0.02) {}
+        : outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
 
@@ -514,7 +557,7 @@ class SettingsClades
  public:
     inline SettingsClades()
         : slot_width(5), arrow_color(BLACK), arrow_extra(0.5), arrow_width(3), line_width(1),
-          label_color(0), label_size(10), separator_color(GREY), separator_width(0.2) {}
+          label_color(0), label_size(10), separator_color(GREY), separator_width(1) {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
 

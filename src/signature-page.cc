@@ -18,6 +18,7 @@ SignaturePage::~SignaturePage()
     delete mTimeSeries;
     delete mClades;
     delete mAntigenicMaps;
+    delete mDrawHzLines;
 
 } // SignaturePage::~SignaturePage
 
@@ -28,8 +29,10 @@ SignaturePage& SignaturePage::select_parts(int aParts)
     mParts = aParts;
     if (aParts & ShowTree)
         mDrawTree = new DrawTree();
-    if (aParts & ShowTimeSeries)
+    if (aParts & ShowTimeSeries) {
         mTimeSeries = new TimeSeries();
+        mDrawHzLines = new DrawHzLines();
+    }
     if (aParts & ShowClades)
         mClades = new Clades();
     if (aParts & ShowAntigenicMaps)
@@ -81,6 +84,8 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Chart* aChart)
             mTimeSeries->prepare(aTree, aTree.settings().time_series);
         if (mClades)
             mClades->prepare(aTree, aTree.settings().clades);
+        if (mDrawHzLines)
+            mDrawHzLines->prepare(aTree, aTree.settings().draw_tree.hz_line_sections);
         if (mAntigenicMaps) {
             if (aChart == nullptr)
                 throw std::runtime_error("Antigenic maps part requested but no chart provided to SignaturePage.prepare");
@@ -156,6 +161,9 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
         }
         if (mClades) {
             mClades->draw(aSurface, clades_viewport, time_series_viewport, *mDrawTree, aTree.settings().clades);
+        }
+        if (mDrawHzLines) {
+            mDrawHzLines->draw(aSurface, time_series_viewport, *mDrawTree, aTree.settings().draw_tree.hz_line_sections);
         }
         if (mAntigenicMaps) {
             mAntigenicMaps->draw(aSurface, antigenic_maps_viewport, aChart, aTree.settings().antigenic_maps);

@@ -54,6 +54,18 @@ class DrawTree
 }; // class DrawTree
 
 // ----------------------------------------------------------------------
+
+class DrawHzLines
+{
+ public:
+    inline DrawHzLines() {}
+
+    DrawHzLines& prepare(Tree& aTree, HzLineSections& aSections);
+    void draw(Surface& aSurface, const Viewport& aViewport, const DrawTree& aDrawTree, const HzLineSections& aSections);
+
+}; // class DrawHzLines
+
+// ----------------------------------------------------------------------
 /// Local Variables:
 /// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
 /// End:
