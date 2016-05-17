@@ -310,6 +310,7 @@ class Surface
       // width in the new region you need to draw the line of
       // width*ratio.
     double set_clip_region(const Viewport& aViewport, double aWidthScale);
+    void reset_clip_region();
 
     Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing = nullptr);
 

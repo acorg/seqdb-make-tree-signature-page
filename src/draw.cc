@@ -228,11 +228,12 @@ Size Surface::text_size(std::string aText, double aSize, const TextStyle& aTextS
 
 double Surface::set_clip_region(const Viewport& aViewport, double aWidthScale)
 {
+    cairo_save(mContext);
+    cairo_reset_clip(mContext);
     const auto center = aViewport.center();
     cairo_translate(mContext, center.x, center.y);
     const double scale = aViewport.size.width / aWidthScale;
     cairo_scale(mContext, scale, scale);
-    cairo_reset_clip(mContext);
     cairo_new_path(mContext);
     const double y_d = aViewport.size.height / scale;
     cairo_rectangle(mContext, - aWidthScale / 2, - y_d / 2, aWidthScale, y_d);
@@ -240,6 +241,14 @@ double Surface::set_clip_region(const Viewport& aViewport, double aWidthScale)
     return 1.0 / scale;
 
 } // Surface::set_clip_region
+
+// ----------------------------------------------------------------------
+
+void Surface::reset_clip_region()
+{
+    cairo_restore(mContext); // cairo_reset_clip(mContext);
+
+} // Surface::reset_clip_region
 
 // ----------------------------------------------------------------------
 
