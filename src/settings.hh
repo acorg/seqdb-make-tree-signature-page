@@ -178,6 +178,7 @@ class HzLineSection
                   | object_value("first_line", mSection.first_line)
                   | object_value("last_name", mSection.last_name)
                   | object_value("last_line", mSection.last_line)
+                  | object_string_value("color", mSection.color)
                   | object_string_ignore_value("?")
                     ))(i1, i2);
             }
@@ -187,19 +188,20 @@ class HzLineSection
         };
 
  public:
-    inline HzLineSection() : first_line(LINE_NOT_SET), last_line(LINE_NOT_SET) {}
-    inline HzLineSection(std::string aFirstName, size_t aFirstLine, std::string aLastName, size_t aLastLine)
-        : first_name(aFirstName), last_name(aLastName), first_line(aFirstLine), last_line(aLastLine) {}
+    inline HzLineSection() : first_line(LINE_NOT_SET), last_line(LINE_NOT_SET), color(COLOR_NOT_SET) {}
+    inline HzLineSection(std::string aFirstName, size_t aFirstLine, std::string aLastName, size_t aLastLine, Color aColor = COLOR_NOT_SET)
+        : first_name(aFirstName), last_name(aLastName), first_line(aFirstLine), last_line(aLastLine), color(aColor) {}
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
             comma = jsonw::json_begin(target, comma, '{', indent, prefix);
             comma = jsonw::json_if(target, comma, "first_name", first_name, 0, prefix);
-            if (first_line != LINE_NOT_SET)
-                comma = jsonw::json(target, comma, "first_line", first_line, 0, prefix);
+            // if (first_line != LINE_NOT_SET)
+            //     comma = jsonw::json(target, comma, "first_line", first_line, 0, prefix);
             comma = jsonw::json(target, comma, "last_name", last_name, 0, prefix);
-            if (last_line != LINE_NOT_SET)
-                comma = jsonw::json(target, comma, "last_line", last_line, 0, prefix);
+            // if (last_line != LINE_NOT_SET)
+            //     comma = jsonw::json(target, comma, "last_line", last_line, 0, prefix);
+            comma = jsonw::json(target, comma, "color", color, 0, prefix);
             return  jsonw::json_end(target, '}', 0, prefix);
         }
 
@@ -207,6 +209,7 @@ class HzLineSection
 
     std::string first_name, last_name;
     size_t first_line, last_line;
+    Color color;
 
 }; // class HzLineSection
 
