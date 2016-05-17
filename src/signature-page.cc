@@ -73,9 +73,12 @@ SignaturePage& SignaturePage::color_by_pos(int aPos)
 
 // ----------------------------------------------------------------------
 
-SignaturePage& SignaturePage::prepare(Tree& aTree, Chart* aChart)
+SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aChart)
 {
     if (mDrawTree) {
+        const double padding = aSurface.canvas_size().width * aTree.settings().signature_page.outer_padding;
+        mPageArea.set(Location(padding, padding), aSurface.canvas_size() - Size(padding + padding, padding + padding));
+
         mDrawTree->prepare(aTree);
         if (mParts & ShowLegend) {
             mLegend = mDrawTree->coloring().legend();
@@ -90,7 +93,7 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Chart* aChart)
             if (aChart == nullptr)
                 throw std::runtime_error("Antigenic maps part requested but no chart provided to SignaturePage.prepare");
             aChart->preprocess(aTree.settings().antigenic_maps);
-            mAntigenicMaps->prepare(aTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
+            mAntigenicMaps->prepare(aTree, mPageArea, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
         }
     }
     return *this;
@@ -103,7 +106,6 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
 {
     const double canvas_width = aSurface.canvas_size().width;
     const double padding = canvas_width * aTree.settings().signature_page.outer_padding;
-    const Viewport page_area = {Location(padding, padding), aSurface.canvas_size() - Size(padding + padding, padding + padding)};
 
     Viewport tree_viewport;
     Viewport legend_viewport;
@@ -113,7 +115,7 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
 
     double tree_top = padding;
     if (mTitle) {
-        const Viewport title_viewport(page_area.origin, Size(1, 1));
+        const Viewport title_viewport(mPageArea.origin, Size(1, 1));
         mTitle->draw(aSurface, title_viewport);
         tree_top += mTitle->right_bottom(aSurface, title_viewport).y + padding * 0.5;
     }
@@ -123,11 +125,12 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
         if (tree_top < time_series_label_height)
             tree_top = time_series_label_height;
 
-        const auto tree_height = std::min(page_area.size.height - tree_top, aSurface.canvas_size().height - tree_top - time_series_label_height - padding * 0.2);
+        const auto tree_height = std::min(mPageArea.size.height - tree_top, aSurface.canvas_size().height - tree_top - time_series_label_height - padding * 0.2);
 
-        double left = page_area.origin.x + page_area.size.width;
+        double left = mPageArea.right();
         if (mAntigenicMaps) {
-            antigenic_maps_viewport.set(Location(page_area.origin.x + page_area.size.width / 2.0, tree_top), Size(page_area.size.width / 2.0, tree_height));
+            const Size size = mAntigenicMaps->size(mPageArea, aTree.settings().antigenic_maps);
+            antigenic_maps_viewport.set(mPageArea.top_right() - Size(size.width, 0), size);
             left = antigenic_maps_viewport.origin.x;
         }
 
@@ -146,13 +149,13 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
             left = time_series_viewport.origin.x;
         }
 
-        tree_viewport.set(Location(page_area.origin.x, tree_top), Size(left - page_area.origin.x - aTree.settings().signature_page.tree_time_series_space * canvas_width, tree_height));
+        tree_viewport.set(Location(mPageArea.origin.x, tree_top), Size(left - mPageArea.origin.x - aTree.settings().signature_page.tree_time_series_space * canvas_width, tree_height));
         mDrawTree->draw(aTree, aSurface, tree_viewport, aTree.settings().draw_tree);
 
           // Note legend must be drawn after tree, because ColoringByPos needs to collect data to be drawn in the legend
         if (mLegend) {
             const auto legend_size = mLegend->size(aSurface, aTree.settings().legend);
-            legend_viewport.set({page_area.origin.x, page_area.origin.y + page_area.size.height - legend_size.height}, legend_size);
+            legend_viewport.set({mPageArea.origin.x, mPageArea.bottom() - legend_size.height}, legend_size);
             mLegend->draw(aSurface, legend_viewport, aTree.settings().legend);
         }
 

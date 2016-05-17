@@ -55,6 +55,7 @@ class Size
     inline Size() : width(0), height(0) {}
     inline Size(double aWidth, double aHeight) : width(aWidth), height(aHeight) {}
     inline Size(const Location& a, const Location& b) : width(std::abs(a.x - b.x)), height(std::abs(a.y - b.y)) {}
+    inline void set(double aWidth, double aHeight) { width = aWidth; height = aHeight; }
     double width, height;
 
     inline std::string to_string() const { return "Size(" + std::to_string(width) + ", " + std::to_string(height) + ")"; }

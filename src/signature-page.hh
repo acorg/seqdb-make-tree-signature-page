@@ -33,7 +33,7 @@ class SignaturePage
     SignaturePage& title(const Text& aTitle);
     SignaturePage& color_by_continent(bool aColorByContinent);
     SignaturePage& color_by_pos(int aPos);
-    SignaturePage& prepare(Tree& aTree, Chart* aChart);
+    SignaturePage& prepare(Tree& aTree, Surface& aSurface, Chart* aChart);
     void draw(const Tree& aTree, Surface& aSurface, const Chart* aChart);
 
  private:
@@ -45,6 +45,8 @@ class SignaturePage
     Clades* mClades;
     AntigenicMaps* mAntigenicMaps;
     DrawHzLines* mDrawHzLines;
+
+    Viewport mPageArea;
 
       // to implement clone all m pointers
     SignaturePage(const SignaturePage&) = default;

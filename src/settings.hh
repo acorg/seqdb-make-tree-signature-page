@@ -597,6 +597,7 @@ class SettingsAntigenicMaps
                     | object_string_value("border_color", mSettings.border_color)
                     | object_double_non_negative_value("grid_line_width", mSettings.grid_line_width)
                     | object_string_value("grid_color", mSettings.grid_color)
+                    | object_value("gap_between_maps", mSettings.gap_between_maps)
                     | object_value("map_zoom", mSettings.map_zoom)
                     | object_value("egg_antigen_aspect", mSettings.egg_antigen_aspect)
                     | object_value("reassortant_rotation", mSettings.reassortant_rotation)
@@ -626,7 +627,7 @@ class SettingsAntigenicMaps
 
  public:
     inline SettingsAntigenicMaps()
-        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), map_zoom(1.1),
+        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), gap_between_maps(0.005), map_zoom(1.1),
           serum_scale(5), reference_antigen_scale(8), test_antigen_scale(5), vaccine_antigen_scale(15), tracked_antigen_scale(8),
           serum_outline_width(0.5), reference_antigen_outline_width(0.5), test_antigen_outline_width(0.5), vaccine_antigen_outline_width(0.5), tracked_antigen_outline_width(0.5),
           serum_outline_color(LIGHT_GREY), reference_antigen_outline_color(LIGHT_GREY), test_antigen_outline_color(LIGHT_GREY), test_antigen_fill_color(LIGHT_GREY), vaccine_antigen_outline_color(BLACK),
@@ -640,6 +641,7 @@ class SettingsAntigenicMaps
 
     double border_width, grid_line_width;
     Color border_color, grid_color;
+    double gap_between_maps;    // relative to canvas width
     double map_zoom;
     double serum_scale, reference_antigen_scale, test_antigen_scale, vaccine_antigen_scale, tracked_antigen_scale;
     double serum_outline_width, reference_antigen_outline_width, test_antigen_outline_width, vaccine_antigen_outline_width, tracked_antigen_outline_width;
