@@ -136,7 +136,7 @@ class Garli:
 
     # ----------------------------------------------------------------------
 
-    def _make_conf(self, run_id, source, source_tree, output_dir, outgroup, attachmentspertaxon, randseed, genthreshfortopoterm, searchreps, strip_comments):
+    def _make_conf(self, run_id, source, source_tree, output_dir, outgroup, attachmentspertaxon, randseed, genthreshfortopoterm, searchreps, stoptime, strip_comments):
         """Returns filename of the written conf file"""
         if not outgroup or not isinstance(outgroup, list) or not all(isinstance(e, int) and e > 0 for e in outgroup):
             raise ValueError("outgroup must be non-empty list of taxa indices in the fasta file starting with 1")
@@ -149,6 +149,7 @@ class Garli:
             "randseed": randseed,
             "genthreshfortopoterm": genthreshfortopoterm,    # termination condition, default: 20000
             "searchreps": searchreps,                  # default: 2
+            "stoptime": stoptime,
             "outgroup": " ".join(str(e) for e in outgroup),
             }
         conf = GARLI_CONF.format(**garli_args)
