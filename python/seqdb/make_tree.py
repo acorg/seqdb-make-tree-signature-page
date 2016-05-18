@@ -6,6 +6,7 @@
 
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
+import operator, subprocess
 from . import json
 from .raxml import Raxml, RaxmlResult
 from .garli import Garli, GarliResults
@@ -115,6 +116,29 @@ def make_results(working_dir, r_raxml, r_garli):
     return r
 
 # ----------------------------------------------------------------------
+
+def make_r_garli_start_final_scores(working_dir, results):
+    if results["garli"]:
+        res = sorted(results["garli"], key=operator.itemgetter("start_score"))
+        min_score = - min(min(e["score"] for e in res), min(e["start_score"] for e in res))
+        max_score = - max(max(e["score"] for e in res), max(e["start_score"] for e in res))
+        start_scores = [-e["start_score"] for e in res]
+        scores = [-e["score"] for e in res]
+        rscript_name = Path(working_dir, "garli.starting-final-scores.r")
+        with rscript_name.open("w") as f:
+            f.write('doplot <- function() {\n')
+            f.write('    plot(c(1, {num_results}), c({min_score}, {max_score}), type="n", main="Score improvement by GARLI", xlab="GARLI run number", ylab="GARLI score")\n'.format(num_results=len(res), min_score=min_score, max_score=max_score))
+            f.write('    legend("bottomleft", c("starting scores", "final scores"), pch=c("-", "-"), col=c("magenta", "blue"), bty="n", lwd=5)\n')
+            f.write('    lines(1:{num_results}, c({start_scores}), col="magenta")\n'.format(num_results=len(res), start_scores=",".join(str(s) for s in start_scores)))
+            f.write('    lines(1:{num_results}, c({scores}), col="blue")\n'.format(num_results=len(res), scores=",".join(str(s) for s in scores)))
+            f.write('}\n\n')
+            f.write('pdf("{fn}", 14, 7)\n'.format(fn=Path(working_dir, "garli.starting-final-scores.pdf")))
+            f.write('doplot()\n')
+            f.write('dev.off()\n\n')
+            f.write('png("{fn}", 1600, 800)\n'.format(fn=Path(working_dir, "garli.starting-final-scores.png")))
+            f.write('doplot()\n')
+            f.write('dev.off()\n\n')
+        subprocess.run(["Rscript", str(rscript_name)], stdout=subprocess.DEVNULL)
 
 # ======================================================================
 ### Local Variables:

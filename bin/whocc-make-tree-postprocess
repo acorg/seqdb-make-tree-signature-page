@@ -11,41 +11,28 @@ import traceback
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
 import logging; module_logger = logging.getLogger(__name__)
+from seqdb import make_tree, json, raxml as raxml_m, garli as garli_m
 
 # ----------------------------------------------------------------------
 
 def main(args):
     if Path(args.dir[0], "result.all.json").exists():
-        from seqdb import json
         results = json.loadf(Path(args.dir[0], "result.all.json"))
     else:
         if Path(args.dir[0], "raxml").is_dir():
-            from seqdb import raxml as raxml_m
             r_raxml = raxml_m.postprocess(target_dir=Path(args.dir[0]), source_dir=Path(args.dir[0], "raxml"))
         else:
             r_raxml = None
         if Path(args.dir[0], "garli").is_dir():
-            from seqdb import garli as garli_m
             r_garli = garli_m.postprocess(target_dir=Path(args.dir[0]), source_dir=Path(args.dir[0], "garli"))
         else:
             r_garli = None
         if r_raxml and r_garli:
-            from seqdb import make_tree
             results = make_tree.make_results(Path(args.dir[0]), r_raxml=r_raxml, r_garli=r_garli)
         else:
             results = None
-    # if results:
-    #     make_r(results)
-
-# ----------------------------------------------------------------------
-
-def make_r(results):
-    if results["garli"]:
-        min_score = min(min(e["score"] for e in results["garli"]), min(e["start_score"] for e in results["garli"]))
-        max_score = max(max(e["score"] for e in results["garli"]), max(e["start_score"] for e in results["garli"]))
-        print('plot(c(1, {num_results}), c({min_score}, {max_score}), type="l", main="Score improvement by GARLI", xlab="no", ylab="GARLI score")'.format(num_results=len(results["garli"]), min_score=min_score, max_score=max_score))
-        for no, r in enumerate(results["garli"]):
-            print('lines(rbind(c({}, {}), c({}, {})))'.format(no, r["start_score"], no, r["score"]))
+    if results:
+        make_tree.make_r_garli_start_final_scores(Path(args.dir[0]), results)
 
 # ----------------------------------------------------------------------
 
