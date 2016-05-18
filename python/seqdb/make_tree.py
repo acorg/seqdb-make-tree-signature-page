@@ -8,7 +8,7 @@ import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
 import operator, subprocess
 from . import json
-from .raxml import Raxml, RaxmlResult
+from .raxml import Raxml, RaxmlResult, make_r_score_vs_time
 from .garli import Garli, GarliResults
 
 # ======================================================================
@@ -48,6 +48,7 @@ def run_raxml(working_dir, run_id, fasta_file, base_seq_name, raxml_bfgs, raxml_
     module_logger.info('RAxML {}'.format(r_raxml.report_best()))
     r_raxml.make_txt(Path(working_dir, "result.raxml.txt"))
     r_raxml.make_json(Path(working_dir, "result.raxml.json"))
+    make_r_score_vs_time(target_dir=working_dir, source_dir=raxml_output_dir, results=r_raxml)
     return r_raxml
 
 # ----------------------------------------------------------------------
@@ -113,6 +114,13 @@ def make_results(working_dir, r_raxml, r_garli):
         }
     json.dumpf(Path(working_dir, "result.all.json"), r)
 
+    from .draw_tree import draw_tree
+    draw_tree(tree_file=r_best["tree"],
+              path_to_seqdb="/Users/eu/WHO/seqdb.json.xz",
+              output_file=Path(working_dir, "tree.pdf"),
+              title="{{virus_type}} GARLI-score: {} Time: {}".format(r_best["score"], longest_time_s),
+              pdf_width=1000, pdf_height=850
+              )
     return r
 
 # ----------------------------------------------------------------------

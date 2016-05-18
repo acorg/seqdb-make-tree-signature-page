@@ -128,10 +128,18 @@ class Garli:
     @classmethod
     def get_result(cls, output_dir, run_id):
         tree = Path(output_dir, run_id + ".best.phy")
-        log_data = Path(output_dir, run_id + ".log00.log").open().readlines()
-        start_score = - float(log_data[2].split()[1])
-        score = - float(log_data[-1].split()[1])
-        execution_time = int(log_data[-1].split()[2])
+        score, execution_time, start_score = None, None, None
+        logfile = Path(output_dir, run_id + ".log00.log")
+        for log_line in logfile.open():
+            fields = log_line.split("\t")
+            if len(fields) == 4:
+                if fields[0] == "Final":
+                    score = - float(fields[1])
+                    execution_time = int(fields[2])
+                elif fields[0] == "0":
+                    start_score = - float(fields[1])
+        if score is None or execution_time is None or start_score is None:
+            raise RuntimeError("Unable to parse " + str(logfile))
         return GarliResult(tree=str(tree), score=score, start_score=start_score, time=execution_time)
 
     # ----------------------------------------------------------------------

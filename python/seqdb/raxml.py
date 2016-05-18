@@ -205,8 +205,8 @@ def make_r_score_vs_time(target_dir, source_dir, results):
         f.write('doplot <- function() {\n')
         f.write('    plot(c(0, {longest_time}), c({min_score}, {max_score}), type="n", xlab="time (hours)", ylab="RAxML score", main="RAxML processing" )\n'.format(
             longest_time=results.longest_time / 3600, min_score=-min_max_score[0], max_score=-min_max_score[1]))
-        for log in source_dir.glob("RAxML_log.*"):
-            f.write('    d <- read.table("{log}")\nd$V1 <- d$V1 / 3600\nlines(d)\n'.format(log=log.resolve()))
+        for log in sorted(source_dir.glob("RAxML_log.*")):
+            f.write('    d <- read.table("{log}")\n    d$V1 <- d$V1 / 3600\n    lines(d)\n'.format(log=log.resolve()))
         f.write('}\n\n')
         f.write('pdf("{fn}", 10, 10)\n'.format(fn=filepath.with_suffix(".pdf")))
         f.write('doplot()\n')
