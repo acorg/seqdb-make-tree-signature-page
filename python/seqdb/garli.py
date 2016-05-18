@@ -104,11 +104,11 @@ class Garli:
         # self.model = "GTRGAMMAI"
         # self.default_args = ["-c", "4", "-f", "d", "--silent", "--no-seq-check"]
 
-    def submit_htcondor(self, num_runs, source, output_dir, run_id, source_tree=None, outgroup=[1], attachmentspertaxon=1000000, genthreshfortopoterm=20000, searchreps=1, strip_comments=True, machines=None):
+    def submit_htcondor(self, num_runs, source, output_dir, run_id, source_tree=None, outgroup=[1], attachmentspertaxon=1000000, genthreshfortopoterm=20000, stoptime=3600*24*7, searchreps=1, strip_comments=True, machines=None):
         from . import htcondor
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
-        conf_files = [self._make_conf(run_id, source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir, attachmentspertaxon=attachmentspertaxon, randseed=self._random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, strip_comments=strip_comments) for run_id in run_ids]
+        conf_files = [self._make_conf(run_id, source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir, attachmentspertaxon=attachmentspertaxon, randseed=self._random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=stoptime, strip_comments=strip_comments) for run_id in run_ids]
         module_logger.info('{} garli conf files saved to {}'.format(len(conf_files), output_dir))
         args=[[str(Path(c).resolve())] for c in conf_files]
         start = time_m.time()
@@ -228,7 +228,7 @@ randseed = {randseed}
 availablememory = 4000
 
 # The frequency with which the best score is written to the log file, default: 10
-logevery = 10000
+logevery = 1000
 
 # Whether to write three files to disk containing all information
 # about the current state of the population every saveevery
@@ -250,7 +250,7 @@ restart = 0
 # If writecheckpoints or outputcurrentbesttopology are specified, this
 # is the frequency (in generations) at which checkpoints or the
 # current best tree are written to file. default: 100
-saveevery = 10000
+saveevery = 1000
 
 # Specifies whether some initial rough optimization is performed on
 # the starting branch lengths and alpha parameter. This is always
@@ -423,7 +423,7 @@ stopgen = 1000000
 # this supersedes the automated stopping criterion (see
 # enforcetermconditions above), and should therefore be set to a very
 # large value if automatic termination is desired.
-stoptime = 9000000
+stoptime = {stoptime}
 
 startoptprec = 0.5
 minoptprec = 0.01

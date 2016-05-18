@@ -34,8 +34,8 @@ def main(args):
             results = make_tree.make_results(Path(args.dir[0]), r_raxml=r_raxml, r_garli=r_garli)
         else:
             results = None
-    if results:
-        make_r(results)
+    # if results:
+    #     make_r(results)
 
 # ----------------------------------------------------------------------
 

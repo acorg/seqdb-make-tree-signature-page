@@ -114,7 +114,7 @@ def export_from_seqdb(seqdb, filename, output_format, amino_acids, lab, virus_ty
     exp = exporter(output=str(filename), output_format=output_format, encode_name=encode_name, wrap=wrap)
     for ss in sequences:
         exp.write(name=ss["n"], sequence=ss["s"])
-    return {"base_seq": fasta_encode_name(sequences[0]["n"]) if base_seq else None, "filename": filename, "hamming_distances": hamming_distances}
+    return {"base_seq": fasta_encode_name(sequences[0]["n"]) if base_seq else None, "filename": filename, "hamming_distances": hamming_distances, "number_of_sequences": len(sequences)}
 
 # ----------------------------------------------------------------------
 

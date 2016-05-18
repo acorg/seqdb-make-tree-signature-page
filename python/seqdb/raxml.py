@@ -71,6 +71,11 @@ class RaxmlResults:
     def make_json(self, filepath :Path):
         json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results})
 
+    def min_max_score(self):
+        min_score = min(min(r.score, *r.start_scores) for r in self.results)
+        max_score = max(max(r.score, *r.start_scores) for r in self.results)
+        return min_score, max_score
+
     @classmethod
     def tabbed_report_header(cls):
         return "{:^10s} {:^8s} {:^10s} {:^10s} {}".format("score", "time", "startscore", "endscore", "tree")
@@ -108,10 +113,10 @@ class Raxml:
 
     # ----------------------------------------------------------------------
 
-    def submit_htcondor(self, source, output_dir, run_id, num_runs, bfgs, outgroups :list, machines=None):
+    def submit_htcondor(self, source, output_dir, run_id, num_runs, bfgs, model_optimization_precision, outgroups :list, machines=None):
         from . import htcondor
         Path(output_dir).mkdir(parents=True, exist_ok=True)
-        general_args = ["-s", str(source.resolve()), "-w", str(output_dir.resolve()), "-m", self.model, "-T", "1", "-N", "1"] + self.default_args
+        general_args = ["-s", str(source.resolve()), "-w", str(output_dir.resolve()), "-m", self.model, "-e", str(model_optimization_precision), "-T", "1", "-N", "1"] + self.default_args
         if outgroups:
             general_args += ["-o", ",".join(outgroups)]
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
@@ -187,7 +192,40 @@ def postprocess(target_dir, source_dir):
     module_logger.info('RAxML {}'.format(results.report_best()))
     results.make_txt(Path(target_dir, "result.raxml.txt"))
     results.make_json(Path(target_dir, "result.raxml.json"))
+    make_r_score_vs_time(target_dir=target_dir, source_dir=source_dir, results=results)
     return results
+
+# ----------------------------------------------------------------------
+
+def make_r_score_vs_time(target_dir, source_dir, results):
+    filepath = Path(target_dir, "raxml.score-vs-time.r")
+    module_logger.info('Generating {}'.format(filepath))
+    min_max_score = results.min_max_score()
+    with filepath.open("w") as f:
+        f.write('plot(c(0, {longest_time}), c({min_score}, {max_score}), col="white", xlab="time (hours)", ylab="RAxML score", main="RAxML processing" )\n'.format(
+            longest_time=results.longest_time / 3600, min_score=-min_max_score[0], max_score=-min_max_score[1]))
+        for log in source_dir.glob("RAxML_log.*"):
+            f.write('d <- read.table("{log}")\nd$V1 <- d$V1 / 3600\nlines(d)\n'.format(log=log.resolve()))
+
+# ----------------------------------------------------------------------
+
+"""
+RAxML options http://sco.h-its.org/exelixis/resource/download/NewManual.pdf
+
+-c 4
+-f d
+--silent
+--no-seq-check
+-m GTRGAMMAI
+-T 1
+-N 1
+­p <random seed>
+--no-bfgs
+
+-e 0.001 (default) set model optimization precision in log likelihood units for final
+      optimization of tree topology
+
+"""
 
 # ======================================================================
 ### Local Variables:
