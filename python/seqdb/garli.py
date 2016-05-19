@@ -89,8 +89,8 @@ class GarliTask:
 
     def wait(self):
         status  = self.job.wait()
-        if status == "FAILED":
-            raise GarliError("HTCondor job failed (aborted by a user?)")
+        # if status == "FAILED":
+        #     raise GarliError("HTCondor job failed (aborted by a user?)")
         return GarliResults(Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
 
 # ----------------------------------------------------------------------

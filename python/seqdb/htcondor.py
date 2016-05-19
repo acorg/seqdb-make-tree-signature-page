@@ -49,32 +49,38 @@ class Job:
         r["all"] = {"state": "running" if all_running else "completed", "done": (all_jobs - all_running) / all_jobs}
         return r
 
-    def wait(self, verbose=False):
+    def wait(self, timeout=None, verbose=False):
         start = datetime.datetime.now()
-        cmd = ["condor_wait", "-status", str(self.condor_log)]
+        cmd = ["condor_wait"]
+        if timeout is not None:
+            cmd.extend(["-wait", str(timeout)])
+        cmd.append(str(self.condor_log))
         if verbose:
             cmd.append("-echo")
         output = _run(*cmd)
-        if " aborted" in output:
-            status = "FAILED"
+        if "All jobs done." in output:
+            status = "done"
+        elif "Time expired." in output:
+            status = "timeout"
         else:
-            status = "completed"
+            status = "unknown"
+            module_logger.warning('Unrecognized condor_wait output:\n' + output)
         if verbose:
             module_logger.info('condor_wait echo:\n' + output)
         module_logger.info('{} in {}'.format(status, datetime.datetime.now() - start))
         return status
 
-    def wait_old(self, check_interval_in_seconds=30, verbose=True):
-        start = datetime.datetime.now()
-        while True:
-            time.sleep(check_interval_in_seconds)
-            status = self.status()
-            if status["all"]["state"] == "completed":
-                break
-            if verbose:
-                module_logger.info('Percent done: {:.1f}%'.format(status["all"]["done"] * 100.0))
-        if verbose:
-            module_logger.info('All done in {}'.format(datetime.datetime.now() - start))
+    # def wait_old(self, check_interval_in_seconds=30, verbose=True):
+    #     start = datetime.datetime.now()
+    #     while True:
+    #         time.sleep(check_interval_in_seconds)
+    #         status = self.status()
+    #         if status["all"]["state"] == "completed":
+    #             break
+    #         if verbose:
+    #             module_logger.info('Percent done: {:.1f}%'.format(status["all"]["done"] * 100.0))
+    #     if verbose:
+    #         module_logger.info('All done in {}'.format(datetime.datetime.now() - start))
 
 # ----------------------------------------------------------------------
 

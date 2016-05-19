@@ -47,6 +47,8 @@ def main(args):
         f = seqdb_m.run_raxml_all_garli
     elif args.mode == "best":
         f = seqdb_m.run_raxml_best_garli
+    elif args.mode == "survived-best":
+        f = seqdb_m.run_raxml_survived_best_garli
     else:
         raise RuntimeError("Unrecognized mode: " + args.mode)
     vt, lin = sVirusTypeLineage[args.virus_type.upper()]
@@ -65,7 +67,7 @@ def main(args):
             sort_by=None, with_hi_name=False, name_match=None)
         r = f(working_dir=working_dir, run_id=run_id, fasta_file=export_data["filename"],
               number_of_sequences=export_data["number_of_sequences"], base_seq_name=export_data["base_seq"],
-              raxml_bfgs=args.raxml_bfgs, raxml_model_optimization_precision=args.raxml_model_optimization_precision, raxml_num_runs=args.raxml_num_runs,
+              raxml_kill_rate=args.raxml_kill_rate, raxml_bfgs=args.raxml_bfgs, raxml_model_optimization_precision=args.raxml_model_optimization_precision, raxml_num_runs=args.raxml_num_runs,
               garli_num_runs=args.garli_num_runs, garli_attachmentspertaxon=args.garli_attachmentspertaxon, garli_stoptime=args.garli_stoptime,
               email=args.email, machines=args.machines and args.machines.split(","))
         if args.email:
@@ -97,13 +99,14 @@ with timeit(sys.argv[0]):
         parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
 
-        parser.add_argument('--mode', action='store', dest='mode', default="all", help='"all", "best".')
+        parser.add_argument('--mode', action='store', dest='mode', default="all", help='"all", "best", "survived-best".')
         parser.add_argument('--flu-lineage', action='store', dest='virus_type', required=True, help='Build tree for this virus type/subtype/lineage: BVIC, BYAM, H1, H3.')
         # parser.add_argument('--gene', action='store', dest='gene', default="", help='HA or NA.')
         # parser.add_argument('--hamming-distance-threshold', action='store', type=int, dest='hamming_distance_threshold', default=150, help='Select only sequences having hamming distance to the base sequence less than threshold. Use 150 for nucs (H3).')
         parser.add_argument('--start-date', action='store', dest='start_date', default=None, help='Build tree for antigens isolated on or after that date (YYYYMMDD).')
         parser.add_argument('--end-date', action='store', dest='end_date', default=None, help='Build tree for antigens isolated before that date (YYYYMMDD).')
 
+        parser.add_argument('--raxml-kill-rate', action='store', type=float, dest='raxml_kill_rate', default=0.1, help='>0, <0.9.')
         parser.add_argument('--raxml-no-bfgs', action='store_false', dest='raxml_bfgs', default=True, help='Disable bfgs in RAxML.')
         parser.add_argument('--raxml-model-optimization-precision', action='store', type=float, dest='raxml_model_optimization_precision', default=0.001, help='See RAxML -e switch, higher values allows faster RAxML run but give worse score.')
         parser.add_argument('--raxml-num-runs', action='store', dest='raxml_num_runs', type=int, default=256, help='Number of runs of RAxML with different random seeds.')

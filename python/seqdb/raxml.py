@@ -95,8 +95,13 @@ class RaxmlTask:
 
     def wait(self):
         status  = self.job.wait()
-        if status == "FAILED":
-            raise RaxmlError("HTCondor job failed (aborted by a user?)")
+        # if status == "FAILED":
+        #     raise RaxmlError("HTCondor job failed (aborted by a user?)")
+        return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
+
+    def wait_and_kill(self, kill_rate, wait_timeout):
+        while self.job.wait(timeout=wait_timeout) != "done":
+            Raxml.analyse_logs(output_dir=self.output_dir, run_ids=self.run_ids, kill_rate=kill_rate, job=self.job)
         return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
 
 # ----------------------------------------------------------------------
@@ -181,6 +186,26 @@ class Raxml:
         log_data = Path(output_dir, "RAxML_log." + run_id).open().readlines()
         start_scores = [- float(log_data[0].split()[1]), - float(log_data[-1].split()[1])]
         return RaxmlResult(run_id=run_id, tree=str(Path(output_dir, "RAxML_bestTree." + run_id)), score=float(best_score), start_scores=start_scores, time=execution_time)
+
+    # ----------------------------------------------------------------------
+    # for "survived" mode
+
+    @classmethod
+    def analyse_logs(cls, output_dir, run_ids, kill_rate, job):
+        completed = [run_id for run_id in run_ids if Path(output_dir, "RAxML_bestTree." + run_id).exists()]
+        if completed:
+            ff = [Path(output_dir, "RAxML_log." + run_id) for run_id in run_ids if not Path(output_dir, "RAxML_bestTree." + run_id).exists()] # just incomplete runs
+            data = {int(str(f).split(".")[-1]): [{"t": float(e[0]), "s": -float(e[1])} for e in (line.strip().split() for line in f.open())] for f in ff}
+            scores = {k: v[-1]["s"] for k,v in data}
+            by_score = sorted(scores, key=lambda e: scores[e])
+            n_to_kill = int(len(by_score) * kill_rate)
+            if n_to_kill > 0:
+                module_logger.info('To kill {}: {}'.format(n_to_kill, by_score[-n_to_kill:]))
+            else:
+                module_logger.info('Nothing to kill')
+            module_logger.info('Scores\n  {}'.format("  \n".join("{:04d} {}".format(k, scores(k)) for k in by_score)))
+
+    # ----------------------------------------------------------------------
 
     def _random_seed(self):
         return self.random_gen.randint(1, 0xFFFFFFFF)
