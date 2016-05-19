@@ -94,14 +94,18 @@ class RaxmlTask:
         self.run_ids = run_ids
 
     def wait(self):
+        start = datetime.datetime.now()
         status  = self.job.wait()
         # if status == "FAILED":
         #     raise RaxmlError("HTCondor job failed (aborted by a user?)")
+        module_logger.info('RAxML jobs completed in ' + str(datetime.datetime.now() - start))
         return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
 
     def wait_and_kill(self, kill_rate, wait_timeout):
+        start = datetime.datetime.now()
         while self.job.wait(timeout=wait_timeout) != "done":
             Raxml.analyse_logs(output_dir=self.output_dir, run_ids=self.run_ids, kill_rate=kill_rate, job=self.job)
+        module_logger.info('RAxML jobs completed in ' + str(datetime.datetime.now() - start))
         return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
 
 # ----------------------------------------------------------------------
@@ -217,16 +221,16 @@ class Raxml:
             data = {int(str(f).split(".")[-1]): load_log_file(f) for f in running_logs}
             scores_for_longer_worse_than_best_completed = {k: v[-1]["s"] for k, v in data.items() if v[-1]["t"] > best_completed["t"] and v[-1]["s"] > best_completed["s"]}
             by_score = sorted(scores_for_longer_worse_than_best_completed, key=lambda e: scores_for_longer_worse_than_best_completed[e])
-            module_logger.info('Scores_for_longer_worse_than_best_completed\n  {}'.format("  \n".join("{:04d} {}".format(k, scores_for_longer_worse_than_best_completed[k]) for k in by_score)))
-            # n_to_kill = int(len(by_score) * kill_rate)
-            # if n_to_kill > 0:
-            #     to_kill = by_score[-n_to_kill:]
-            #     job.kill_tasks(to_kill)
-            #     for run_id_to_del in (ri for ri in run_ids if int(ri.split(".")[-1]) in to_kill):
-            #         run_ids.remove(run_id_to_del)
-            #     module_logger.info('To kill {}: {} run_ids left: {}'.format(n_to_kill, to_kill, run_ids))
-            # else:
-            #     module_logger.info('Nothing to kill')
+            # module_logger.info('Scores_for_longer_worse_than_best_completed\n  {}'.format("  \n".join("{:04d} {}".format(k, scores_for_longer_worse_than_best_completed[k]) for k in by_score)))
+            n_to_kill = int(len(by_score) * kill_rate)
+            if n_to_kill > 0:
+                to_kill = by_score[-n_to_kill:]
+                job.kill_tasks(to_kill)
+                for run_id_to_del in (ri for ri in run_ids if int(ri.split(".")[-1]) in to_kill):
+                    run_ids.remove(run_id_to_del)
+                module_logger.info('To kill {}: {} run_ids left: {}'.format(n_to_kill, to_kill, run_ids))
+            else:
+                module_logger.info('Nothing to kill')
 
     @classmethod
     def analyse_logs_old1(cls, output_dir, run_ids, kill_rate, job):
