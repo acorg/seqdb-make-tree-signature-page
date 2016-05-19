@@ -69,7 +69,7 @@ def run_raxml_survived(working_dir, run_id, fasta_file, base_seq_name, raxml_kil
     raxml_job = raxml.submit_htcondor(num_runs=raxml_num_runs, source=fasta_file, output_dir=raxml_output_dir,
                                       run_id=run_id, bfgs=raxml_bfgs, model_optimization_precision=raxml_model_optimization_precision,
                                       outgroups=[base_seq_name], machines=machines)
-    r_raxml = raxml_job.wait_and_kill(kill_rate=raxml_kill_rate, wait_timeout=600)
+    r_raxml = raxml_job.wait_and_kill(kill_rate=raxml_kill_rate, wait_timeout=60)
     module_logger.info('RAxML {}'.format(r_raxml.report_best()))
     r_raxml.make_txt(Path(working_dir, "result.raxml.txt"))
     r_raxml.make_json(Path(working_dir, "result.raxml.json"))

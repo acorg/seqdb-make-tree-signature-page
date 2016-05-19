@@ -193,6 +193,7 @@ class Raxml:
     @classmethod
     def analyse_logs(cls, output_dir, run_ids, kill_rate, job):
         completed = [run_id for run_id in run_ids if Path(output_dir, "RAxML_bestTree." + run_id).exists()]
+        module_logger.info('analyse_logs completed: {}'.format(len(completed)))
         if completed:
             ff = [Path(output_dir, "RAxML_log." + run_id) for run_id in run_ids if not Path(output_dir, "RAxML_bestTree." + run_id).exists()] # just incomplete runs
             data = {int(str(f).split(".")[-1]): [{"t": float(e[0]), "s": -float(e[1])} for e in (line.strip().split() for line in f.open())] for f in ff}
