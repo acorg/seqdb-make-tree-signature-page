@@ -72,6 +72,11 @@ class Job:
             module_logger.info('{} in {}'.format(status, datetime.datetime.now() - start))
         return status
 
+    def kill_tasks(self, tasks):
+        cmd = ["condor_rm", *("{}.{}".format(list(self.clusters)[0], t) for t in tasks)]
+        module_logger.info(str(cmd))
+        _run(*cmd)
+
     # def wait_old(self, check_interval_in_seconds=30, verbose=True):
     #     start = datetime.datetime.now()
     #     while True:

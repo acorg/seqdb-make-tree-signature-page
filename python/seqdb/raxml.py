@@ -213,12 +213,16 @@ class Raxml:
             data = {int(str(f).split(".")[-1]): load_log_file(f) for f in ff}
             scores = {k: v[-1]["s"] for k,v in data.items()}
             by_score = sorted(scores, key=lambda e: scores[e])
+            module_logger.info('Scores\n  {}'.format("  \n".join("{:04d} {}".format(k, scores[k]) for k in by_score)))
             n_to_kill = int(len(by_score) * kill_rate)
             if n_to_kill > 0:
-                module_logger.info('To kill {}: {}'.format(n_to_kill, by_score[-n_to_kill:]))
+                to_kill = by_score[-n_to_kill:]
+                job.kill_tasks(to_kill)
+                for run_id_to_del in (ri for ri in run_ids if int(ri.split(".")[-1]) in to_kill):
+                    run_ids.remove(run_id_to_del)
+                module_logger.info('To kill {}: {} run_ids left: {}'.format(n_to_kill, to_kill, run_ids))
             else:
                 module_logger.info('Nothing to kill')
-            module_logger.info('Scores\n  {}'.format("  \n".join("{:04d} {}".format(k, scores[k]) for k in by_score)))
 
     # ----------------------------------------------------------------------
 
