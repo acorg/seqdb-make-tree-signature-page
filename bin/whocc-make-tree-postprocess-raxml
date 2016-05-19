@@ -1,0 +1,87 @@
+#! /usr/bin/env python3
+# -*- Python -*-
+
+"""
+Postprocess data in the directories upon making tree via whocc-make-tree
+"""
+
+import sys
+if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
+import traceback
+from pathlib import Path
+sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
+import logging; module_logger = logging.getLogger(__name__)
+from seqdb import make_tree, json, raxml as raxml_m, garli as garli_m
+
+# ----------------------------------------------------------------------
+
+def main(args):
+    kill_rate = 0.5
+    source_dir = Path(args.dir[0], "raxml").resolve()
+    data = {str(f).split(".")[-1]: load(f) for f in source_dir.glob("RAxML_log.*")}
+    max_t = max(ee["t"] for e in data.values() for ee in e)
+    print("max_t", max_t, max_t / 3600)
+    killed = set()
+    for tt in range(60*10, int(max_t+1), 60*10):
+        states = {k: state_at(tt, v, k in killed) for k,v in data.items()}
+        completed = set(filter(lambda kk: states[kk]["state"] == "completed", states))
+        best_score = min(v["s"] for v in states.values())
+        worst_score = max(v["s"] for v in states.values())
+        # score_threshold = best_score + (worst_score - best_score) * 0.8
+        if completed:
+            # killed = killed | set(filter(lambda kk: states[kk]["s"] > score_threshold, states))
+            ordered = [e for e in sorted(states, key=lambda kk: states[kk]["s"]) if e not in killed and states[e]["state"] == "running"]
+            print("ordered", ordered)
+            n_to_kill = int(len(ordered) * kill_rate)
+            if n_to_kill > 0:
+                print("to-kill", ordered[-n_to_kill:])
+                killed = killed | set(ordered[-n_to_kill:])
+            else:
+                print("no-kill: too few")
+            print(tt, "\n   ", "\n    ".join("{:50s} {}".format(str(states[k]), k) for k in sorted(states, key=lambda kk: states[kk]["s"])))
+            print("survived", len(ordered))
+            # print("completed", sorted(completed), "best", best_score, "worst", worst_score, "threshold", score_threshold)
+            # print("best", best_score, "worst", worst_score, "threshold", score_threshold)
+    print("total killed", len(killed), 'survived', len(data) - len(killed))
+
+# ----------------------------------------------------------------------
+
+def state_at(tt, ee, killed):
+    no = None
+    suffix = "-killed" if killed else ""
+    for i, e in enumerate(ee):
+        if e["t"] > tt:
+            no = i - 1
+            break
+    if no is None:
+        r = {"state": "completed" + suffix, "s": ee[-1]["s"]}
+    elif no < 0:
+        r = {"state": "pending" + suffix, "s": 1e10}
+    else:
+        r = {"state": "running" + suffix, "s": ee[no]["s"]}
+    return r
+
+def load(filepath):
+    return [{"t": float(e[0]), "s": -float(e[1])} for e in (line.strip().split() for line in filepath.open())]
+
+# ----------------------------------------------------------------------
+
+try:
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
+
+    parser.add_argument('dir', nargs=1, help='directory where tree data stored.')
+
+    args = parser.parse_args()
+    logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")
+    exit_code = main(args)
+except Exception as err:
+    logging.error('{}\n{}'.format(err, traceback.format_exc()))
+    exit_code = 1
+exit(exit_code)
+
+# ======================================================================
+### Local Variables:
+### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+### End:
