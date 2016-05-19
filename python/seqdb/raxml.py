@@ -50,7 +50,7 @@ class RaxmlResult:
 
 class RaxmlResults:
 
-    def __init__(self, results):
+    def __init__(self, results=None):
         self.results = sorted(results, key=operator.attrgetter("score"))
         self.longest_time = max(self.results, key=operator.attrgetter("time")).time
 
@@ -106,7 +106,8 @@ class RaxmlTask:
         while self.job.wait(timeout=wait_timeout) != "done":
             Raxml.analyse_logs(output_dir=self.output_dir, run_ids=self.run_ids, kill_rate=kill_rate, job=self.job)
         module_logger.info('RAxML jobs completed in ' + str(datetime.datetime.now() - start))
-        return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
+        # return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
+        return RaxmlResults.import_from(source_dir=self.output_dir) # get all found results
 
 # ----------------------------------------------------------------------
 
@@ -200,7 +201,7 @@ class Raxml:
         def load_log_file(filepath):
             for attempt in range(10):
                 try:
-                    r = [{"t": float(e[0]), "s": -float(e[1])} for e in (line.strip().split() for line in filepath.open())]
+                    r = [{"t": float(e[0]), "s": -float(e[1]), "f": str(filepath).split(".")[-1]} for e in (line.strip().split() for line in filepath.open())]
                     if not r:   # pending
                         r = [{"t": 0, "s": 0}]
                     return r
@@ -214,21 +215,25 @@ class Raxml:
             return min((load_log_file(filepath)[-1] for filepath in files), key=operator.itemgetter("s"))
 
         completed = [run_id for run_id in run_ids if Path(output_dir, "RAxML_bestTree." + run_id).exists()]
-        module_logger.info('analyse_logs completed: {}'.format(len(completed)))
         if completed:
             best_completed = time_score_from_log(Path(output_dir, "RAxML_log." + run_id) for run_id in completed)
+            module_logger.info('completed: {} best: {}'.format(len(completed), best_completed))
             running_logs = [f for f in (Path(output_dir, "RAxML_log." + run_id) for run_id in run_ids if run_id not in completed) if f.exists()]
             data = {int(str(f).split(".")[-1]): load_log_file(f) for f in running_logs}
             scores_for_longer_worse_than_best_completed = {k: v[-1]["s"] for k, v in data.items() if v[-1]["t"] > best_completed["t"] and v[-1]["s"] > best_completed["s"]}
             by_score = sorted(scores_for_longer_worse_than_best_completed, key=lambda e: scores_for_longer_worse_than_best_completed[e])
             # module_logger.info('Scores_for_longer_worse_than_best_completed\n  {}'.format("  \n".join("{:04d} {}".format(k, scores_for_longer_worse_than_best_completed[k]) for k in by_score)))
+            module_logger.info('With Scores_for_longer_worse_than_best_completed: {} {}'.format(len(by_score), by_score))
             n_to_kill = int(len(by_score) * kill_rate)
             if n_to_kill > 0:
                 to_kill = by_score[-n_to_kill:]
                 job.kill_tasks(to_kill)
-                for run_id_to_del in (ri for ri in run_ids if int(ri.split(".")[-1]) in to_kill):
-                    run_ids.remove(run_id_to_del)
-                module_logger.info('To kill {}: {} run_ids left: {}'.format(n_to_kill, to_kill, run_ids))
+                run_id_to_del = [ri for ri in run_ids if int(ri.split(".")[-1]) in to_kill]
+                module_logger.info('run_id_to_del {}'.format(run_id_to_del))
+                for ri in run_id_to_del:
+                    run_ids.remove(ri)
+                # module_logger.info('To kill {}: {} run_ids left: {}'.format(n_to_kill, to_kill, run_ids))
+                module_logger.info('To kill {}: {}'.format(n_to_kill, to_kill))
             else:
                 module_logger.info('Nothing to kill')
 
