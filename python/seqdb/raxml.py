@@ -211,7 +211,7 @@ class Raxml:
         if completed:
             ff = [f for f in (Path(output_dir, "RAxML_log." + run_id) for run_id in run_ids if not Path(output_dir, "RAxML_bestTree." + run_id).exists()) if f.exists()] # just incomplete runs
             data = {int(str(f).split(".")[-1]): load_log_file(f) for f in ff}
-            scores = {k: v[-1]["s"] for k,v in data}
+            scores = {k: v[-1]["s"] for k,v in data.items()}
             by_score = sorted(scores, key=lambda e: scores[e])
             n_to_kill = int(len(by_score) * kill_rate)
             if n_to_kill > 0:
