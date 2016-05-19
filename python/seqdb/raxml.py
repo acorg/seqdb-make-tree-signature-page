@@ -22,7 +22,8 @@ class RaxmlError (Exception):
 
 class RaxmlResult:
 
-    def __init__(self, tree, score, start_scores, time):
+    def __init__(self, run_id, tree, score, start_scores, time):
+        self.run_id = run_id
         self.tree = tree
         self.score = score
         self.start_scores = start_scores
@@ -71,10 +72,9 @@ class RaxmlResults:
     def make_json(self, filepath :Path):
         json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results})
 
-    def min_max_score(self):
-        min_score = min(min(r.score, *r.start_scores) for r in self.results)
-        max_score = max(max(r.score, *r.start_scores) for r in self.results)
-        return min_score, max_score
+    def max_start_score(self):
+        max_e_all = max(self.results, key=lambda e: max(e.score, *e.start_scores))
+        return max(max_e_all.score, *max_e_all.start_scores)
 
     @classmethod
     def tabbed_report_header(cls):
@@ -180,7 +180,7 @@ class Raxml:
             execution_time = None
         log_data = Path(output_dir, "RAxML_log." + run_id).open().readlines()
         start_scores = [- float(log_data[0].split()[1]), - float(log_data[-1].split()[1])]
-        return RaxmlResult(tree=str(Path(output_dir, "RAxML_bestTree." + run_id)), score=float(best_score), start_scores=start_scores, time=execution_time)
+        return RaxmlResult(run_id=run_id, tree=str(Path(output_dir, "RAxML_bestTree." + run_id)), score=float(best_score), start_scores=start_scores, time=execution_time)
 
     def _random_seed(self):
         return self.random_gen.randint(1, 0xFFFFFFFF)
@@ -200,21 +200,32 @@ def postprocess(target_dir, source_dir):
 def make_r_score_vs_time(target_dir, source_dir, results):
     filepath = Path(target_dir, "raxml.score-vs-time.r")
     module_logger.info('Generating {}'.format(filepath))
-    min_max_score = results.min_max_score()
+    colors = {results.results[0].tree: "green", results.results[1].tree: "cyan", results.results[2].tree: "blue", results.results[-1].tree: "red"}
     with filepath.open("w") as f:
-        f.write('doplot <- function() {\n')
+        f.write('doplot <- function(lwd) {\n')
         f.write('    plot(c(0, {longest_time}), c({min_score}, {max_score}), type="n", xlab="time (hours)", ylab="RAxML score", main="RAxML processing" )\n'.format(
-            longest_time=results.longest_time / 3600, min_score=-min_max_score[0], max_score=-min_max_score[1]))
-        for log in sorted(source_dir.glob("RAxML_log.*")):
-            f.write('    d <- read.table("{log}")\n    d$V1 <- d$V1 / 3600\n    lines(d)\n'.format(log=log.resolve()))
+            longest_time=results.longest_time / 3600,
+            min_score=-results.results[0].score,
+            max_score=-results.max_start_score()
+            # max_score=-results.results[-1].score,
+            ))
+        f.write('    legend("bottomright", lwd=5, legend=c({trees}), col=c({colors}))\n'.format(
+            trees=",".join(repr(t.split("/")[-1]) for t in sorted(colors)),
+            colors=",".join(repr(colors[t]) for t in sorted(colors))))
+        for r_e in reversed(results.results): # reversed for the best score line appear on top
+            f.write('    d <- read.table("{log}")\n'.format(log=r_e.tree.replace("/RAxML_bestTree.", "/RAxML_log.")))
+            f.write('    d$V1 <- d$V1 / 3600\n')
+            color = colors.get(r_e.tree, "grey")
+            f.write('    lines(d, col="{color}", lwd=lwd)\n'.format(color=color))
         f.write('}\n\n')
         f.write('pdf("{fn}", 10, 10)\n'.format(fn=filepath.with_suffix(".pdf")))
-        f.write('doplot()\n')
+        f.write('doplot(lwd=0.1)\n')
         f.write('dev.off()\n\n')
         f.write('png("{fn}", 1200, 1200)\n'.format(fn=filepath.with_suffix(".png")))
-        f.write('doplot()\n')
+        f.write('doplot(lwd=0.5)\n')
         f.write('dev.off()\n\n')
     subprocess.run(["Rscript", str(filepath)], stdout=subprocess.DEVNULL)
+    module_logger.info('Plot {} generated'.format(filepath.with_suffix(".pdf")))
 
 # ----------------------------------------------------------------------
 

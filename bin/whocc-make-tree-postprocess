@@ -16,7 +16,7 @@ from seqdb import make_tree, json, raxml as raxml_m, garli as garli_m
 # ----------------------------------------------------------------------
 
 def main(args):
-    if Path(args.dir[0], "result.all.json").exists():
+    if False: # Path(args.dir[0], "result.all.json").exists():
         results = json.loadf(Path(args.dir[0], "result.all.json"))
     else:
         if Path(args.dir[0], "raxml").is_dir():
