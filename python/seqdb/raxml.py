@@ -218,7 +218,7 @@ class Raxml:
                 module_logger.info('To kill {}: {}'.format(n_to_kill, by_score[-n_to_kill:]))
             else:
                 module_logger.info('Nothing to kill')
-            module_logger.info('Scores\n  {}'.format("  \n".join("{:04d} {}".format(k, scores(k)) for k in by_score)))
+            module_logger.info('Scores\n  {}'.format("  \n".join("{:04d} {}".format(k, scores[k]) for k in by_score)))
 
     # ----------------------------------------------------------------------
 
