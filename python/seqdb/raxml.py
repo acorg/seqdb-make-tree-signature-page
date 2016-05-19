@@ -206,6 +206,44 @@ class Raxml:
                 time_m.sleep(3)
             raise RuntimeError("Cannot process {}".format(filepath))
 
+        def time_score_from_log(files):
+            return min((load_log_file(filepath)[-1] for filepath in files), key=operator.itemgetter("s"))
+
+        completed = [run_id for run_id in run_ids if Path(output_dir, "RAxML_bestTree." + run_id).exists()]
+        module_logger.info('analyse_logs completed: {}'.format(len(completed)))
+        if completed:
+            best_completed = time_score_from_log(Path(output_dir, "RAxML_log." + run_id) for run_id in completed)
+            running_logs = [f for f in (Path(output_dir, "RAxML_log." + run_id) for run_id in run_ids if run_id not in completed) if f.exists()]
+            data = {int(str(f).split(".")[-1]): load_log_file(f) for f in running_logs}
+            scores_for_longer_worse_than_best_completed = {k: v[-1]["s"] for k, v in data.items() if v[-1]["t"] > best_completed["t"] and v[-1]["s"] > best_completed["s"]}
+            by_score = sorted(scores, key=lambda e: scores_for_longer_worse_than_best_completed[e])
+            module_logger.info('Scores_for_longer_worse_than_best_completed\n  {}'.format("  \n".join("{:04d} {}".format(k, scores_for_longer_worse_than_best_completed[k]) for k in by_score)))
+            # n_to_kill = int(len(by_score) * kill_rate)
+            # if n_to_kill > 0:
+            #     to_kill = by_score[-n_to_kill:]
+            #     job.kill_tasks(to_kill)
+            #     for run_id_to_del in (ri for ri in run_ids if int(ri.split(".")[-1]) in to_kill):
+            #         run_ids.remove(run_id_to_del)
+            #     module_logger.info('To kill {}: {} run_ids left: {}'.format(n_to_kill, to_kill, run_ids))
+            # else:
+            #     module_logger.info('Nothing to kill')
+
+    @classmethod
+    def analyse_logs_old1(cls, output_dir, run_ids, kill_rate, job):
+
+        def load_log_file(filepath):
+            for attempt in range(10):
+                try:
+                    r = [{"t": float(e[0]), "s": -float(e[1])} for e in (line.strip().split() for line in filepath.open())]
+                    if not r:   # pending
+                        r = [{"t": 0, "s": 0}]
+                    return r
+                except ValueError as err:
+                    pass        # file is being written at the moment, try again later
+                    module_logger.info('(ignored) cannot process {}: {}'.format(filepath.name, err))
+                time_m.sleep(3)
+            raise RuntimeError("Cannot process {}".format(filepath))
+
         completed = [run_id for run_id in run_ids if Path(output_dir, "RAxML_bestTree." + run_id).exists()]
         module_logger.info('analyse_logs completed: {}'.format(len(completed)))
         if completed:
@@ -258,9 +296,11 @@ def make_r_score_vs_time(target_dir, source_dir, results):
             colors=",".join(repr(colors[t]) for t in sorted(colors))))
         for r_e in reversed(results.results): # reversed for the best score line appear on top
             f.write('    d <- read.table("{log}")\n'.format(log=r_e.tree.replace("/RAxML_bestTree.", "/RAxML_log.")))
+            f.write('    dlen <- length(d$V1)\n')
             f.write('    d$V1 <- d$V1 / 3600\n')
             color = colors.get(r_e.tree, "grey")
             f.write('    lines(d, col="{color}", lwd=lwd)\n'.format(color=color))
+            f.write('    points(d$V1[dlen], d$V2[dlen], col="black")\n')
         f.write('}\n\n')
         f.write('pdf("{fn}", 10, 10)\n'.format(fn=filepath.with_suffix(".pdf")))
         f.write('doplot(lwd=0.1)\n')
