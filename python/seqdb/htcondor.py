@@ -57,7 +57,8 @@ class Job:
         cmd.append(str(self.condor_log))
         if verbose:
             cmd.append("-echo")
-        output = _run(*cmd)
+        # output = _run(*cmd)
+        output = subprocess.run(cmd, env={"LD_LIBRARY_PATH": ""}, check=False, stdout=subprocess.PIPE).stdout.decode("utf-8") # ignore exit code, condor_wait exits with 1 on timeout
         if "All jobs done." in output:
             status = "done"
         elif "Time expired." in output:
