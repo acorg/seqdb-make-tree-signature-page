@@ -216,7 +216,7 @@ class Raxml:
             running_logs = [f for f in (Path(output_dir, "RAxML_log." + run_id) for run_id in run_ids if run_id not in completed) if f.exists()]
             data = {int(str(f).split(".")[-1]): load_log_file(f) for f in running_logs}
             scores_for_longer_worse_than_best_completed = {k: v[-1]["s"] for k, v in data.items() if v[-1]["t"] > best_completed["t"] and v[-1]["s"] > best_completed["s"]}
-            by_score = sorted(scores, key=lambda e: scores_for_longer_worse_than_best_completed[e])
+            by_score = sorted(scores_for_longer_worse_than_best_completed, key=lambda e: scores_for_longer_worse_than_best_completed[e])
             module_logger.info('Scores_for_longer_worse_than_best_completed\n  {}'.format("  \n".join("{:04d} {}".format(k, scores_for_longer_worse_than_best_completed[k]) for k in by_score)))
             # n_to_kill = int(len(by_score) * kill_rate)
             # if n_to_kill > 0:
