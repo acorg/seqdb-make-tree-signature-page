@@ -68,7 +68,8 @@ class Job:
             module_logger.warning('Unrecognized condor_wait output:\n' + output)
         if verbose:
             module_logger.info('condor_wait echo:\n' + output)
-        module_logger.info('{} in {}'.format(status, datetime.datetime.now() - start))
+        if status != "timeout":
+            module_logger.info('{} in {}'.format(status, datetime.datetime.now() - start))
         return status
 
     # def wait_old(self, check_interval_in_seconds=30, verbose=True):

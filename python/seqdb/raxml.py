@@ -192,11 +192,22 @@ class Raxml:
 
     @classmethod
     def analyse_logs(cls, output_dir, run_ids, kill_rate, job):
+
+        def load_log_file(filepath):
+            for attempt in range(10):
+                try:
+                    return [{"t": float(e[0]), "s": -float(e[1])} for e in (line.strip().split() for line in filepath.open())]
+                except ValueError as err:
+                    pass        # file is being written at the moment, try again later
+                    module_logger.info('(ignored) cannot process {}: {}'.format(filepath.name, err))
+                time.sleep(3)
+            raise RuntimeError("Cannot process {}".format(filepath))
+
         completed = [run_id for run_id in run_ids if Path(output_dir, "RAxML_bestTree." + run_id).exists()]
         module_logger.info('analyse_logs completed: {}'.format(len(completed)))
         if completed:
             ff = [Path(output_dir, "RAxML_log." + run_id) for run_id in run_ids if not Path(output_dir, "RAxML_bestTree." + run_id).exists()] # just incomplete runs
-            data = {int(str(f).split(".")[-1]): [{"t": float(e[0]), "s": -float(e[1])} for e in (line.strip().split() for line in f.open())] for f in ff}
+            data = {int(str(f).split(".")[-1]): load_log_file(f) for f in ff}
             scores = {k: v[-1]["s"] for k,v in data}
             by_score = sorted(scores, key=lambda e: scores[e])
             n_to_kill = int(len(by_score) * kill_rate)
