@@ -50,9 +50,10 @@ class RaxmlResult:
 
 class RaxmlResults:
 
-    def __init__(self, results=None):
+    def __init__(self, results=None, overall_time=None):
         self.results = sorted(results, key=operator.attrgetter("score"))
         self.longest_time = max(self.results, key=operator.attrgetter("time")).time
+        self.overall_time = overall_time
 
     def longest_time_str(self):
         return RaxmlResult.time_str(self.longest_time)
@@ -65,12 +66,13 @@ class RaxmlResults:
 
     def make_txt(self, filepath :Path):
         with filepath.open("w") as f:
-            f.write("Longest time: " + self.longest_time_str()+ "\n\n")
+            f.write("Longest time: " + self.longest_time_str()+ "\n")
+            f.write("Overall time: " + RaxmlResult.time_str(self.overall_time)+ "\n\n")
             f.write(self.tabbed_report_header()+ "\n")
             f.write("\n".join(rr.tabbed_report() for rr in self.results) + "\n")
 
     def make_json(self, filepath :Path):
-        json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results})
+        json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results, "overall_time": self.overall_time})
 
     def max_start_score(self):
         max_e_all = max(self.results, key=lambda e: max(e.score, *e.start_scores))
@@ -81,8 +83,10 @@ class RaxmlResults:
         return "{:^10s} {:^8s} {:^10s} {:^10s} {}".format("score", "time", "startscore", "endscore", "tree")
 
     @classmethod
-    def import_from(cls, source_dir):
-        return RaxmlResults(Raxml.get_result(source_dir, ".".join(tree.parts[-1].split(".")[1:])) for tree in source_dir.glob("RAxML_bestTree.*"))
+    def import_from(cls, source_dir, overall_time=None):
+        r = RaxmlResults(Raxml.get_result(source_dir, ".".join(tree.parts[-1].split(".")[1:])) for tree in source_dir.glob("RAxML_bestTree.*"))
+        r.overall_time = overall_time
+        return r
 
 # ----------------------------------------------------------------------
 
@@ -93,21 +97,17 @@ class RaxmlTask:
         self.output_dir = output_dir
         self.run_ids = run_ids
 
-    def wait(self):
-        start = datetime.datetime.now()
-        status  = self.job.wait()
-        # if status == "FAILED":
-        #     raise RaxmlError("HTCondor job failed (aborted by a user?)")
-        module_logger.info('RAxML jobs completed in ' + str(datetime.datetime.now() - start))
-        return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
-
-    def wait_and_kill(self, kill_rate, wait_timeout):
-        start = datetime.datetime.now()
-        while self.job.wait(timeout=wait_timeout) != "done":
-            Raxml.analyse_logs(output_dir=self.output_dir, run_ids=self.run_ids, kill_rate=kill_rate, job=self.job)
-        module_logger.info('RAxML jobs completed in ' + str(datetime.datetime.now() - start))
+    def wait(self, kill_rate=None, wait_timeout=None):
+        start = time_m.time()
+        if kill_rate:
+            while self.job.wait(timeout=wait_timeout or 600) != "done":
+                Raxml.analyse_logs(output_dir=self.output_dir, run_ids=self.run_ids, kill_rate=kill_rate, job=self.job)
+        else:
+            self.job.wait()
+        overall_time = time_m.time() - start
+        module_logger.info('RAxML jobs completed in ' + RaxmlResult.time_str(overall_time))
         # return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
-        return RaxmlResults.import_from(source_dir=self.output_dir) # get all found results
+        return RaxmlResults.import_from(source_dir=self.output_dir, overall_time=overall_time) # get all found results
 
 # ----------------------------------------------------------------------
 

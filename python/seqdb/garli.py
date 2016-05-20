@@ -35,9 +35,10 @@ class GarliResult:
 
 class GarliResults:
 
-    def __init__(self, results):
+    def __init__(self, results, overall_time=None):
         self.results = sorted(results, key=operator.attrgetter("score")) if results else []
         self.longest_time = max(self.results, key=operator.attrgetter("time")).time if results else 0
+        self.overall_time = overall_time
 
     def recompute(self):
         self.results.sort(key=operator.attrgetter("score"))
@@ -88,10 +89,11 @@ class GarliTask:
         self.start = start
 
     def wait(self):
-        status  = self.job.wait()
-        # if status == "FAILED":
-        #     raise GarliError("HTCondor job failed (aborted by a user?)")
-        return GarliResults(Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
+        start = time_m.time()
+        self.job.wait()
+        overall_time = time_m.time() - start
+        module_logger.info('GARLI jobs completed in ' + RaxmlResult.time_str(overall_time))
+        return GarliResults((Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids), overall_time=overall_time)
 
 # ----------------------------------------------------------------------
 

@@ -69,7 +69,7 @@ def run_raxml_survived(working_dir, run_id, fasta_file, base_seq_name, raxml_kil
     raxml_job = raxml.submit_htcondor(num_runs=raxml_num_runs, source=fasta_file, output_dir=raxml_output_dir,
                                       run_id=run_id, bfgs=raxml_bfgs, model_optimization_precision=raxml_model_optimization_precision,
                                       outgroups=[base_seq_name], machines=machines)
-    r_raxml = raxml_job.wait_and_kill(kill_rate=raxml_kill_rate, wait_timeout=60)
+    r_raxml = raxml_job.wait(kill_rate=raxml_kill_rate, wait_timeout=60)
     module_logger.info('RAxML {}'.format(r_raxml.report_best()))
     r_raxml.make_txt(Path(working_dir, "result.raxml.txt"))
     r_raxml.make_json(Path(working_dir, "result.raxml.json"))
@@ -116,14 +116,20 @@ def make_results(working_dir, r_raxml, r_garli):
     longest_time = r_raxml.longest_time + r_garli.longest_time
     longest_time_s = RaxmlResult.time_str(longest_time)
     module_logger.info('Longest time: ' + longest_time_s)
+    overall_time = r_raxml.overall_time + r_garli.overall_time
+    overall_time_s = RaxmlResult.time_str(overall_time)
+    module_logger.info('Overall time: ' + overall_time_s)
 
     r_best = vars(r_garli.results[0])
     r_best["longest_time"] = longest_time
     r_best["longest_time_s"] = longest_time_s
+    r_best["overall_time"] = overall_time
+    r_best["overall_time_s"] = overall_time_s
     json.dumpf(Path(working_dir, "result.best.json"), r_best)
 
     with Path(working_dir, "result.all.txt").open("w") as f:
-        f.write("Overall time: " + longest_time_s + "\n")
+        f.write("Longest time: " + longest_time_s + "\n")
+        f.write("Overall time: " + overall_time_s + "\n")
         f.write("GARLI score : " + str(r_best["score"]) + "\n")
         f.write("Tree        : " + str(r_best["tree"]) + "\n")
 
@@ -131,6 +137,8 @@ def make_results(working_dir, r_raxml, r_garli):
         " total": {
             "longest_time": longest_time,
             "longest_time_s": longest_time_s,
+            "overall_time": overall_time,
+            "overall_time_s": overall_time_s,
             "tree": str(r_garli.results[0].tree),
             "garli_score": r_garli.results[0].score,
             },
@@ -143,7 +151,7 @@ def make_results(working_dir, r_raxml, r_garli):
     draw_tree(tree_file=r_best["tree"],
               path_to_seqdb="/Users/eu/WHO/seqdb.json.xz",
               output_file=Path(working_dir, "tree.pdf"),
-              title="{{virus_type}} GARLI-score: {} Time: {}".format(r_best["score"], longest_time_s),
+              title="{{virus_type}} GARLI-score: {} Time: {} ({})".format(r_best["score"], overall_time_s, longest_time_s),
               pdf_width=1000, pdf_height=850
               )
     return r
