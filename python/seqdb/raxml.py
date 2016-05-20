@@ -28,6 +28,9 @@ class RaxmlResult (tree_maker.Result):
 
 class RaxmlResults (tree_maker.Results):
 
+    # def __init__(self, results, overall_time, submitted_tasks, survived_tasks):
+    #     super().__init__(results=results, overall_time=overall_time, submitted_tasks=submitted_tasks, survived_tasks=survived_tasks)
+
     def max_start_score(self):
         max_e_all = max(self.results, key=lambda e: max(e.score, *e.start_scores))
         return max(max_e_all.score, *max_e_all.start_scores)
@@ -36,8 +39,8 @@ class RaxmlResults (tree_maker.Results):
         return "{:^10s} {:^8s} {:^10s} {:^10s} {}".format("score", "time", "startscore", "endscore", "tree")
 
     @classmethod
-    def import_from(cls, source_dir, overall_time=None):
-        return RaxmlResults((Raxml.get_result(source_dir, ".".join(tree.parts[-1].split(".")[1:])) for tree in source_dir.glob("RAxML_bestTree.*")), overall_time=overall_time)
+    def import_from(cls, source_dir, overall_time, submitted_tasks, survived_tasks):
+        return RaxmlResults((Raxml.get_result(source_dir, ".".join(tree.parts[-1].split(".")[1:])) for tree in source_dir.glob("RAxML_bestTree.*")), overall_time=overall_time, submitted_tasks=submitted_tasks, survived_tasks=survived_tasks)
 
 # ----------------------------------------------------------------------
 
@@ -54,7 +57,7 @@ class RaxmlTask (tree_maker.Task):
         else:
             self.job.wait()
         self.wait_end()
-        return RaxmlResults.import_from(source_dir=self.output_dir, overall_time=self.overall_time)
+        return RaxmlResults.import_from(source_dir=self.output_dir, overall_time=self.overall_time, submitted_tasks=self.submitted_tasks, survived_tasks=len(self.run_ids))
 
 # ----------------------------------------------------------------------
 
@@ -226,7 +229,7 @@ class Raxml:
 # ----------------------------------------------------------------------
 
 def postprocess(target_dir, source_dir):
-    results = RaxmlResults.import_from(source_dir)
+    results = RaxmlResults.import_from(source_dir, overall_time=None, submitted_tasks=None, survived_tasks=None)
     module_logger.info('RAxML {}'.format(results.report_best()))
     results.make_txt(Path(target_dir, "result.raxml.txt"))
     results.make_json(Path(target_dir, "result.raxml.json"))

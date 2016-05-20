@@ -38,10 +38,12 @@ class Result:
 
 class Results:
 
-    def __init__(self, results=None, overall_time=None):
+    def __init__(self, results=None, overall_time=None, submitted_tasks=None, survived_tasks=None):
         self.results = sorted(results, key=operator.attrgetter("score")) if results else []
         self.longest_time = max(self.results, key=operator.attrgetter("time")).time if results else 0
         self.overall_time = overall_time
+        self.submitted_tasks = submitted_tasks
+        self.survived_tasks = survived_tasks
 
     def recompute(self):
         self.results.sort(key=operator.attrgetter("score"))
@@ -58,13 +60,18 @@ class Results:
 
     def make_txt(self, filepath :Path):
         with filepath.open("w") as f:
-            f.write("Longest time: " + self.longest_time_str()+ "\n")
-            f.write("Overall time: " + Result.time_str(self.overall_time)+ "\n\n")
+            f.write("Longest time:    " + self.longest_time_str()+ "\n")
+            f.write("Overall time:    " + Result.time_str(self.overall_time)+ "\n")
+            if self.submitted_tasks:
+                f.write("Submitted tasks: " + str(self.submitted_tasks) + "\n")
+            if self.survived_tasks and self.survived_tasks != self.submitted_tasks:
+                f.write("Survived tasks:  " + str(self.survived_tasks) + "\n")
+            f.write("\n")
             f.write(self.tabbed_report_header()+ "\n")
             f.write("\n".join(rr.tabbed_report() for rr in self.results) + "\n")
 
     def make_json(self, filepath :Path):
-        json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results, "overall_time": self.overall_time})
+        json.dumpf(filepath, vars(self))
 
 # ----------------------------------------------------------------------
 
@@ -75,6 +82,7 @@ class Task:
         self.output_dir = output_dir
         self.run_ids = run_ids
         self.progname = progname
+        self.submitted_tasks = len(run_ids)
 
     def wait_begin(self):
         self.start = time_m.time()

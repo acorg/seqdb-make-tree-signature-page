@@ -26,15 +26,15 @@ class GarliResults (tree_maker.Results):
         return "{:^10s} {:^8s} {:^10s} {}".format("score", "time", "startscore", "tree")
 
     @classmethod
-    def import_from(cls, source_dir, overall_time=None):
+    def import_from(cls, source_dir, overall_time, submitted_tasks, survived_tasks):
         if Path(source_dir, "001").is_dir():
-            r = GarliResults(None, overall_time=overall_time)
+            r = GarliResults(None, overall_time=overall_time, submitted_tasks=submitted_tasks, survived_tasks=survived_tasks)
             for subdir in source_dir.glob("*"):
                 if subdir.is_dir():
                     r.results.extend(Garli.get_result(output_dir=subdir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in subdir.glob("*.best.phy"))
             r.recompute()
         else:
-            r = GarliResults((Garli.get_result(output_dir=source_dir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in source_dir.glob("*.best.phy")), overall_time=overall_time)
+            r = GarliResults((Garli.get_result(output_dir=source_dir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in source_dir.glob("*.best.phy")), overall_time=overall_time, submitted_tasks=submitted_tasks, survived_tasks=survived_tasks)
         return r
 
 # ----------------------------------------------------------------------
@@ -48,7 +48,7 @@ class GarliTask (tree_maker.Task):
         self.wait_begin()
         self.job.wait()
         self.wait_end()
-        return GarliResults((Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids), overall_time=self.overall_time)
+        return GarliResults((Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids), overall_time=self.overall_time, submitted_tasks=self.submitted_tasks, survived_tasks=len(self.run_ids))
 
 # ----------------------------------------------------------------------
 
@@ -150,7 +150,7 @@ class Garli:
 # ----------------------------------------------------------------------
 
 def postprocess(target_dir, source_dir):
-    results = GarliResults.import_from(source_dir)
+    results = GarliResults.import_from(source_dir, overall_time=None, submitted_tasks=None, survived_tasks=None)
     module_logger.info('GARLI {}'.format(results.report_best()))
     results.make_txt(Path(target_dir, "result.garli.txt"))
     results.make_json(Path(target_dir, "result.garli.json"))
