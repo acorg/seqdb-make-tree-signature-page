@@ -5,95 +5,50 @@
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
 import re, random, subprocess, time as time_m, operator
-from . import raxml, json
+from . import tree_maker, json
 
 # ----------------------------------------------------------------------
 
-class GarliError (Exception):
-    pass
+class GarliResult (tree_maker.Result):
 
-# ----------------------------------------------------------------------
-
-class GarliResult:
-
-    def __init__(self, tree, score, start_score, time):
-        self.tree = tree
-        self.score = score
+    def __init__(self, run_id, tree, score, start_score, time):
+        super().__init__(run_id=run_id, tree=tree, score=score, time=time)
         self.start_score = start_score
-        self.time = time
-
-    def __repr__(self):
-        return str(vars(self))
 
     def tabbed_report(self):
-        return "{:10.4f} {:>8s} {:10.4f} {}".format(self.score, raxml.RaxmlResult.time_str(self.time), self.start_score, str(self.tree))
-
-    def json(self):
-        return vars(self)
+        return "{:10.4f} {:>8s} {:10.4f} {}".format(self.score, self.time_str(self.time), self.start_score, str(self.tree))
 
 # ----------------------------------------------------------------------
 
-class GarliResults:
+class GarliResults (tree_maker.Results):
 
-    def __init__(self, results, overall_time=None):
-        self.results = sorted(results, key=operator.attrgetter("score")) if results else []
-        self.longest_time = max(self.results, key=operator.attrgetter("time")).time if results else 0
-        self.overall_time = overall_time
-
-    def recompute(self):
-        self.results.sort(key=operator.attrgetter("score"))
-        self.longest_time = max(self.results, key=operator.attrgetter("time")).time
-
-    def longest_time_str(self):
-        return raxml.RaxmlResult.time_str(self.longest_time)
-
-    def best_tree(self):
-        return self.results[0].tree
-
-    def report_best(self):
-        return "{} {} {}".format(self.results[0].score, self.longest_time_str(), self.best_tree())
-
-    def make_txt(self, filepath :Path):
-        with filepath.open("w") as f:
-            f.write("Longest time: " + self.longest_time_str()+ "\n\n")
-            f.write(self.tabbed_report_header()+ "\n")
-            f.write("\n".join(rr.tabbed_report() for rr in self.results) + "\n")
-
-    def make_json(self, filepath :Path):
-        json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results})
-
-    @classmethod
     def tabbed_report_header(cls):
         return "{:^10s} {:^8s} {:^10s} {}".format("score", "time", "startscore", "tree")
 
     @classmethod
-    def import_from(cls, source_dir):
+    def import_from(cls, source_dir, overall_time=None):
         if Path(source_dir, "001").is_dir():
-            r = GarliResults(None)
+            r = GarliResults(None, overall_time=overall_time)
             for subdir in source_dir.glob("*"):
                 if subdir.is_dir():
                     r.results.extend(Garli.get_result(output_dir=subdir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in subdir.glob("*.best.phy"))
             r.recompute()
         else:
-            r = GarliResults(Garli.get_result(output_dir=source_dir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in source_dir.glob("*.best.phy"))
+            r = GarliResults((Garli.get_result(output_dir=source_dir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in source_dir.glob("*.best.phy")), overall_time=overall_time)
         return r
 
 # ----------------------------------------------------------------------
 
-class GarliTask:
+class GarliTask (tree_maker.Task):
 
-    def __init__(self, job, output_dir, run_ids, start):
-        self.job = job
-        self.output_dir = output_dir
-        self.run_ids = run_ids
-        self.start = start
+    def __init__(self, job, output_dir, run_ids):
+        super().__init__(job=job, output_dir=output_dir, run_ids=run_ids, progname="GARLI")
 
     def wait(self):
-        start = time_m.time()
+        self.wait_begin()
         self.job.wait()
-        overall_time = time_m.time() - start
-        module_logger.info('GARLI jobs completed in ' + RaxmlResult.time_str(overall_time))
-        return GarliResults((Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids), overall_time=overall_time)
+        self.wait_end()
+        return GarliResults((Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids), overall_time=self.overall_time)
 
 # ----------------------------------------------------------------------
 
@@ -120,7 +75,7 @@ class Garli:
                               current_dir=output_dir,
                               capture_stdout=False, email=self.email, notification="Error", machines=machines)
         module_logger.info('Jobs submitted to htcondor: {}'.format(job))
-        return GarliTask(job=job, output_dir=output_dir, run_ids=run_ids, start=start)
+        return GarliTask(job=job, output_dir=output_dir, run_ids=run_ids)
 
     # ----------------------------------------------------------------------
 
@@ -142,7 +97,7 @@ class Garli:
                     start_score = - float(fields[1])
         if score is None or execution_time is None or start_score is None:
             raise RuntimeError("Unable to parse " + str(logfile))
-        return GarliResult(tree=str(tree), score=score, start_score=start_score, time=execution_time)
+        return GarliResult(run_id=run_id, tree=str(tree), score=score, start_score=start_score, time=execution_time)
 
     # ----------------------------------------------------------------------
 

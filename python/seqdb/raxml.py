@@ -6,7 +6,7 @@
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
 import re, subprocess, random, operator, time as time_m, datetime
-from . import json
+from . import tree_maker, json
 from .timeit import timeit
 
 # ----------------------------------------------------------------------
@@ -15,99 +15,46 @@ from .timeit import timeit
 # docs: https://github.com/stamatak/standard-RAxML/blob/master/manual/NewManual.pdf
 # ----------------------------------------------------------------------
 
-class RaxmlError (Exception):
-    pass
-
-# ----------------------------------------------------------------------
-
-class RaxmlResult:
+class RaxmlResult (tree_maker.Result):
 
     def __init__(self, run_id, tree, score, start_scores, time):
-        self.run_id = run_id
-        self.tree = tree
-        self.score = score
+        super().__init__(run_id=run_id, tree=tree, score=score, time=time)
         self.start_scores = start_scores
-        self.time = time
-
-    def __repr__(self):
-        return str(vars(self))
 
     def tabbed_report(self):
         return "{:10.4f} {:>8s} {:10.4f} {:10.4f} {}".format(self.score, self.time_str(self.time), self.start_scores[0], self.start_scores[1], str(self.tree))
 
-    def json(self):
-        return vars(self)
-
-    @classmethod
-    def time_str(cls, time):
-        s = str(datetime.timedelta(seconds=time))
-        try:
-            return s[:s.index('.')]
-        except:
-            return s
-
 # ----------------------------------------------------------------------
 
-class RaxmlResults:
-
-    def __init__(self, results=None, overall_time=None):
-        self.results = sorted(results, key=operator.attrgetter("score"))
-        self.longest_time = max(self.results, key=operator.attrgetter("time")).time
-        self.overall_time = overall_time
-
-    def longest_time_str(self):
-        return RaxmlResult.time_str(self.longest_time)
-
-    def best_tree(self):
-        return self.results[0].tree
-
-    def report_best(self):
-        return "{} {} {}".format(self.results[0].score, self.longest_time_str(), self.best_tree())
-
-    def make_txt(self, filepath :Path):
-        with filepath.open("w") as f:
-            f.write("Longest time: " + self.longest_time_str()+ "\n")
-            f.write("Overall time: " + RaxmlResult.time_str(self.overall_time)+ "\n\n")
-            f.write(self.tabbed_report_header()+ "\n")
-            f.write("\n".join(rr.tabbed_report() for rr in self.results) + "\n")
-
-    def make_json(self, filepath :Path):
-        json.dumpf(filepath, {"longest_time": self.longest_time, "results": self.results, "overall_time": self.overall_time})
+class RaxmlResults (tree_maker.Results):
 
     def max_start_score(self):
         max_e_all = max(self.results, key=lambda e: max(e.score, *e.start_scores))
         return max(max_e_all.score, *max_e_all.start_scores)
 
-    @classmethod
     def tabbed_report_header(cls):
         return "{:^10s} {:^8s} {:^10s} {:^10s} {}".format("score", "time", "startscore", "endscore", "tree")
 
     @classmethod
     def import_from(cls, source_dir, overall_time=None):
-        r = RaxmlResults(Raxml.get_result(source_dir, ".".join(tree.parts[-1].split(".")[1:])) for tree in source_dir.glob("RAxML_bestTree.*"))
-        r.overall_time = overall_time
-        return r
+        return RaxmlResults((Raxml.get_result(source_dir, ".".join(tree.parts[-1].split(".")[1:])) for tree in source_dir.glob("RAxML_bestTree.*")), overall_time=overall_time)
 
 # ----------------------------------------------------------------------
 
-class RaxmlTask:
+class RaxmlTask (tree_maker.Task):
 
     def __init__(self, job, output_dir, run_ids):
-        self.job = job
-        self.output_dir = output_dir
-        self.run_ids = run_ids
+        super().__init__(job=job, output_dir=output_dir, run_ids=run_ids, progname="RAxML")
 
     def wait(self, kill_rate=None, wait_timeout=None):
-        start = time_m.time()
+        self.wait_begin()
         if kill_rate:
             while self.job.wait(timeout=wait_timeout or 600) != "done":
                 Raxml.analyse_logs(output_dir=self.output_dir, run_ids=self.run_ids, kill_rate=kill_rate, job=self.job)
         else:
             self.job.wait()
-        overall_time = time_m.time() - start
-        module_logger.info('RAxML jobs completed in ' + RaxmlResult.time_str(overall_time))
-        # return RaxmlResults(Raxml.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids)
-        return RaxmlResults.import_from(source_dir=self.output_dir, overall_time=overall_time) # get all found results
+        self.wait_end()
+        return RaxmlResults.import_from(source_dir=self.output_dir, overall_time=self.overall_time)
 
 # ----------------------------------------------------------------------
 
