@@ -176,7 +176,7 @@ class Node
     AA_Transitions aa_transitions;
     mutable double cumulative_edge_length;
     void remove_aa_transition(size_t aPos, char aRight, bool aDescentUponRemoval); // recursively
-    void compute_cumulative_edge_length(double initial_edge_length) const;
+    void compute_cumulative_edge_length(double initial_edge_length, double& max_cumulative_edge_length) const;
 
       // for ladderizing
     double ladderize_max_edge_length;
@@ -190,10 +190,6 @@ class Node
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
     inline auto json_parser() { return json_parser_t(*this); }
 
- protected:
-    void ladderize();
-    bool find_name_r(std::string aName, std::vector<const Node*>& aPath) const;
-
     inline Node* find_path_to_first_leaf(std::vector<std::pair<size_t, Node*>>& path)
         {
             if (is_leaf()) {
@@ -205,6 +201,10 @@ class Node
             }
         }
 
+ protected:
+    void ladderize();
+    bool find_name_r(std::string aName, std::vector<const Node*>& aPath) const;
+
 }; // class Node
 
 // ----------------------------------------------------------------------
@@ -212,7 +212,7 @@ class Node
 class Tree : public Node
 {
  public:
-    inline Tree() : Node(), mCumulativeEdgeLengthsComputed(false) {}
+    inline Tree() : Node(), mMaxCumulativeEdgeLength(-1) {}
 
     void print(std::ostream& out) const;
     void print_edges(std::ostream& out) const;
@@ -237,7 +237,11 @@ class Tree : public Node
       // aa transitions
     void make_aa_transitions();
     void make_aa_transitions(const std::vector<size_t>& aPositions);
-    std::vector<const Node*> leaf_nodes_sorted_by_cumulative_edge_length() const;
+    inline std::vector<const Node*> leaf_nodes_sorted_by_cumulative_edge_length() const
+        {
+            compute_cumulative_edge_length();
+            return leaf_nodes_sorted_by([](const Node* a, const Node* b) -> bool { return a->cumulative_edge_length < b->cumulative_edge_length; });
+        }
 
       // returns list of aa and its number of occurences at each pos found in the sequences of the tree
     std::vector<std::map<char, size_t>> aa_per_pos() const;
@@ -253,22 +257,35 @@ class Tree : public Node
       // re-roots tree making the parent of the leaf node with the passed name root
     void re_root(std::string aName);
 
-    void compute_cumulative_edge_length() const;
+    inline void compute_cumulative_edge_length() const
+        {
+            if (mMaxCumulativeEdgeLength < 0)
+                Node::compute_cumulative_edge_length(0, mMaxCumulativeEdgeLength);
+        }
+
     void preprocess_upon_importing_from_external_format();
     void ladderize();
+
+      // hz line sections
     void make_hz_line_sections(double tolerance);
+    inline std::vector<const Node*> leaf_nodes_sorted_by_edge_length_to_next() const // longest first!
+        {
+            compute_cumulative_edge_length();
+            return leaf_nodes_sorted_by([](const Node* a, const Node* b) -> bool { return b->edge_length_to_next < a->edge_length_to_next; });
+        }
+
 
  private:
     Settings mSettings;
     std::string mVirusType;     // set in match_seqdb
     std::string mLineage;       // set in match_seqdb
-    mutable bool mCumulativeEdgeLengthsComputed;
+    mutable double mMaxCumulativeEdgeLength;
 
     size_t longest_aa() const;
     void set_branch_id();
     void set_line_no();
     void set_top_bottom();
-    void init_hz_line_sections();
+    void init_hz_line_sections(bool reset = false);
 
     inline std::pair<Node*, std::vector<std::pair<size_t, Node*>>> find_path_to_first_leaf()
         {
@@ -277,7 +294,11 @@ class Tree : public Node
             return std::make_pair(node, path);
         }
 
-    Node* find_path_to_next_leaf(std::vector<std::pair<size_t, Node*>>& aPath);
+      // returns next leaf node and common root for the passed node and the next node.
+      // returns (nullptr, nullptr) if the last leaf node was passed
+    std::pair<Node*,Node*> find_path_to_next_leaf(std::vector<std::pair<size_t, Node*>>& aPath);
+
+    std::vector<const Node*> leaf_nodes_sorted_by(const std::function<bool(const Node*,const Node*)>& cmp) const;
 
 }; // class Tree
 

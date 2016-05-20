@@ -1,5 +1,13 @@
 #include "settings.hh"
 #include "draw-clades.hh"
+#include "tree.hh"
+
+// ----------------------------------------------------------------------
+
+HzLineSection::HzLineSection(const Node& aNode, Color aColor)
+    : first_name(aNode.name), first_line(aNode.line_no), last_line(0), color(aColor), line_width(2)
+{
+} // HzLineSection::HzLineSection
 
 // ----------------------------------------------------------------------
 

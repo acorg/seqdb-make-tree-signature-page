@@ -165,12 +165,15 @@ void Tree::set_branch_id()
 
 // ----------------------------------------------------------------------
 
-void Tree::init_hz_line_sections()
+void Tree::init_hz_line_sections(bool reset)
 {
-    if (settings().draw_tree.hz_line_sections.empty()) {
+    auto& hz_line_sections = settings().draw_tree.hz_line_sections;
+    if (reset)
+        hz_line_sections.clear();
+    if (hz_line_sections.empty()) {
         const auto first = find_first_leaf(*this);
-        const auto last = find_last_leaf(*this);
-        settings().draw_tree.hz_line_sections.emplace_back(first.name, first.line_no, last.line_no);
+          // const auto last = find_last_leaf(*this);
+        hz_line_sections.emplace_back(first.name, first.line_no, 0);
     }
 
 } // Tree::init_hz_line_sections
@@ -530,45 +533,30 @@ std::vector<std::map<char, size_t>> Tree::aa_per_pos() const
 
 // ----------------------------------------------------------------------
 
-void Node::compute_cumulative_edge_length(double initial_edge_length) const
+void Node::compute_cumulative_edge_length(double initial_edge_length, double& max_cumulative_edge_length) const
 {
     cumulative_edge_length = initial_edge_length + edge_length;
     if (!is_leaf()) {
         for (auto& node: subtree) {
-            node.compute_cumulative_edge_length(cumulative_edge_length);
+            node.compute_cumulative_edge_length(cumulative_edge_length, max_cumulative_edge_length);
         }
+    }
+    else if (cumulative_edge_length > max_cumulative_edge_length) {
+        max_cumulative_edge_length = cumulative_edge_length;
     }
 
 } // Node::compute_cumulative_edge_length
 
 // ----------------------------------------------------------------------
 
-void Tree::compute_cumulative_edge_length() const
+std::vector<const Node*> Tree::leaf_nodes_sorted_by(const std::function<bool(const Node*,const Node*)>& cmp) const
 {
-    if (!mCumulativeEdgeLengthsComputed) {
-        Node::compute_cumulative_edge_length(0);
-        mCumulativeEdgeLengthsComputed = true;
-    }
-
-} // Tree::compute_cumulative_edge_length
-
-// ----------------------------------------------------------------------
-
-std::vector<const Node*> Tree::leaf_nodes_sorted_by_cumulative_edge_length() const
-{
-    compute_cumulative_edge_length();
     std::vector<const Node*> leaf_nodes;
-    auto add_to_list = [&](const Node& aNode) -> void { leaf_nodes.push_back(&aNode); };
-    iterate_leaf(*this, add_to_list);
-    std::sort(leaf_nodes.begin(), leaf_nodes.end(), [](const auto& a, const auto& b) -> bool { return a->cumulative_edge_length < b->cumulative_edge_length; });
-
-    // for (const auto& node: leaf_nodes) {
-    //     std::cout << node->cumulative_edge_length << "  " << node->display_name() << std::endl;
-    // }
-
+    iterate_leaf(*this, [&](const Node& aNode) -> void { leaf_nodes.push_back(&aNode); });
+    std::sort(leaf_nodes.begin(), leaf_nodes.end(), cmp);
     return leaf_nodes;
 
-} // Tree::leaf_nodes_sorted_by_cumulative_edge_length
+} // Tree::leaf_nodes_sorted_by
 
 // ----------------------------------------------------------------------
 
@@ -674,10 +662,19 @@ void Tree::re_root(const std::vector<const Node*>& aNewRoot)
 
 // ----------------------------------------------------------------------
 
-Node* Tree::find_path_to_next_leaf(std::vector<std::pair<size_t, Node*>>& aPath)
+std::pair<Node*,Node*> Tree::find_path_to_next_leaf(std::vector<std::pair<size_t, Node*>>& aPath)
 {
-    // if (++aPath.back().first < aPath.back().second->subtree.size())
-    //     return aPath.back().second->
+    auto& back = aPath.back();
+    if (++back.first < back.second->subtree.size()) {
+        return std::make_pair(back.second->subtree[back.first].find_path_to_first_leaf(aPath), back.second);
+    }
+    else if (aPath.size() > 1) {
+        aPath.pop_back();
+        return find_path_to_next_leaf(aPath);
+    }
+    else {
+        return std::make_pair(nullptr, nullptr);         //  end of tree
+    }
 
 } // Tree::find_path_to_next_leaf
 
@@ -686,8 +683,31 @@ Node* Tree::find_path_to_next_leaf(std::vector<std::pair<size_t, Node*>>& aPath)
 void Tree::make_hz_line_sections(double tolerance)
 {
     compute_cumulative_edge_length();
+    std::cout << "max_cumulative_edge_length " << mMaxCumulativeEdgeLength << std::endl;
 
-    auto node_path = find_path_to_first_leaf();
+      // compute edge_length_to_next
+    for (auto node_path = find_path_to_first_leaf(); node_path.first != nullptr; ) {
+        auto next_root = find_path_to_next_leaf(node_path.second);
+        if (next_root.first != nullptr) {
+            node_path.first->edge_length_to_next = node_path.first->cumulative_edge_length - next_root.second->cumulative_edge_length + next_root.first->cumulative_edge_length - next_root.second->cumulative_edge_length;
+              // std::cout << node_path.first->name << " " << node_path.first->edge_length_to_next << std::endl;
+        }
+        node_path.first = next_root.first;
+    }
+
+    const auto by_edge_length_to_next = leaf_nodes_sorted_by_edge_length_to_next(); // longest first!
+    for (const auto& node: by_edge_length_to_next) {
+        std::cout << node->name << " " << node->line_no << " " << node->edge_length_to_next << " " << (node->edge_length_to_next / mMaxCumulativeEdgeLength) << std::endl;
+    }
+
+    init_hz_line_sections(true);
+    auto& hz_line_sections = settings().draw_tree.hz_line_sections;
+    for (const auto& node: by_edge_length_to_next) {
+        if ((node->edge_length_to_next / mMaxCumulativeEdgeLength) < tolerance)
+            break;
+        hz_line_sections.emplace_back(*node, 0xFF0000);
+    }
+    hz_line_sections.sort();
 
 } // Tree::make_hz_line_sections
 

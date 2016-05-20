@@ -191,6 +191,7 @@ class HzLineSection
     inline HzLineSection() : first_line(LINE_NOT_SET), last_line(LINE_NOT_SET), color(COLOR_NOT_SET), line_width(2) {}
     inline HzLineSection(std::string aFirstName, size_t aFirstLine, size_t aLastLine, Color aColor = COLOR_NOT_SET)
         : first_name(aFirstName), first_line(aFirstLine), last_line(aLastLine), color(aColor), line_width(2) {}
+    HzLineSection(const Node& aNode, Color aColor = COLOR_NOT_SET);
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
@@ -243,6 +244,11 @@ class HzLineSections : public std::vector<HzLineSection>
     static constexpr const char* json_name = "hz_line_sections";
 
     inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY) {}
+
+    inline void sort()
+        {
+            std::sort(begin(), end(), [](const auto& a, const auto& b) { return a.first_line < b.first_line; });
+        }
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
