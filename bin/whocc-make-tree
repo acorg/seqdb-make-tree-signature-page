@@ -124,7 +124,7 @@ with timeit(sys.argv[0]):
         parser.add_argument('--end-date', action='store', dest='end_date', default=None, help='Build tree for antigens isolated before that date (YYYYMMDD).')
 
         parser.add_argument('--raxml-kill-rate', action='store', type=float, dest='raxml_kill_rate', default=0.5, help='>0, <=1.')
-        Parser.add_argument('--raxml-no-bfgs', action='store_false', dest='raxml_bfgs', default=True, help='Disable bfgs in RAxML.')
+        parser.add_argument('--raxml-no-bfgs', action='store_false', dest='raxml_bfgs', default=True, help='Disable bfgs in RAxML.')
         parser.add_argument('--raxml-model-optimization-precision', action='store', type=float, dest='raxml_model_optimization_precision', default=0.001, help='See RAxML -e switch, higher values allows faster RAxML run but give worse score.')
         parser.add_argument('--raxml-num-runs', action='store', dest='raxml_num_runs', type=int, default=256, help='Number of runs of RAxML with different random seeds.')
 
