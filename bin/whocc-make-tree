@@ -99,12 +99,10 @@ def run_in_background(working_dir):
     log_file = Path(working_dir, "stdout.log")
     if os.fork() == 0:
         # child
-        fd = os.open(str(log_file), os.O_WRONLY | os.O_CREAT)
-        os.dup2(1, fd)
-        os.dup2(2, fd)
+        f = log_file.open("w")
+        os.dup2(f.fileno(), 1)
+        os.dup2(f.fileno(), 2)
         os.close(0)
-        os.close(1)
-        os.close(2)
     else:
         # parent
         module_logger.info('Log is written to {}'.format(log_file))
