@@ -176,12 +176,15 @@ class Node
     AA_Transitions aa_transitions;
     mutable double cumulative_edge_length;
     void remove_aa_transition(size_t aPos, char aRight, bool aDescentUponRemoval); // recursively
-    void compute_cumulative_edge_length(double initial_edge_length = 0) const;
+    void compute_cumulative_edge_length(double initial_edge_length) const;
 
       // for ladderizing
     double ladderize_max_edge_length;
     Date ladderize_max_date;
     std::string ladderize_max_name_alphabetically;
+
+      // for hz line sections
+    double edge_length_to_next;
 
       // serialize
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
@@ -191,6 +194,17 @@ class Node
     void ladderize();
     bool find_name_r(std::string aName, std::vector<const Node*>& aPath) const;
 
+    inline Node* find_path_to_first_leaf(std::vector<std::pair<size_t, Node*>>& path)
+        {
+            if (is_leaf()) {
+                return this;
+            }
+            else {
+                path.push_back(std::make_pair(0, this));
+                return subtree.front().find_path_to_first_leaf(path);
+            }
+        }
+
 }; // class Node
 
 // ----------------------------------------------------------------------
@@ -198,6 +212,8 @@ class Node
 class Tree : public Node
 {
  public:
+    inline Tree() : Node(), mCumulativeEdgeLengthsComputed(false) {}
+
     void print(std::ostream& out) const;
     void print_edges(std::ostream& out) const;
     void fix_labels();
@@ -237,19 +253,31 @@ class Tree : public Node
       // re-roots tree making the parent of the leaf node with the passed name root
     void re_root(std::string aName);
 
+    void compute_cumulative_edge_length() const;
     void preprocess_upon_importing_from_external_format();
     void ladderize();
+    void make_hz_line_sections(double tolerance);
 
  private:
     Settings mSettings;
     std::string mVirusType;     // set in match_seqdb
     std::string mLineage;       // set in match_seqdb
+    mutable bool mCumulativeEdgeLengthsComputed;
 
     size_t longest_aa() const;
     void set_branch_id();
     void set_line_no();
     void set_top_bottom();
     void init_hz_line_sections();
+
+    inline std::pair<Node*, std::vector<std::pair<size_t, Node*>>> find_path_to_first_leaf()
+        {
+            std::vector<std::pair<size_t, Node*>> path;
+            Node* node = Node::find_path_to_first_leaf(path);
+            return std::make_pair(node, path);
+        }
+
+    Node* find_path_to_next_leaf(std::vector<std::pair<size_t, Node*>>& aPath);
 
 }; // class Tree
 
@@ -361,6 +389,11 @@ template <typename P> inline const Node* find_node(const Node& aNode, P predicat
 // ----------------------------------------------------------------------
 
 inline const Node& find_first_leaf(const Node& aNode)
+{
+    return aNode.is_leaf() ? aNode : find_first_leaf(aNode.subtree.front());
+}
+
+inline Node& find_first_leaf(Node& aNode)
 {
     return aNode.is_leaf() ? aNode : find_first_leaf(aNode.subtree.front());
 }

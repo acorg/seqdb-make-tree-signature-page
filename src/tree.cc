@@ -543,6 +543,17 @@ void Node::compute_cumulative_edge_length(double initial_edge_length) const
 
 // ----------------------------------------------------------------------
 
+void Tree::compute_cumulative_edge_length() const
+{
+    if (!mCumulativeEdgeLengthsComputed) {
+        Node::compute_cumulative_edge_length(0);
+        mCumulativeEdgeLengthsComputed = true;
+    }
+
+} // Tree::compute_cumulative_edge_length
+
+// ----------------------------------------------------------------------
+
 std::vector<const Node*> Tree::leaf_nodes_sorted_by_cumulative_edge_length() const
 {
     compute_cumulative_edge_length();
@@ -660,6 +671,25 @@ void Tree::re_root(const std::vector<const Node*>& aNewRoot)
     edge_length = 0;
 
 } // Tree::re_root
+
+// ----------------------------------------------------------------------
+
+Node* Tree::find_path_to_next_leaf(std::vector<std::pair<size_t, Node*>>& aPath)
+{
+    // if (++aPath.back().first < aPath.back().second->subtree.size())
+    //     return aPath.back().second->
+
+} // Tree::find_path_to_next_leaf
+
+// ----------------------------------------------------------------------
+
+void Tree::make_hz_line_sections(double tolerance)
+{
+    compute_cumulative_edge_length();
+
+    auto node_path = find_path_to_first_leaf();
+
+} // Tree::make_hz_line_sections
 
 // ----------------------------------------------------------------------
 // json

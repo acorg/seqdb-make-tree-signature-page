@@ -20,6 +20,8 @@ def main(args):
     tree.ladderize()        # must be before clade_setup()
     tree.clade_setup()
     tree.make_aa_transitions()
+    if args.hz_line_section_tolerance > 0:
+        tree.make_hz_line_sections(args.hz_line_section_tolerance)
     open_file.write_binary(filename=args.output[0], data=tree.json(indent=1).encode("utf-8"))
 
 # ----------------------------------------------------------------------
@@ -33,6 +35,8 @@ with seqdb.timeit(sys.argv[0]):
 
         parser.add_argument('input', nargs=1, help='source tree.')
         parser.add_argument('output', nargs=1, help='output tree.')
+
+        parser.add_argument('--hz-line-section-tolerance', action='store', type=float, dest='hz_line_section_tolerance', default=0, help='')
 
         parser.add_argument('--db', action='store', dest='path_to_seqdb', required=True, help='Path to sequence database (to match tree leaves with seqdb entries).')
         # parser.add_argument('--email', action='store', dest='email', default="eu@antigenic-cartography.org", help='Email to report status of the tasks running in the cluster.')
