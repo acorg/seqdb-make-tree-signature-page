@@ -7,7 +7,7 @@ Makes phylogenetic tree for WHO CC sequences
 
 import sys
 if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
-import datetime, getpass, socket, traceback
+import os, datetime, getpass, socket, traceback
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
 import logging; module_logger = logging.getLogger(__name__)
@@ -65,6 +65,8 @@ def main(args):
             base_seq=sBaseSeq[args.virus_type.upper()], name_format="{seq_id}",
             aligned=True, encode_name=True, wrap=False, truncate_to_most_common_length=True, hamming_distance_threshold=150, hamming_distance_report=False,
             sort_by=None, with_hi_name=False, name_match=None)
+        if not args.foreground_mode:
+            run_in_background(working_dir=working_dir)
         r = f(working_dir=working_dir, run_id=run_id, fasta_file=export_data["filename"],
               number_of_sequences=export_data["number_of_sequences"], base_seq_name=export_data["base_seq"],
               raxml_kill_rate=args.raxml_kill_rate, raxml_bfgs=args.raxml_bfgs, raxml_model_optimization_precision=args.raxml_model_optimization_precision, raxml_num_runs=args.raxml_num_runs,
@@ -93,6 +95,23 @@ def make_working_dir(args):
 
 # ----------------------------------------------------------------------
 
+def run_in_background(working_dir):
+    log_file = Path(working_dir, "stdout.log")
+    if os.fork() == 0:
+        # child
+        fd = os.open(str(log_file), os.O_WRONLY | os.O_CREAT)
+        os.dup2(1, fd)
+        os.dup2(2, fd)
+        os.close(0)
+        os.close(1)
+        os.close(2)
+    else:
+        # parent
+        module_logger.info('Log is written to {}'.format(log_file))
+        exit(0)
+
+# ----------------------------------------------------------------------
+
 with timeit(sys.argv[0]):
     try:
         import argparse
@@ -116,6 +135,7 @@ with timeit(sys.argv[0]):
         parser.add_argument('--garli-genthreshfortopoterm', action='store', type=int, dest='garli_genthreshfortopoterm', default=20000, help='GARLI termination condition: when no new significantly better scoring topology has been encountered in greater than this number of generations, garli stops.')
         parser.add_argument('--garli-stoptime', action='store', type=int, dest='garli_stoptime', default=60*60*24*7, help='GARLI termination condition: the maximum number of seconds for the run to continue.')
 
+        parser.add_argument('--fg', action='store_true', dest='foreground_mode', default=False, help='Run in the foreground mode.')
         parser.add_argument('--db', action='store', dest='path_to_seqdb', default='~/WHO/seqdb.json.xz', help='Path to sequence database.')
         parser.add_argument('--email', action='store', dest='email', default=getpass.getuser(), help='Email to report status of the tasks running in the cluster.')
         parser.add_argument('--machines', action='store', dest='machines', default=None, help="Comma separated list: odette,i19,i20,i21,o16,o17") # odette.antigenic-cartography.org
