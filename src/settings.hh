@@ -176,7 +176,6 @@ class HzLineSection
                 return (object(
                     object_value("first_name", mSection.first_name)
                   | object_value("first_line", mSection.first_line)
-                  | object_value("last_name", mSection.last_name)
                   | object_value("last_line", mSection.last_line)
                   | object_string_value("color", mSection.color)
                   | object_value("line_width", mSection.line_width)
@@ -190,8 +189,8 @@ class HzLineSection
 
  public:
     inline HzLineSection() : first_line(LINE_NOT_SET), last_line(LINE_NOT_SET), color(COLOR_NOT_SET), line_width(2) {}
-    inline HzLineSection(std::string aFirstName, size_t aFirstLine, std::string aLastName, size_t aLastLine, Color aColor = COLOR_NOT_SET)
-        : first_name(aFirstName), last_name(aLastName), first_line(aFirstLine), last_line(aLastLine), color(aColor), line_width(2) {}
+    inline HzLineSection(std::string aFirstName, size_t aFirstLine, size_t aLastLine, Color aColor = COLOR_NOT_SET)
+        : first_name(aFirstName), first_line(aFirstLine), last_line(aLastLine), color(aColor), line_width(2) {}
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
@@ -199,7 +198,6 @@ class HzLineSection
             comma = jsonw::json_if(target, comma, "first_name", first_name, 0, prefix);
             // if (first_line != LINE_NOT_SET)
             //     comma = jsonw::json(target, comma, "first_line", first_line, 0, prefix);
-            comma = jsonw::json(target, comma, "last_name", last_name, 0, prefix);
             // if (last_line != LINE_NOT_SET)
             //     comma = jsonw::json(target, comma, "last_line", last_line, 0, prefix);
             comma = jsonw::json(target, comma, "color", color, 0, prefix);
@@ -209,7 +207,7 @@ class HzLineSection
 
     inline auto json_parser() { return json_parser_t(*this); }
 
-    std::string first_name, last_name;
+    std::string first_name;
     size_t first_line, last_line;
     Color color;
     double line_width;

@@ -170,7 +170,7 @@ void Tree::init_hz_line_sections()
     if (settings().draw_tree.hz_line_sections.empty()) {
         const auto first = find_first_leaf(*this);
         const auto last = find_last_leaf(*this);
-        settings().draw_tree.hz_line_sections.emplace_back(first.name, first.line_no, last.name, last.line_no);
+        settings().draw_tree.hz_line_sections.emplace_back(first.name, first.line_no, last.line_no);
     }
 
 } // Tree::init_hz_line_sections
@@ -391,9 +391,10 @@ std::vector<std::string> Tree::names_between(std::string first, std::string last
         if (!collect && aNode.name == first)
             collect = true;
         if (collect) {
-            names.push_back(aNode.name);
             if (aNode.name == last)
                 collect = false;
+            else
+                names.push_back(aNode.name);
         }
     };
     iterate_leaf(*this, get_name);

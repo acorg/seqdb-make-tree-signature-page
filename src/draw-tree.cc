@@ -189,32 +189,26 @@ double DrawTree::tree_width(Surface& aSurface, const Node& aNode, const Settings
 DrawHzLines& DrawHzLines::prepare(Tree& aTree, HzLineSections& aSections)
 {
       // find line_no for each section first and last
-    for (auto& section: aSections) {
+    for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
+        auto& section = aSections[section_no];
         const auto first = aTree.find_name(section.first_name);
         if (first.empty())
             throw std::runtime_error("Cannot process hz-line-section: \"" + section.first_name + "\" not found in the tree");
         section.first_line = first.back()->line_no;
-
-        const auto last = aTree.find_name(section.last_name);
-        if (last.empty())
-            throw std::runtime_error("Cannot process hz-line-section: \"" + section.last_name + "\" not found in the tree");
-        section.last_line = last.back()->line_no;
+        if (section_no == 0 && section.first_line != 0)
+            throw std::runtime_error("Cannot process hz-line-section: line_no for the first section is not 0");
+        if (section_no < (aSections.size() - 1)) {
+            const auto last = aTree.find_name(aSections[section_no + 1].first_name);
+            if (last.empty())
+                throw std::runtime_error("Cannot process hz-line-section: \"" + aSections[section_no + 1].first_name + "\" not found in the tree");
+            section.last_line = last.back()->line_no - 1;
+        }
+        else {
+            section.last_line = find_last_leaf(aTree).line_no;
+        }
     }
 
     std::sort(aSections.begin(), aSections.end(), [](const auto& a, const auto& b) -> bool { return a.first_line < b.first_line; });
-
-    for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
-        if (section_no == 0) {
-            if (aSections[section_no].first_line != 0)
-                throw std::runtime_error("Cannot process hz-line-section: line_no for the first section is not 0");
-        }
-        else {
-            if (aSections[section_no].first_line != (aSections[section_no - 1].last_line + 1))
-                throw std::runtime_error("Cannot process hz-line-section: there must be no gap or intersection for the section \"" + aSections[section_no - 1].last_name + "\" and \"" + aSections[section_no].first_name + "\"");
-            if (section_no == (aSections.size() - 1) && aSections[section_no].last_line != find_last_leaf(aTree).line_no)
-                throw std::runtime_error("Cannot process hz-line-section: line_no for the last section is not of the last leaf of the tree");
-        }
-    }
 
     return *this;
 

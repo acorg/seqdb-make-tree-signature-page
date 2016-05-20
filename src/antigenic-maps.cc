@@ -7,9 +7,10 @@
 AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageArea, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
 {
     if (!aSections.empty()) {
-        for (const auto& section: aSections) {
-            mNamesPerMap.push_back(aTree.names_between(section.first_name, section.last_name));
+        for (size_t section_no = 0; section_no < (aSections.size() - 1); ++section_no) {
+            mNamesPerMap.push_back(aTree.names_between(aSections[section_no].first_name, aSections[section_no + 1].first_name));
         }
+        mNamesPerMap.push_back(aTree.names_between(aSections.back().first_name, "after-the-last-name"));
     }
     else {
         mNamesPerMap.push_back(aTree.names());
