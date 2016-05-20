@@ -6,7 +6,7 @@
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
 import re, subprocess, random, operator, time as time_m, datetime
-from . import tree_maker, json
+from . import tree_maker
 from .timeit import timeit
 
 # ----------------------------------------------------------------------

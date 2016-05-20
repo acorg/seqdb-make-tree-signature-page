@@ -4,8 +4,8 @@
 
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
-import re, random, subprocess, time as time_m, operator
-from . import tree_maker, json
+import re, random, subprocess, time as time_m
+from . import tree_maker
 
 # ----------------------------------------------------------------------
 
