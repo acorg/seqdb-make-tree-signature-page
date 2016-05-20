@@ -75,7 +75,7 @@ class Job:
     def kill_tasks(self, tasks):
         cmd = ["condor_rm", *("{}.{}".format(list(self.clusters)[0], t) for t in tasks)]
         module_logger.info(str(cmd))
-        subprocess.run(cmd, env={"LD_LIBRARY_PATH": ""}, check=False) # ignore exit code, condor_rm exits with 1 when all the tasks to remove have already completed
+        subprocess.run(cmd, env={"LD_LIBRARY_PATH": ""}, check=False, stdout=subprocess.DEVNULL) # ignore exit code, condor_rm exits with 1 when all the tasks to remove have already completed
 
     # def wait_old(self, check_interval_in_seconds=30, verbose=True):
     #     start = datetime.datetime.now()
