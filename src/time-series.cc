@@ -2,6 +2,7 @@
 #include "settings.hh"
 #include "tree.hh"
 #include "draw-tree.hh"
+#include "stream.hh"
 
 // ----------------------------------------------------------------------
 
@@ -9,12 +10,26 @@ TimeSeries& TimeSeries::prepare(const Tree& aTree, const SettingsTimeSeries& aSe
 {
     mBegin = aSettings.begin;
     mEnd = aSettings.end;
-    auto const mmd = aTree.min_max_date();
-    std::cout << "dates in source tree: " << mmd.first << " .. " << mmd.second << "  months: " << (months_between_dates(mmd) + 1) << std::endl;
-    if (mBegin.empty())
-        mBegin.assign_and_remove_day(mmd.first);
-    if (mEnd.empty())
-        mEnd.assign_and_remove_day(mmd.second);
+    auto const sequences_per_month = aTree.sequences_per_month();
+    if (mBegin.empty()) {
+        for (Date d = sequences_per_month.crbegin()->first; sequences_per_month.find(d) != sequences_per_month.end(); d.decrement_month()) {
+            mBegin = d;
+        }
+    }
+    if (mEnd.empty()) {
+        for (auto ms = sequences_per_month.crbegin(); mEnd.empty() && ms != sequences_per_month.crend(); ++ms) {
+            if (ms->second)
+                mEnd = ms->first;
+        }
+    }
+
+    // auto const mmd = aTree.min_max_date();
+    // std::cout << "dates in source tree: " << mmd.first << " .. " << mmd.second << "  months: " << (months_between_dates(mmd) + 1) << std::endl;
+    // if (mBegin.empty())
+    //     mBegin.assign_and_remove_day(mmd.first);
+    // if (mEnd.empty())
+    //     mEnd.assign_and_remove_day(mmd.second);
+
     mNumberOfMonths = static_cast<size_t>(months_between_dates(mBegin, mEnd)) + 1;
     if (mNumberOfMonths > aSettings.max_number_of_months) {
         mBegin.assign_and_subtract_months(mEnd, aSettings.max_number_of_months - 1);

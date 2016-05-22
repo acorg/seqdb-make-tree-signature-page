@@ -218,6 +218,7 @@ class Tree : public Node
     void print_edges(std::ostream& out) const;
     void fix_labels();
     std::pair<Date, Date> min_max_date() const;
+    std::map<Date, size_t> sequences_per_month() const;
     std::pair<double, double> min_max_edge() const;
     std::pair<const Node*, const Node*> top_bottom_nodes_of_subtree(std::string branch_id) const;
     std::string virus_type() const { return mVirusType; }

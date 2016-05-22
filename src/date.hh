@@ -80,6 +80,13 @@ class Date
             mTime.tm_mday = 1;
         }
 
+    inline Date remove_day() const
+        {
+            Date r;
+            r.assign_and_remove_day(*this);
+            return r;
+        }
+
     inline void assign_and_subtract_months(const Date& d, size_t months)
         {
             *this = d;
@@ -101,6 +108,17 @@ class Date
             else {
                 mTime.tm_mon = 0;
                 ++mTime.tm_year;
+            }
+        }
+
+    inline void decrement_month()
+        {
+            if (mTime.tm_mon > 0) {
+                --mTime.tm_mon;
+            }
+            else {
+                mTime.tm_mon = 11;
+                --mTime.tm_year;
             }
         }
 

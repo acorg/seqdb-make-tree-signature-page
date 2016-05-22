@@ -223,6 +223,21 @@ std::pair<Date, Date> Tree::min_max_date() const
 
 // ----------------------------------------------------------------------
 
+std::map<Date, size_t> Tree::sequences_per_month() const
+{
+    std::map<Date, size_t> result;
+    auto worker = [&result](const Node& aNode) -> void {
+        if (!aNode.date.empty()) {
+            ++result[aNode.date.remove_day()];
+        }
+    };
+    iterate_leaf(*this, worker);
+    return result;
+
+} // Tree::sequences_per_month
+
+// ----------------------------------------------------------------------
+
 std::pair<double, double> Tree::min_max_edge() const
 {
     double min_edge = 1e99, max_edge = 0.0;
