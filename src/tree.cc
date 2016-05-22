@@ -414,11 +414,11 @@ void Tree::make_aa_transitions(const std::vector<size_t>& aPositions)
       // ?reset aa_transition for all nodes?
 
     auto make_aa_at = [&](Node& aNode) {
-        aNode.aa.resize(aPositions.back() + 1, AA_Transition::Empty);
+        aNode.aa.resize(aPositions.back() + 1, AA_Transition::Empty); // actual max length of aa in child leaf nodes may be less than aPositions.back()
         for (size_t pos: aPositions) {
             aNode.aa[pos] = 'X';
             for (const auto& child: aNode.subtree) {
-                if (child.aa[pos] != 'X') {
+                if (child.aa.size() > pos && child.aa[pos] != 'X') { // child can be shorter than pos
                     if (aNode.aa[pos] == 'X')
                         aNode.aa[pos] = child.aa[pos];
                     else if (aNode.aa[pos] != child.aa[pos])
@@ -466,7 +466,7 @@ void Tree::make_aa_transitions(const std::vector<size_t>& aPositions)
             const auto lb = std::lower_bound(leaf_nodes.begin(), leaf_nodes.end(), node_left_edge, [](const Node* a, double b) { return a->cumulative_edge_length < b; });
             const Node* node_for_left = lb == leaf_nodes.begin() ? nullptr : *(lb - 1);
             for (auto& transition: aNode.aa_transitions) {
-                if (node_for_left) {
+                if (node_for_left and node_for_left->aa.size() > transition.pos) { // node_for_left can have shorter aa
                     transition.left = node_for_left->aa[transition.pos];
                     transition.for_left = node_for_left;
                       // std::cout << transition << ' ' << node_left_edge << "   " << node_for_left->display_name() << " " << node_for_left->cumulative_edge_length << std::endl;
