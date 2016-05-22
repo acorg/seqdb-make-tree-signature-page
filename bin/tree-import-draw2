@@ -1,0 +1,9 @@
+#! /bin/bash
+source="$1"
+source=${source%.xz}
+t1=${source%.*}.json.xz
+t2=${source%.*}.pdf
+
+$(dirname $0)/tree-import --db $HOME/WHO/seqdb.json.xz "$@" "$t1" &&
+    $(dirname $0)/tree-draw --show-aa-transitions all --continents --db $HOME/WHO/seqdb.json.xz "$t1" "$t2" &&
+    open "$t2"

@@ -2,4 +2,4 @@
 source="$1"
 source=${source%.xz}
 target=${source%.*}.json.xz
-$(dirname $0)/tree-import "$@" "$target" && e "$target"
+$(dirname $0)/tree-import --db $HOME/WHO/seqdb.json.xz "$@" "$target" && e "$target"
