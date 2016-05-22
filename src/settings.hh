@@ -666,14 +666,15 @@ class Settings
 
             template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
             {
-                return (jsonr::skey("settings") > jsonr::object(
-                    mSettings.draw_tree.json_parser()
-                  | mSettings.legend.json_parser()
-                  | mSettings.signature_page.json_parser()
-                  | mSettings.time_series.json_parser()
-                  | mSettings.clades.json_parser()
-                  | mSettings.antigenic_maps.json_parser())
-                )(i1, i2);
+                using namespace jsonr;
+                return (skey("settings") > object(
+                            mSettings.draw_tree.json_parser()
+                            | mSettings.legend.json_parser()
+                            | mSettings.signature_page.json_parser()
+                            | mSettings.time_series.json_parser()
+                            | mSettings.clades.json_parser()
+                            | mSettings.antigenic_maps.json_parser())
+                        )(i1, i2);
             }
 
           private:

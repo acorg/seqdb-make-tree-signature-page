@@ -782,8 +782,11 @@ Tree Tree::from_json(std::string data)
     try {
         parse_tree(std::begin(data), std::end(data));
     }
+    catch (jsonr::failure& err) {
+        throw jsonr::JsonParsingError(err.message(std::begin(data)));
+    }
     catch (axe::failure<char>& err) {
-        throw jsonr::JsonParsingError(err.message());
+        throw jsonr::JsonParsingError(err.message() + "\nat offset " + std::to_string(err.mI1 - data.begin()));
     }
     return tree;
 
