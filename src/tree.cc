@@ -125,7 +125,7 @@ void Tree::ladderize()
     set_branch_id();
     set_line_no();
     set_top_bottom();
-    init_hz_line_sections();
+    init_hz_line_sections(true);
 
 } // Tree::ladderize
 
@@ -144,6 +144,7 @@ void Tree::preprocess_upon_importing_from_external_format()
     set_branch_id();
     set_line_no();
     set_top_bottom();
+    init_hz_line_sections();
 
 } // Tree::preprocess_upon_importing_from_external_format
 

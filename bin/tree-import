@@ -17,7 +17,8 @@ def main(args):
     seq_db = seqdb.Seqdb()
     seq_db.load(filename=args.path_to_seqdb)
     tree.match_seqdb(seq_db)
-    tree.ladderize()        # must be before clade_setup()
+    if args.ladderize:
+        tree.ladderize()        # must be before clade_setup()
     tree.clade_setup()
     tree.make_aa_transitions()
     if args.hz_line_section_tolerance > 0:
@@ -35,6 +36,8 @@ with seqdb.timeit(sys.argv[0]):
 
         parser.add_argument('input', nargs=1, help='source tree.')
         parser.add_argument('output', nargs=1, help='output tree.')
+
+        parser.add_argument('--no-ladderize', action='store_false', dest='ladderize', default=True, help='No ladderize the tree')
 
         parser.add_argument('--hz-line-section-tolerance', action='store', type=float, dest='hz_line_section_tolerance', default=0, help='')
 
