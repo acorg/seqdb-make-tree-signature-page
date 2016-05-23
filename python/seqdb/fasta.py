@@ -161,7 +161,7 @@ def read_from_string(source, filename):
             if name or sequence:
                 yield (name, _check_sequence("".join(sequence), name, filename, line_no))
             sequence = []
-            name = line[1:]
+            name = line[1:].strip()
         else:
             if not name:
                 raise FastaReaderError('{filename}:{line_no}: sequence without name'.format(filename=filename, line_no=line_no))
