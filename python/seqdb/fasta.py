@@ -100,7 +100,7 @@ def export_from_seqdb(seqdb, filename, output_format, amino_acids, lab, virus_ty
 
     # base seq is always the first one in the file, regardless of sorting, to ease specifying the outgroup for GARLI
     if base_seq:
-        base_seqs = [make_entry(e) for e in seqdb.iter_seq().filter_name_regex(base_seq)]
+        base_seqs = [get_sequence(make_entry(e), left_part_size) for e in seqdb.iter_seq().filter_name_regex(base_seq)]
         if len(base_seqs) != 1:
             raise ValueError("{} base sequences selected: {}".format(len(base_seqs), " ".join(repr(s.make_name()) for s in base_seqs)))
         module_logger.info('base_seq: {}'.format(base_seqs[0]["n"]))
