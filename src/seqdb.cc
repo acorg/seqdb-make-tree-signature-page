@@ -130,6 +130,7 @@ AlignAminoAcidsData SeqdbSeq::align(bool aForce, Messages& aMessages)
           align_data = align_amino_acids(mAminoAcids, aMessages);
           if (align_data.shift.aligned()) {
               mAminoAcidsShift = align_data.shift;
+              update_gene(align_data.gene, aMessages, true);
           }
           else {
               aMessages.warning() << "AA not aligned" /* << mAminoAcids */ << std::endl;

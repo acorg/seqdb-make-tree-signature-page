@@ -34,7 +34,7 @@ def main(args):
 
 # ----------------------------------------------------------------------
 
-with timeit.timeit(sys.argv[0]):
+with timeit(sys.argv[0]):
     try:
         import argparse
         parser = argparse.ArgumentParser(description=__doc__)
