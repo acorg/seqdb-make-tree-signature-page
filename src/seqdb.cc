@@ -162,13 +162,13 @@ void SeqdbSeq::update_clades(std::string aVirusType, std::string aLineage)
 
 // ----------------------------------------------------------------------
 
-std::string SeqdbSeq::amino_acids(bool aAligned) const
+std::string SeqdbSeq::amino_acids(bool aAligned, size_t aLeftPartSize) const
 {
     std::string r = mAminoAcids;
     if (aAligned) {
         if (!aligned())
             throw std::runtime_error("amino_acids(): sequence not aligned");
-        r = shift(r, mAminoAcidsShift, 'X');
+        r = shift(r, mAminoAcidsShift + static_cast<int>(aLeftPartSize), 'X');
 
           // find the longest part not having *, replace parts before longest with X, truncate traling parts
         size_t longest_part_start = 0;
@@ -191,13 +191,13 @@ std::string SeqdbSeq::amino_acids(bool aAligned) const
 
 // ----------------------------------------------------------------------
 
-std::string SeqdbSeq::nucleotides(bool aAligned) const
+std::string SeqdbSeq::nucleotides(bool aAligned, size_t aLeftPartSize) const
 {
     std::string r = mNucleotides;
     if (aAligned) {
         if (!aligned())
             throw std::runtime_error("nucleotides(): sequence not aligned");
-        r = shift(r, mNucleotidesShift, '-');
+        r = shift(r, mNucleotidesShift + static_cast<int>(aLeftPartSize), '-');
     }
     return r;
 

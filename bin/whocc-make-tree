@@ -63,7 +63,7 @@ def main(args):
             gene="HA",
             start_date=args.start_date or sStartDates[args.virus_type.upper()], end_date=args.end_date,
             base_seq=sBaseSeq[args.virus_type.upper()], name_format="{seq_id}",
-            aligned=True, encode_name=True, wrap=False, truncate_to_most_common_length=True, hamming_distance_threshold=150, hamming_distance_report=False,
+            aligned=True, truncate_left=args.truncate_left, encode_name=True, wrap=False, truncate_to_most_common_length=True, hamming_distance_threshold=150, hamming_distance_report=False,
             sort_by=None, with_hi_name=False, name_match=None)
         if not args.foreground_mode:
             run_in_background(working_dir=working_dir)
@@ -122,6 +122,7 @@ with timeit(sys.argv[0]):
         # parser.add_argument('--hamming-distance-threshold', action='store', type=int, dest='hamming_distance_threshold', default=150, help='Select only sequences having hamming distance to the base sequence less than threshold. Use 150 for nucs (H3).')
         parser.add_argument('--start-date', action='store', dest='start_date', default=None, help='Build tree for antigens isolated on or after that date (YYYYMMDD).')
         parser.add_argument('--end-date', action='store', dest='end_date', default=None, help='Build tree for antigens isolated before that date (YYYYMMDD).')
+        parser.add_argument('--no-truncate-left', action='store_false', dest='truncate_left', default=True, help='Do not truncate left part of the sequence (e.g. signal peptide).')
 
         parser.add_argument('--raxml-kill-rate', action='store', type=float, dest='raxml_kill_rate', default=0.5, help='>0, <=1.')
         parser.add_argument('--raxml-no-bfgs', action='store_false', dest='raxml_bfgs', default=True, help='Disable bfgs in RAxML.')

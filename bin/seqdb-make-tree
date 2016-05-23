@@ -150,7 +150,7 @@ def export_fasta(working_dir, args):
         amino_acids=False, lab=None, virus_type=args.virus_type, lineage=args.lineage,
         gene=args.gene, start_date=args.start_date, end_date=args.end_date,
         base_seq=args.base_seq, name_format="{seq_id}",
-        aligned=True, encode_name=True, wrap=False, truncate_to_most_common_length=True,
+        aligned=True, truncate_left=args.truncate_left, encode_name=True, wrap=False, truncate_to_most_common_length=True,
         hamming_distance_threshold=args.hamming_distance_threshold, hamming_distance_report=False,
         sort_by=None, with_hi_name=False, name_match=None)
     return filename, base_seq_name

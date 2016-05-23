@@ -126,8 +126,11 @@ class SeqdbSeq
     inline void add_hi_name(std::string aHiName) { mHiNames.push_back(aHiName); }
     inline bool hi_name_present(std::string aHiName) const { return std::find(mHiNames.begin(), mHiNames.end(), aHiName) != mHiNames.end(); }
 
-    std::string amino_acids(bool aAligned) const;
-    std::string nucleotides(bool aAligned) const;
+      // if aAligned && aLeftPartSize > 0 - include signal peptide and other stuff to the left from the beginning of the aligned sequence
+    std::string amino_acids(bool aAligned, size_t aLeftPartSize = 0) const;
+    std::string nucleotides(bool aAligned, size_t aLeftPartSize = 0) const;
+    inline int amino_acids_shift() const { return mAminoAcidsShift; } // throws if sequence was not aligned
+    inline int nucleotides_shift() const { return mNucleotidesShift; }  // throws if sequence was not aligned
 
     //   // Empty passages must not be removed! this is just for testing purposes
     // inline void remove_empty_passages()

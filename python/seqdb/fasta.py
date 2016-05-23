@@ -17,14 +17,22 @@ class FastaReaderError (Exception):
 
 # ======================================================================
 
-def export_from_seqdb(seqdb, filename, output_format, amino_acids, lab, virus_type, lineage, gene, start_date, end_date, base_seq, name_format, aligned, encode_name, wrap, truncate_to_most_common_length, hamming_distance_threshold, hamming_distance_report, sort_by, with_hi_name, name_match):
+def export_from_seqdb(seqdb, filename, output_format, amino_acids, lab, virus_type, lineage, gene, start_date, end_date, base_seq, name_format, aligned, truncate_left, encode_name, wrap, truncate_to_most_common_length, hamming_distance_threshold, hamming_distance_report, sort_by, with_hi_name, name_match):
 
     def make_entry(e):
-        return {
-            "s": e.seq.amino_acids(aligned=aligned) if amino_acids else e.seq.nucleotides(aligned=aligned),
+        r = {
+            "e": e,
             "n": name_format.format(name=e.make_name(), date=e.entry.date(), lab_id=e.seq.lab_id(), passage=e.seq.passage(), lab=e.seq.lab(), gene=e.seq.gene(), seq_id=e.seq_id()),
             "d": e.entry.date(),
             }
+        return r
+
+    def get_sequence(e, left_part_size):
+        e["s"] = e["e"].seq.amino_acids(aligned=aligned, left_part_size=left_part_size) if amino_acids else e["e"].seq.nucleotides(aligned=aligned, left_part_size=left_part_size)
+        return e
+
+    def left_part(e):
+        return - (e["e"].seq.amino_acids_shift() if amino_acids else e["e"].seq.nucleotides_shift())
 
     def exclude_by_hamming_distance(e1, e2, threshold):
         hd = hamming_distance(e1["s"], e2["s"])
@@ -49,6 +57,10 @@ def export_from_seqdb(seqdb, filename, output_format, amino_acids, lab, virus_ty
     if name_match is not None:
         iter = iter.filter_name_regex(name_match)
     sequences = [make_entry(e) for e in iter]
+    left_part_size = 0 if truncate_left else max(left_part(seq) for seq in sequences)
+    if left_part_size:
+        module_logger.info('Left part size (signal peptide): {}'.format(left_part_size))
+    sequences = [get_sequence(seq, left_part_size) for seq in sequences]
 
     # report empty sequences
     empty = [seq for seq in sequences if not seq["s"]]
