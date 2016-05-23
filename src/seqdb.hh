@@ -117,6 +117,7 @@ class SeqdbSeq
     inline const std::vector<std::string> cdcids() const { auto i = mLabIds.find("CDC"); return i == mLabIds.end() ? std::vector<std::string>() : i->second; }
     inline const std::vector<std::string>& passages() const { return mPassages; }
     inline std::string passage() const { return mPassages.empty() ? std::string() : mPassages[0]; }
+    inline bool passage_present(std::string aPassage) const { return mPassages.empty() ? aPassage.empty() : std::find(mPassages.begin(), mPassages.end(), aPassage) != mPassages.end(); }
     inline const std::vector<std::string>& reassortant() const { return mReassortant; }
     inline std::string gene() const { return mGene; }
 

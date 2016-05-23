@@ -445,20 +445,23 @@ SeqdbEntrySeq Seqdb::find_by_seq_id(std::string aSeqId) const
             }
         }
     }
-    else {                  // hi-name
-        std::smatch found;
-        if (std::regex_search(aSeqId, found, sReYearSpace)) {
-            const auto entry = find_by_name(std::string(aSeqId, 0, static_cast<std::string::size_type>(found.position(0) + found.length(0)) - 1));
-            if (entry != nullptr) {
-                for (auto seq = entry->begin_seq(); seq != entry->end_seq(); ++seq) {
-                    if (seq->hi_name_present(aSeqId)) {
-                        result.assign(*entry, *seq);
-                        break;
-                    }
-                }
+    else {
+        std::smatch year_space;
+        const auto year_space_present = std::regex_search(aSeqId, year_space, sReYearSpace);
+        const std::string look_for = year_space_present ? std::string(aSeqId, 0, static_cast<std::string::size_type>(year_space.position(0) + year_space.length(0)) - 1) : aSeqId;
+        const auto entry = find_by_name(look_for);
+        if (entry != nullptr) {
+            auto found = std::find_if(entry->begin_seq(), entry->end_seq(), [&aSeqId](const auto& seq) -> bool { return seq.hi_name_present(aSeqId); });
+            if (found == entry->end_seq()) { // not found by hi_name, look by passage (or empty passage)
+                const std::string passage = year_space_present ? std::string(aSeqId, static_cast<std::string::size_type>(year_space.position(0) + year_space.length(0))) : std::string();
+                found = std::find_if(entry->begin_seq(), entry->end_seq(), [&passage](const auto& seq) -> bool { return seq.passage_present(passage); });
+            }
+            if (found != entry->end_seq()) {
+                result.assign(*entry, *found);
             }
         }
     }
+
     if (!result) {
         std::cerr << "Error: \"" << aSeqId << "\" not in seqdb" << std::endl;
     }
