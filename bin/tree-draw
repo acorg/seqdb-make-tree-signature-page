@@ -69,16 +69,20 @@ def main(args):
     else:
         chart = None
 
-    virus_type = tree.virus_type()
-    lineage = tree.lineage()
-    if virus_type:
-        title = virus_type
-        if lineage:
-            if lineage in ["VICTORIA", "YAMAGATA"]:
-                lineage = lineage[:3].capitalize()
-            title += "/" + lineage
+    if args.title is None:
+        virus_type = tree.virus_type()
+        lineage = tree.lineage()
+        if virus_type:
+            title = virus_type
+            if lineage:
+                if lineage in ["VICTORIA", "YAMAGATA"]:
+                    lineage = lineage[:3].capitalize()
+                title += "/" + lineage
+        else:
+            title = ""
     else:
-        title = ""
+        title = args.title
+
     signature_page = seqdb.SignaturePage()
     (signature_page
      .select_parts(parts)
@@ -115,6 +119,7 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('--chart', action='store', dest='chart', default=None, help='Chart (in sdb format) to use for antigenic maps.')
 
         parser.add_argument('--aspect', action='store', type=float, dest='pdf_aspect_ratio', default=0.7, help='width/height for pdf (if --chart is not provided).')
+        parser.add_argument('--title', action='store', dest='title', default=None, help='Title (use "" to show no title).')
 
         parser.add_argument('--db', action='store', dest='path_to_seqdb', default=None, help='Path to sequence database (to match tree leaves with seqdb entries).')
         # parser.add_argument('--email', action='store', dest='email', default="eu@antigenic-cartography.org", help='Email to report status of the tasks running in the cluster.')
