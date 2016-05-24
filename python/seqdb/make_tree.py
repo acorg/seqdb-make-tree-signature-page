@@ -37,7 +37,7 @@ def run_raxml_all_garli(working_dir, run_id, fasta_file, number_of_sequences, ba
     """Run RAxML raxml_num_runs times, take all the results and run GARLI garli_num_runs times starting with each result."""
     run_id = run_id.replace(' ', '-').replace('/', '-') # raxml cannot handle spaces and slashes in run-id
     save_settings(working_dir=working_dir, run_id=run_id, mode="all", fasta_file=Path(fasta_file).resolve(), number_of_sequences=number_of_sequences, base_seq_name=base_seq_name, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
-    r_raxml = run_raxml(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, base_seq_name=base_seq_name, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, email=email, machines=machines)
+    r_raxml = run_raxml(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, base_seq_name=base_seq_name, raxml_kill_rate=raxml_kill_rate, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, email=email, machines=machines)
     r_garli = run_garli_multi(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, trees=[r.tree for r in r_raxml.results], garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
     return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli)
 
