@@ -2,6 +2,7 @@
 
 URL_RAXML="https://github.com/stamatak/standard-RAxML.git"
 URL_GARLI="https://github.com/skepner/garli.git"
+URL_IQTREE="https://github.com/Cibiv/IQ-TREE.git"
 
 # ----------------------------------------------------------------------
 
@@ -22,6 +23,7 @@ case "$(hostname)" in
         MAKEFILE_RAXML=Makefile.AVX.mac
         OPT=-Ofast
         NPROC=$(/usr/sbin/sysctl -n hw.logicalcpu)
+        IQTREE_CMAKE_FLAGS="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
         ;;
     i19)
         BIN_DIR=/syn/bin
@@ -29,6 +31,7 @@ case "$(hostname)" in
         MAKEFILE_RAXML=Makefile.AVX.gcc
         OPT=-Ofast
         NPROC=$(nproc)
+        IQTREE_CMAKE_FLAGS=
         ;;
     *)
         echo "Unsupported host" 1>&2
@@ -39,39 +42,74 @@ esac
 # RAxML
 # ----------------------------------------------------------------------
 
-BUILD_DIR_RAXML="$BUILD_DIR_ROOT"/raxml
+raxml()
+{
+    BUILD_DIR_RAXML="$BUILD_DIR_ROOT"/raxml
 
-if [ -d "$BUILD_DIR_RAXML" ]; then
-    cd "$BUILD_DIR_RAXML"
-    make -f "$MAKEFILE_RAXML" clean
-    git pull
-else
-    cd "$(dirname $BUILD_DIR_RAXML)"
-    git clone "$URL_RAXML" "$BUILD_DIR_RAXML"
-    cd "$BUILD_DIR_RAXML"
-fi
+    if [ -d "$BUILD_DIR_RAXML" ]; then
+        cd "$BUILD_DIR_RAXML"
+        make -f "$MAKEFILE_RAXML" clean
+        git pull
+    else
+        cd "$(dirname $BUILD_DIR_RAXML)"
+        git clone "$URL_RAXML" "$BUILD_DIR_RAXML"
+        cd "$BUILD_DIR_RAXML"
+    fi
 
-mv "$MAKEFILE_RAXML" "$MAKEFILE_RAXML".bak
-sed "s/-O2/$OPT/" "$MAKEFILE_RAXML".bak >"$MAKEFILE_RAXML"
-make -j $NPROC -f "$MAKEFILE_RAXML"
-install raxmlHPC-AVX "$BIN_DIR"/raxml
+    mv "$MAKEFILE_RAXML" "$MAKEFILE_RAXML".bak
+    sed "s/-O2/$OPT/" "$MAKEFILE_RAXML".bak >"$MAKEFILE_RAXML"
+    make -j$NPROC -f "$MAKEFILE_RAXML"
+    install raxmlHPC-AVX "$BIN_DIR"/raxml
+}
 
 # ----------------------------------------------------------------------
 # GARLI
 # ----------------------------------------------------------------------
 
-BUILD_DIR_GARLI="$BUILD_DIR_ROOT"/garli
-MAKE_DIR_GARLI="$BUILD_DIR_GARLI"/garli/trunk
+garli()
+{
+    BUILD_DIR_GARLI="$BUILD_DIR_ROOT"/garli
+    MAKE_DIR_GARLI="$BUILD_DIR_GARLI"/garli/trunk
 
-if [ -d "$BUILD_DIR_GARLI" ]; then
-    cd "$MAKE_DIR_GARLI"
-    # make -f "$MAKEFILE_GARLI" clean
-    git pull
-else
-    cd "$(dirname $BUILD_DIR_GARLI)"
-    git clone "$URL_GARLI" "$BUILD_DIR_GARLI"
-    cd "$MAKE_DIR_GARLI"
-fi
+    if [ -d "$BUILD_DIR_GARLI" ]; then
+        cd "$MAKE_DIR_GARLI"
+        # make -f "$MAKEFILE_GARLI" clean
+        git pull
+    else
+        cd "$(dirname $BUILD_DIR_GARLI)"
+        git clone "$URL_GARLI" "$BUILD_DIR_GARLI"
+        cd "$MAKE_DIR_GARLI"
+    fi
 
-./build2016.sh
-install bin/Garli "$BIN_DIR"/garli
+    ./build2016.sh
+    install bin/Garli "$BIN_DIR"/garli
+}
+
+# ----------------------------------------------------------------------
+# IQ-TREE http://www.cibiv.at/software/iqtree/doc/Compilation-Guide/
+# ----------------------------------------------------------------------
+
+iqtree()
+{
+    BUILD_DIR_IQTREE="$BUILD_DIR_ROOT"/iqtree
+
+    if [ -d "$BUILD_DIR_IQTREE" ]; then
+        cd "$BUILD_DIR_IQTREE"
+        git pull
+    else
+        cd "$(dirname $BUILD_DIR_IQTREE)"
+        git clone "$URL_IQTREE" "$BUILD_DIR_IQTREE"
+        cd "$BUILD_DIR_IQTREE"
+    fi
+
+    mkdir -p build && cd build
+    cmake $IQTREE_CMAKE_FLAGS ..
+    make -j$(NPROC)
+    install ./iqtree "$BIN_DIR"/iqtree
+}
+
+# ----------------------------------------------------------------------
+
+raxml
+garli
+iqtree
