@@ -295,6 +295,9 @@ class NameParser:
                 .replace("Crick Worldwide Influenza Centre", "NIMR")
                 .replace("National Institute for Medical Research", "NIMR")
                 .replace("WHO Collaborating Centre for Reference and Research on Influenza", "MELB")
+                .replace("National Institute of Infectious Diseases (NIID)", "NIID")
+                .replace("National Institute of Infectious Diseases", "NIID")
+                .replace("Erasmus Medical Center", "EMC")
                 )
 
     def gisaid_without_date(self, raw_name, m, **kw):
