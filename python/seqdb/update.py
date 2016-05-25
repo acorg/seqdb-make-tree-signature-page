@@ -72,7 +72,7 @@ class SeqdbUpdater:
             module_logger.warning('Cannot add entry without name: {}'.format(data["lab_id"]))
 
     def _update_db_entry(self, entry, data):
-        if entry.virus_type != data["virus_type"]:
+        if data["virus_type"] and entry.virus_type != data["virus_type"]:
             raise RuntimeError("Cannot add {!r} to {!r}".format(data["virus_type"], entry.virus_type))
         if data.get("location", {}).get("country"):
             entry.country = data["location"]["country"]

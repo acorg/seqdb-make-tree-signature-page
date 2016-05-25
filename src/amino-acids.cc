@@ -108,10 +108,8 @@ struct AlignEntry : public AlignData
     std::string name;           // for debugging
 };
 
-    // std::string subtype;
-    // std::string lineage;
-    // std::string gene;
-    // Shift shift;
+// http://sbkb.org/
+// http://signalpeptide.com
 
 static AlignEntry ALIGN_RAW_DATA[] = {
     {"A(H3N2)", "", "HA", Shift(),   std::regex("MKTIIAL[CS][HY]I[FLS]C[LQ][AV][FL][AG]"),  20,  true, "h3-MKT-1"},
@@ -143,9 +141,10 @@ static AlignEntry ALIGN_RAW_DATA[] = {
     {"A(H1N1)", "",         "M1", Shift(), std::regex("MGLIYNRMGTVTTEAAFGLVCA"),                        200, false, "h1-M1-2"},
     {"A(H1N1)", "",         "M1", Shift(), std::regex("QRLESVFAGKNTDLEALMEWL"),                         200, false, "h1-M1-3"},
 
-    {"A(H5N1)", "", "HA", Shift(),   std::regex("MEKIVLL[FL]AI[IV]SLVKS"),  20,  true, "h5-MEK-1"}, // http://signalpeptide.com
-    {"A(H5)",   "", "HA", Shift(),   std::regex("MEKIVLLLAVVSLVRS"),        20,  true, "h5-MEK-2"}, // http://signalpeptide.com H5N6, H5N2
-    {"A(H5)",   "", "HA",       0,   std::regex("DQICIGYHANNSTEQV"),        40, false, "h5-DQI-1"},
+      //{"A(H5)",   "", "HA", Shift(),   std::regex("MEKIVLL[FL]AI[IV]SLVKS"),     20,  true, "h5-MEK-1"}, // http://signalpeptide.com
+      // {"A(H5)",   "", "HA", Shift(),   std::regex("MEKIVLLLAVVSLVRS"),           20,  true, "h5-MEK-2"}, // http://signalpeptide.com H5N6, H5N2
+      // {"A(H5)",   "", "HA", Shift(),   std::regex("MEKIVLLFA[AT]ISLVKS"),        20,  true, "h5-MEK-3"}, // http://sbkb.org/
+    {"A(H5)",   "", "HA",       0,   std::regex("D[HQR]IC[IV]GY[HQ]ANNST[EK][KQR][IV]"), 40, false, "h5-DQI-1"},
 
     {"B", "", "HA", Shift(), std::regex("M[EKT][AGT][AIL][ICX]V[IL]L[IMT][AEILVX][AIVX][AMT]S[DHKNSTX][APX]"), 30,  true, "B-MKT"}, // http://repository.kulib.kyoto-u.ac.jp/dspace/bitstream/2433/49327/1/8_1.pdf, inferred by Eu for B/INDONESIA/NIHRD-JBI152/2015, B/CAMEROON/14V-8639/2014
     {"B", "", "HA",       0, std::regex("DR[ISV]C[AST][GX][ITV][IT][SWX]S[DKNX]SP[HXY][ILTVX][VX][KX]T[APT]T[QX][GV][EK][IV]NVTG[AV][IX][LPS]LT[AITX][AIST][LP][AIT][KRX]"), 50, false, "B-DRICT"},
@@ -162,21 +161,33 @@ static AlignEntry ALIGN_RAW_DATA[] = {
 
 AlignData align(std::string aAminoAcids, Messages& /*aMessages*/)
 {
+    std::vector<AlignEntry> results;
     for (auto raw_data = std::begin(ALIGN_RAW_DATA); raw_data != std::end(ALIGN_RAW_DATA); ++raw_data) {
         std::smatch m;
         if (std::regex_search(aAminoAcids.cbegin(), aAminoAcids.cbegin() + static_cast<std::string::difference_type>(std::min(aAminoAcids.size(), raw_data->endpos)), m, raw_data->re)) {
-            AlignData r(*raw_data);
+            AlignEntry r(*raw_data);
             if (raw_data->signalpeptide) {
                 r.shift = - (m[0].second - aAminoAcids.cbegin());
             }
             else if (r.shift.aligned()) {
                 r.shift -= m[0].first - aAminoAcids.cbegin();
             }
-            return r;
+            results.push_back(r);
         }
     }
-    std::cerr << "Not aligned: " << aAminoAcids << std::endl;
-    return AlignData();
+    if (results.empty()) {
+        std::cerr << "Not aligned: " << aAminoAcids << std::endl;
+        return AlignData();
+    }
+    else if (results.size() > 1) {
+        std::cerr << "Multiple alignment matches for " << aAminoAcids << std::endl << "    ";
+        std::transform(results.begin(), results.end(), std::ostream_iterator<std::string>(std::cerr, " "), [](const auto& e) -> std::string { return e.name; });
+        std::cerr << std::endl;
+        return results[0];
+    }
+    else {
+        return results[0];
+    }
 
 } // align
 
