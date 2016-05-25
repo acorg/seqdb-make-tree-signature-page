@@ -1,8 +1,10 @@
 #include <iostream>
 #include <map>
 #include <regex>
+#include <numeric>
 
 #include "string.hh"
+#include "stream.hh"
 #include "amino-acids.hh"
 
 // ----------------------------------------------------------------------
@@ -160,7 +162,7 @@ static AlignEntry ALIGN_RAW_DATA[] = {
     {"B", "", "",    Shift(), std::regex("GNFLWLLHV"),                                                           45, false, "B-CNIC"}, // Only CNIC sequences 2008-2009 have it, perhaps not HA
 };
 
-AlignData align(std::string aAminoAcids, Messages& /*aMessages*/)
+AlignData align(std::string aAminoAcids, Messages& aMessages)
 {
     std::vector<AlignEntry> results;
     for (auto raw_data = std::begin(ALIGN_RAW_DATA); raw_data != std::end(ALIGN_RAW_DATA); ++raw_data) {
@@ -181,9 +183,21 @@ AlignData align(std::string aAminoAcids, Messages& /*aMessages*/)
         return AlignData();
     }
     else if (results.size() > 1) {
-        std::cerr << "Multiple alignment matches for " << aAminoAcids << std::endl << "    ";
-        std::transform(results.begin(), results.end(), std::ostream_iterator<std::string>(std::cerr, " "), [](const auto& e) -> std::string { return e.name; });
-        std::cerr << std::endl;
+        try {
+            const auto subtypes = std::accumulate(results.begin(), results.end(), std::set<std::string>(), [](auto& a, const auto& e) { a.insert(e.subtype); return a; });
+            const auto shifts = std::accumulate(results.begin(), results.end(), std::set<Shift>(), [](auto& a, const auto& e) { a.insert(e.shift); return a; });
+            if (subtypes.size() > 1 || shifts.size() > 1) {
+                std::ostringstream os;
+                os << "Multiple alignment matches produce different subtypes and/or shifts: " << subtypes << "  " << shifts << std::endl
+                   << "    " << aAminoAcids << std::endl
+                   << "    " << to_stream(results, [](const auto& e) -> std::string { return e.name; });
+                  //std::cerr << os.str() << std::endl;
+                aMessages.warning() << os.str() << std::endl;
+            }
+        }
+        catch (InvalidShift&) {
+            std::cerr << "INTERNAL ERROR: InvalidShift " << aAminoAcids << std::endl;
+        }
         return results[0];
     }
     else {

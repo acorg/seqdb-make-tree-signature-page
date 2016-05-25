@@ -43,6 +43,8 @@ class Shift
     inline Shift& operator=(std::string::difference_type aShift) { mShift = static_cast<ShiftT>(aShift); return *this; }
     inline Shift& operator-=(std::string::difference_type a) { mShift -= static_cast<ShiftT>(a); return *this; }
     inline Shift& operator-=(size_t a) { mShift -= static_cast<ShiftT>(a); return *this; }
+    inline bool operator==(Shift aShift) const { try { return mShift == aShift.mShift; } catch (InvalidShift&) { return false; } }
+    inline bool operator!=(Shift aShift) const { return !operator==(aShift); }
 
     inline bool aligned() const { return mShift != NotAligned && mShift != AlignmentFailed /* && mShift != SequenceTooShort */; }
     inline bool alignment_failed() const { return mShift == AlignmentFailed; }
@@ -80,5 +82,7 @@ class Shift
     ShiftT mShift;
 
 }; // class Shift
+
+inline std::ostream& operator << (std::ostream& out, Shift aShift) { return out << static_cast<std::string>(aShift); }
 
 // ----------------------------------------------------------------------
