@@ -16,13 +16,14 @@
 AlignAminoAcidsData translate_and_align(std::string aNucleotides, Messages& aMessages)
 {
     std::vector<AlignAminoAcidsData> r;
+    AlignAminoAcidsData not_aligned;
     for (int offset = 0; offset < 3; ++offset) {
         auto amino_acids = translate_nucleotides_to_amino_acids(aNucleotides, static_cast<size_t>(offset), aMessages);
         auto aa_parts = string::split(amino_acids, "*");
         size_t prefix_len = 0;
-        for (auto part = aa_parts.begin(); part != aa_parts.end(); ++part) {
-            if (part->size() >= MINIMUM_SEQUENCE_AA_LENGTH) {
-                auto align_data = align(*part, aMessages);
+        for (const auto& part: aa_parts) {
+            if (part.size() >= MINIMUM_SEQUENCE_AA_LENGTH) {
+                auto align_data = align(part, aMessages);
                 if (!align_data.shift.alignment_failed()) {
                     if (align_data.shift.aligned() && prefix_len > 0) {
                         align_data.shift -= prefix_len;
@@ -30,12 +31,18 @@ AlignAminoAcidsData translate_and_align(std::string aNucleotides, Messages& aMes
                     r.push_back(AlignAminoAcidsData(align_data, amino_acids, offset));
                     break;
                 }
+                else {
+                    if (not_aligned.amino_acids.size() < part.size()) {
+                        not_aligned.amino_acids = part;
+                        not_aligned.offset = offset;
+                    }
+                }
             }
-            prefix_len += 1 + part->size();
+            prefix_len += 1 + part.size();
         }
     }
     if (r.empty()) {
-        return AlignAminoAcidsData();
+        return not_aligned;
     }
     if (r.size() > 1)
         aMessages.warning() << "Multiple translations and alignment for: " << aNucleotides << std::endl;
@@ -136,6 +143,8 @@ static AlignEntry ALIGN_RAW_DATA[] = {
     {"A(H1N1)", "",         "M1", Shift(), std::regex("MGLIYNRMGTVTTEAAFGLVCA"),                        200, false, "h1-M1-2"},
     {"A(H1N1)", "",         "M1", Shift(), std::regex("QRLESVFAGKNTDLEALMEWL"),                         200, false, "h1-M1-3"},
 
+    {"A(H5N1)", "", "HA", Shift(),   std::regex("MEKIVLL[FL]AI[IV]SLVKS"),  20,  true, "h5-MEK-1"}, // http://signalpeptide.com
+    {"A(H5)",   "", "HA", Shift(),   std::regex("MEKIVLLLAVVSLVRS"),        20,  true, "h5-MEK-2"}, // http://signalpeptide.com H5N6, H5N2
 
     {"B", "", "HA", Shift(), std::regex("M[EKT][AGT][AIL][ICX]V[IL]L[IMT][AEILVX][AIVX][AMT]S[DHKNSTX][APX]"), 30,  true, "B-MKT"}, // http://repository.kulib.kyoto-u.ac.jp/dspace/bitstream/2433/49327/1/8_1.pdf, inferred by Eu for B/INDONESIA/NIHRD-JBI152/2015, B/CAMEROON/14V-8639/2014
     {"B", "", "HA",       0, std::regex("DR[ISV]C[AST][GX][ITV][IT][SWX]S[DKNX]SP[HXY][ILTVX][VX][KX]T[APT]T[QX][GV][EK][IV]NVTG[AV][IX][LPS]LT[AITX][AIST][LP][AIT][KRX]"), 50, false, "B-DRICT"},

@@ -46,6 +46,14 @@ class SeqdbIterator;
 
 // ----------------------------------------------------------------------
 
+class SequenceNotAligned : public std::runtime_error
+{
+ public:
+    inline SequenceNotAligned(std::string prefix) : std::runtime_error(prefix + ": sequence not aligned") {}
+};
+
+// ----------------------------------------------------------------------
+
 class SeqdbSeq
 {
  private:
@@ -469,6 +477,7 @@ class Seqdb
       // returns db stat
     std::string report() const;
     std::string report_identical() const;
+    std::string report_not_aligned(size_t prefix_size) const;
     std::vector<std::string> all_hi_names() const;
     void remove_hi_names();
 
@@ -617,9 +626,11 @@ template <typename Value> std::deque<std::vector<SeqdbEntrySeq>> Seqdb::find_ide
     std::deque<std::vector<SeqdbEntrySeq>> identical = {{}};
     for (auto previous = refs.begin(), current = previous + 1; current != refs.end(); ++current) {
         if (value(*previous) == value(*current)) {
-            if (identical.back().empty())
-                identical.back().push_back(*previous);
-            identical.back().push_back(*current);
+            if (!value(*previous).empty()) { // empty means not aligned, ignore them
+                if (identical.back().empty())
+                    identical.back().push_back(*previous);
+                identical.back().push_back(*current);
+            }
         }
         else {
             previous = current;

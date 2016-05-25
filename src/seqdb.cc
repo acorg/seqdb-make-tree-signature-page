@@ -1,3 +1,5 @@
+#include <typeinfo>
+
 #include "seqdb.hh"
 #include "clades.hh"
 #include "string.hh"
@@ -113,8 +115,9 @@ AlignAminoAcidsData SeqdbSeq::align(bool aForce, Messages& aMessages)
       case align_nucleotides:
           mAminoAcidsShift.reset();
           align_data = translate_and_align(mNucleotides, aMessages);
-          if (!align_data.shift.alignment_failed()) {
+          if (!align_data.amino_acids.empty())
               mAminoAcids = align_data.amino_acids;
+          if (!align_data.shift.alignment_failed()) {
               update_gene(align_data.gene, aMessages, true);
               if (align_data.shift.aligned()) {
                   mAminoAcidsShift = align_data.shift;
@@ -167,7 +170,7 @@ std::string SeqdbSeq::amino_acids(bool aAligned, size_t aLeftPartSize) const
     std::string r = mAminoAcids;
     if (aAligned) {
         if (!aligned())
-            throw std::runtime_error("amino_acids(): sequence not aligned");
+            throw SequenceNotAligned("amino_acids()");
         r = shift(r, mAminoAcidsShift + static_cast<int>(aLeftPartSize), 'X');
 
           // find the longest part not having *, replace parts before longest with X, truncate traling parts
@@ -196,7 +199,7 @@ std::string SeqdbSeq::nucleotides(bool aAligned, size_t aLeftPartSize) const
     std::string r = mNucleotides;
     if (aAligned) {
         if (!aligned())
-            throw std::runtime_error("nucleotides(): sequence not aligned");
+            throw SequenceNotAligned("nucleotides()");
         r = shift(r, mNucleotidesShift + static_cast<int>(aLeftPartSize), '-');
     }
     return r;
@@ -293,9 +296,12 @@ std::string Seqdb::cleanup(bool remove_short_sequences)
     if (remove_short_sequences) {
         std::for_each(mEntries.begin(), mEntries.end(), std::mem_fn(&SeqdbEntry::remove_short_sequences));
     }
+
     std::for_each(mEntries.begin(), mEntries.end(), std::mem_fn(&SeqdbEntry::remove_not_translated_sequences));
-    //   // Note empty passages must not be removed, this is just for testing purposes
-    // std::for_each(mEntries.begin(), mEntries.end(), std::mem_fn(&SeqdbEntry::remove_empty_passages));
+
+      // Note empty passages must not be removed, this is just for testing purposes
+      // std::for_each(mEntries.begin(), mEntries.end(), std::mem_fn(&SeqdbEntry::remove_empty_passages));
+
       // remove empty entries
     auto const num_entries_before = mEntries.size();
       //std::remove_if(mEntries.begin(), mEntries.end(), [](auto entry) { return entry.empty(); });
@@ -374,24 +380,43 @@ std::string Seqdb::report_identical() const
     };
 
     try {
-        report("Identical nucleotides:", find_identical_sequences([](const SeqdbEntrySeq& e) -> std::string { return e.seq().nucleotides(true); }));
+        report("Identical nucleotides:", find_identical_sequences([](const SeqdbEntrySeq& e) -> std::string { try { return e.seq().nucleotides(true); } catch (SequenceNotAligned&) { return std::string(); } }));
         os << std::endl;
     }
-    catch (InvalidShift&) {
-        os << "Cannot report identical nucleotides: not aligned or absent" << std::endl;
+    catch (std::exception& err) {
+        os << "Cannot report identical nucleotides: " << typeid(err).name() << ": " << err.what() << std::endl;
     }
 
     try {
-        report("Identical amino-acids:", find_identical_sequences([](const SeqdbEntrySeq& e) -> std::string { return e.seq().amino_acids(true); }));
+        report("Identical amino-acids:", find_identical_sequences([](const SeqdbEntrySeq& e) -> std::string { try { return e.seq().amino_acids(true); } catch (SequenceNotAligned&) { return std::string(); } }));
         os << std::endl;
     }
-    catch (InvalidShift&) {
-        os << "Cannot report identical amino-acids: not aligned or absent" << std::endl;
+    catch (std::exception& err) {
+        os << "Cannot report identical amino-acids: " << typeid(err).name() << ": " << err.what() << std::endl;
     }
 
     return os.str();
 
 } // Seqdb::report_identical
+
+// ----------------------------------------------------------------------
+
+std::string Seqdb::report_not_aligned(size_t prefix_size) const
+{
+    std::vector<SeqdbEntrySeq> not_aligned;
+    std::copy_if(begin(), end(), std::back_inserter(not_aligned), [](const auto& e) -> bool { return !e.seq().aligned(); });
+    std::vector<std::string> prefixes;
+    std::transform(not_aligned.begin(), not_aligned.end(), std::back_inserter(prefixes), [&prefix_size](const auto& e) -> std::string { return std::string(e.seq().amino_acids(false), 0, prefix_size); });
+    std::sort(prefixes.begin(), prefixes.end());
+    const auto p_end = std::unique(prefixes.begin(), prefixes.end());
+
+    std::ostringstream os;
+    os << "Prefixes of not aligned sequences of length " << prefix_size << ": " << p_end - prefixes.begin() << std::endl;
+    std::copy(prefixes.begin(), p_end, std::ostream_iterator<std::string>(os, "\n"));
+
+    return os.str();
+
+} // Seqdb::report_not_aligned
 
 // ----------------------------------------------------------------------
 

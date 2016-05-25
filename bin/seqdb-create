@@ -29,6 +29,8 @@ def main(args):
     print(db.report())
     if args.report_identical:
         print(db.report_identical())
+    if args.report_not_aligned_prefixes:
+        print(db.report_not_aligned(args.report_not_aligned_prefixes))
     if args.save:
         db_updater.save(indent=1)
 
@@ -45,6 +47,7 @@ with timeit(sys.argv[0]):
         # parser.add_argument('--acmacs', action='store', dest='acmacs_url', default='https://localhost:1168', help='AcmacsWeb server host and port, e.g. https://localhost:1168.')
         # parser.add_argument('--hidb', action='store', dest='path_to_hidb', default="~/WHO/hidb.json.xz", help='Path to HI database.')
         parser.add_argument('--report-identical', action='store_true', dest='report_identical', default=False, help='Report identical sequences.')
+        parser.add_argument('--report-not-aligned-prefixes', type=int, action='store', dest='report_not_aligned_prefixes', default=None, help='Report prefixes of not aligned aa sequences up to the specified length (signal peptide is often 16).')
         parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
         args = parser.parse_args()
         logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")
