@@ -59,7 +59,7 @@ class SeqdbUpdater:
     def _add_sequence(self, data):
         name = data.get("name")
         if name:
-            if name[1] in ["/", "("] and name[0] != data["virus_type"][0]:
+            if name[1] in ["/", "("] and data["virus_type"] and name[0] != data["virus_type"][0]:
                 module_logger.warning('Virus type ({}) and name ({}) mismatch'.format(data["virus_type"], name))
             entry = self.seqdb.find_by_name(name)
             if entry is None:
