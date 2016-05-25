@@ -59,7 +59,7 @@ class Iqtree:
         self._find_program()
         self.random_gen = random.SystemRandom()
         self.model = "GTR+I+G4"           # K3Pu+I+G4
-        self.default_args = []            # "-keep-ident", "-cptime", "20"
+        self.default_args = ["-cptime", "600"]            # "-keep-ident",
 
     def submit_htcondor(self, num_runs, source, output_dir, run_id, outgroups :list, machines=None):
         from . import htcondor
@@ -70,7 +70,7 @@ class Iqtree:
         if outgroups:
             general_args += ["-o", ",".join(outgroups)]
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
-        args = [(general_args + ["-pre", ri]) for ri in run_ids]
+        args = [(general_args + ["-pre", ri, "-seed", str(self._random_seed())]) for ri in run_ids]
         job = htcondor.submit(program=self.program,
                               program_args=args,
                               description="IQTREE {run_id} {num_runs}".format(run_id=run_id, num_runs=num_runs),
@@ -147,8 +147,8 @@ class Iqtree:
         else:
             raise ValueError("Unrecognized IQTREE version\n" + output)
 
-    # def _random_seed(self):
-    #     return self.random_gen.randint(1, 0x7FFFFFFF) # iqtree accepts 31-bit random number seed
+    def _random_seed(self):
+        return self.random_gen.randint(1, 0x7FFFFFFF) # iqtree accepts 31-bit random number seed
 
 # ----------------------------------------------------------------------
 
