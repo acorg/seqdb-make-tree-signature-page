@@ -144,7 +144,8 @@ static AlignEntry ALIGN_RAW_DATA[] = {
       //{"A(H5)",   "", "HA", Shift(),   std::regex("MEKIVLL[FL]AI[IV]SLVKS"),     20,  true, "h5-MEK-1"}, // http://signalpeptide.com
       // {"A(H5)",   "", "HA", Shift(),   std::regex("MEKIVLLLAVVSLVRS"),           20,  true, "h5-MEK-2"}, // http://signalpeptide.com H5N6, H5N2
       // {"A(H5)",   "", "HA", Shift(),   std::regex("MEKIVLLFA[AT]ISLVKS"),        20,  true, "h5-MEK-3"}, // http://sbkb.org/
-    {"A(H5)",   "", "HA",       0,   std::regex("D[HQR]IC[IV]GY[HQ]ANNST[EK][KQR][IV]"), 40, false, "h5-DQI-1"},
+      // {"A(H5)",   "", "HA",       0,   std::regex("D[HQR]IC[IV]GY[HQ]ANNST[EK][KQR][IV]"), 60, false, "h5-DQI-1"},
+    {"A(H5)",   "", "HA",       0,   std::regex("D[HQR]IC[IV]GY[HQ]AN[KN]S[KT][EK][KQR][IV]"), 60, false, "h5-DQI-1"},
 
     {"B", "", "HA", Shift(), std::regex("M[EKT][AGT][AIL][ICX]V[IL]L[IMT][AEILVX][AIVX][AMT]S[DHKNSTX][APX]"), 30,  true, "B-MKT"}, // http://repository.kulib.kyoto-u.ac.jp/dspace/bitstream/2433/49327/1/8_1.pdf, inferred by Eu for B/INDONESIA/NIHRD-JBI152/2015, B/CAMEROON/14V-8639/2014
     {"B", "", "HA",       0, std::regex("DR[ISV]C[AST][GX][ITV][IT][SWX]S[DKNX]SP[HXY][ILTVX][VX][KX]T[APT]T[QX][GV][EK][IV]NVTG[AV][IX][LPS]LT[AITX][AIST][LP][AIT][KRX]"), 50, false, "B-DRICT"},
