@@ -24,7 +24,7 @@ template <typename Key, typename Value> inline std::ostream& operator << (std::o
 
 namespace stream_internal
 {
-    template <typename Collection> inline std::ostream& write_to_stream(std::ostream& out, const Collectionе& aCollection, std::string prefix, std::string suffix, std::string separator)
+    template <typename Collection> inline std::ostream& write_to_stream(std::ostream& out, const Collection& aCollection, std::string prefix, std::string suffix, std::string separator)
     {
         out << prefix;
         bool sep = false;

@@ -128,14 +128,13 @@ static AlignEntry ALIGN_RAW_DATA[] = {
     {"A(H1N1)", "",         "HA", Shift(), std::regex("MKVK[LY]LVLLCTFTATYA"),                           20,  true, "h1-MKV-1"},
     {"A(H1N1)", "SEASONAL", "HA", Shift(), std::regex("MKVKLLVLLCTFSATYA"),                              20,  true, "h1-MKV-2"},
     {"A(H1N1)", "2009PDM",  "HA", Shift(), std::regex("M[EK]AIL[VX][VX][LM]L[CHY]T[FL][AT]T[AT][NS]A"),  20,  true, "h1-MKA-2"},
-    {"A(H1N1)", "",         "HA",       0, std::regex("DTLCI[GX][YX]HA"),                               100, false, "h1-DTL-1"},
-    {"A(H1N1)", "",         "HA",       0, std::regex("DT[IL]C[IM]G[HXY]H[AX]NN"),                      100, false, "h1-DTL-2"},
+    {"A(H1N1)", "",         "HA",       0, std::regex("DT[IL]CIG[HY]H[AT][DNTX][DN]"),                  100, false, "h1-DTL-1"},
     {"A(H1N1)", "",         "HA",       5, std::regex("GYHANNS[AT]DTV"),                                100, false, "h1-GYH"},
     {"A(H1N1)", "",         "HA",      96, std::regex("[DN]YEELREQL"),                                  120, false, "h1-DYE"},
-    {"A(H1N1)", "",         "HA",     162, std::regex("[KQ]SY[AI]N[ND]K[EG]KEVLVLWG[IV]HHP"),           220, false, "h1-KSY"},
+      // leads to wrong alignment due to insertion before the regex {"A(H1N1)", "",         "HA",     162, std::regex("[KQ]SY[AI]N[ND]K[EG]KEVLVLWG[IV]HHP"),           220, false, "h1-KSY"},
     {"A(H1N1)", "",         "HA",     105, std::regex("SSISSFER"),                                      200, false, "h1-SSI"},
 
-    {"A(H1N1)", "",         "NA",       0, std::regex("MNPNQKIITIGSVCMTI"),                              20, false, "h1-NA-1"},
+    {"A(H1N1)", "",         "NA",       0, std::regex("MNPNQKIITIG[SW]VCMTI"),                           20, false, "h1-NA-1"},
     {"A(H1N1)", "",         "NA", Shift(), std::regex("FAAGQSVVSVKLAGNSSLCPVSGWAIYSK"),                 200, false, "h1-NA-2"},
     {"A(H1N1)", "",         "NA", Shift(), std::regex("QASYKIFRIEKGKI"),                                300, false, "h1-NA-3"},
 
@@ -185,7 +184,7 @@ AlignData align(std::string aAminoAcids, Messages& aMessages)
     else if (results.size() > 1) {
         try {
             const auto subtypes = std::accumulate(results.begin(), results.end(), std::set<std::string>(), [](auto& a, const auto& e) { a.insert(e.subtype); return a; });
-            const auto shifts = std::accumulate(results.begin(), results.end(), std::set<Shift>(), [](auto& a, const auto& e) { a.insert(e.shift); return a; });
+            const auto shifts = std::accumulate(results.begin(), results.end(), std::set<std::string>(), [](auto& a, const auto& e) { a.insert(e.shift); return a; });
             if (subtypes.size() > 1 || shifts.size() > 1) {
                 std::ostringstream os;
                 os << "Multiple alignment matches produce different subtypes and/or shifts: " << subtypes << "  " << shifts << std::endl
@@ -201,6 +200,8 @@ AlignData align(std::string aAminoAcids, Messages& aMessages)
         return results[0];
     }
     else {
+        if (results[0].name == "h3-ATL")
+            std::cerr << "%%% " << results[0].name << " " << results[0].shift << " " << aAminoAcids << std::endl;
         return results[0];
     }
 
