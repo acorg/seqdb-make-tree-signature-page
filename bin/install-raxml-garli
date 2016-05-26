@@ -89,6 +89,7 @@ garli()
 # IQ-TREE http://www.cibiv.at/software/iqtree/doc/Compilation-Guide/
 # ----------------------------------------------------------------------
 
+# !!! WARNING iqtree corrupts names too much, does not allow /, % in names (perhaps due to phylip format)
 iqtree()
 {
     BUILD_DIR_IQTREE="$BUILD_DIR_ROOT"/iqtree
@@ -112,4 +113,4 @@ iqtree()
 
 raxml
 garli
-iqtree
+#iqtree
