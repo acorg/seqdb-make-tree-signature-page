@@ -194,6 +194,18 @@ def _check_sequence(sequence, name, filename, line_no):
 
 # ----------------------------------------------------------------------
 
+def read_fasta(fasta_file):
+    """Returns list of dict {"name":, "sequence":}"""
+
+    def make_entry(raw_name, sequence):
+        return {"sequence": sequence, "name": raw_name}
+
+    r = [make_entry(raw_name, sequence) for raw_name, sequence in read_from_string(open_file.open_for_reading_text(fasta_file).read(), fasta_file)]
+    module_logger.debug('{} sequences imported from {}'.format(len(r), fasta_file))
+    return r
+
+# ----------------------------------------------------------------------
+
 def read_fasta_with_name_parsing(fasta_file, lab, virus_type, **_):
     """Returns list of dict {"name":, "sequence":, "date":, "lab":}"""
     np = name_parser()

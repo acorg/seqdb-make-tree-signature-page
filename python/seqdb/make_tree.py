@@ -6,7 +6,7 @@
 
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
-import operator, subprocess
+import os, operator, subprocess
 from . import json
 from .raxml import Raxml, RaxmlResult, make_r_score_vs_time
 from .garli import Garli, GarliResults
@@ -41,7 +41,22 @@ def run_raxml_all_garli(working_dir, run_id, fasta_file, number_of_sequences, ba
     r_garli = run_garli_multi(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, trees=[r.tree for r in r_raxml.results], garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
     return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli)
 
-# ----------------------------------------------------------------------
+# ======================================================================
+
+def run_in_background(working_dir):
+    log_file = Path(working_dir, "stdout.log")
+    if os.fork() == 0:
+        # child
+        f = log_file.open("w")
+        os.dup2(f.fileno(), 1)
+        os.dup2(f.fileno(), 2)
+        os.close(0)
+    else:
+        # parent
+        module_logger.info('Log is written to {}'.format(log_file))
+        exit(0)
+
+# ======================================================================
 
 def save_settings(working_dir, **args):
     json.dumpf(Path(working_dir, "settings.json"), args)

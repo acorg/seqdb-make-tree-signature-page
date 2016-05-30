@@ -146,9 +146,9 @@ def write_binary(filename, data, compressed=None, backup=True, makedirs=True):
 def backup_file(filename, backup_dir=None):
     """Backup the file, if it exists. Backups versioning is supported."""
     if isinstance(backup_dir, str):
-        newname = os.path.join(backup_dir, os.path.basename(filename))
+        newname = os.path.join(backup_dir, os.path.basename(str(filename)))
     else:
-        newname = filename
+        newname = str(filename)
     version = 1
     while os.access(newname, os.F_OK):
         newname = '{}.~{:02d}~'.format(filename, version)
@@ -165,8 +165,8 @@ def backup_file(filename, backup_dir=None):
 class FileBinaryReader:
 
     def __init__(self, filename):
-        self.filename = filename
-        self.name = filename
+        self.filename = str(filename)
+        self.name = str(filename)
         self.open_xz()
 
     def read(self, size=-1):

@@ -2,7 +2,9 @@
 # -*- Python -*-
 
 """
-Makes phylogenetic tree for WHO CC sequences
+Makes phylogenetic tree from the fasta file.
+The first sequence in the fasta file is used as an outgroup (root sequence).
+Sequences in the fasta file must be aligned.
 """
 
 import sys
@@ -13,36 +15,27 @@ sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), st
 import logging; module_logger = logging.getLogger(__name__)
 
 import seqdb as seqdb_m
-from seqdb import Seqdb, timeit, email, run_in_background
-
-# ----------------------------------------------------------------------
-
-sBaseSeq = {
-    "BVIC": "VICTORIA/830/2013 MDCK2",
-    "BYAM": "CAMBODIA/FSS29374/2014 MDCK1",
-    "H3":   "HAWAII/22/2012 MDCK1",
-    "H1":   "SWITZERLAND/9772556/2013 SIAT2",
-    }
-
-sStartDates = {
-    "BVIC": "20141201",
-    "BYAM": "20141201",
-    "H3":   "20150301",
-    "H1":   "20141201",
-    }
-
-sVirusTypeLineage = {
-    "BVIC": ["B", "VICTORIA"],
-    "BYAM": ["B", "YAMAGATA"],
-    "H3":   ["A(H3N2)", None],
-    "H1":   ["A(H1N1)", None],
-    }
-
-sWorkingDirRoot = Path("/syn/eu/ac/results/whocc-tree")
+from seqdb import Seqdb, SeqdbUpdater, timeit, email, fasta as fasta_m, run_in_background
 
 # ----------------------------------------------------------------------
 
 def main(args):
+    working_dir = Path(args.working_dir[0])
+    working_dir.mkdir(parents=True, exist_ok=True)
+    working_dir = working_dir.resolve()
+    module_logger.info('Working dir: {}'.format(working_dir))
+
+    fasta_file = Path(args.source[0]).resolve()
+    seqdb_file = Path(working_dir, fasta_file.stem + ".json.xz")
+
+    seqdb = Seqdb()
+    db_updater = SeqdbUpdater(seqdb, filename=seqdb_file, normalize_names=False, load=False)
+    data = fasta_m.read_fasta(fasta_file=fasta_file)
+    base_seq = data[0]["name"]
+    db_updater.add(data)
+    db_updater.save(indent=1)
+    print(seqdb.report())
+
     if args.mode == "all":
         f = seqdb_m.run_raxml_all_garli
     elif args.mode == "best":
@@ -51,19 +44,16 @@ def main(args):
         f = seqdb_m.run_raxml_survived_best_garli
     else:
         raise RuntimeError("Unrecognized mode: " + args.mode)
-    vt, lin = sVirusTypeLineage[args.virus_type.upper()]
-    run_id = "{} {}".format(args.virus_type, "bfgs" if args.raxml_bfgs else "no-bfgs")
+
+    run_id = "{} {}".format(fasta_file.stem, "bfgs" if args.raxml_bfgs else "no-bfgs")
 
     try:
-        working_dir = make_working_dir(args)
-        module_logger.info('Working dir: {}'.format(working_dir))
-        seqdb = seqdb_m.open(Path(args.path_to_seqdb).expanduser())
         export_data = seqdb_m.export_from_seqdb(
-            seqdb=seqdb, filename=Path(working_dir, "source.fasta"), output_format="fasta", amino_acids=False, lab=None, virus_type=vt, lineage=lin,
+            seqdb=seqdb, filename=Path(working_dir, "source.fasta"), output_format="fasta", amino_acids=False, lab=None, virus_type=None, lineage=None,
             gene="HA",
-            start_date=args.start_date or sStartDates[args.virus_type.upper()], end_date=args.end_date,
-            base_seq=sBaseSeq[args.virus_type.upper()], name_format="{seq_id}",
-            aligned=True, truncate_left=args.truncate_left, encode_name=True, wrap=False, truncate_to_most_common_length=True, hamming_distance_threshold=150, hamming_distance_report=False,
+            start_date=None, end_date=None,
+            base_seq=base_seq, name_format="{seq_id}",
+            aligned=True, truncate_left=False, encode_name=True, wrap=False, truncate_to_most_common_length=True, hamming_distance_threshold=150, hamming_distance_report=False,
             sort_by=None, with_hi_name=False, name_match=None)
         if not args.foreground_mode:
             run_in_background(working_dir=working_dir)
@@ -85,29 +75,16 @@ def main(args):
 
 # ----------------------------------------------------------------------
 
-def make_working_dir(args):
-    working_dir = Path(sWorkingDirRoot, args.virus_type.lower(), "{}-{}-r{}-{}-g{}".format(datetime.datetime.now().strftime("%Y-%m%d-%H%M"), "bfgs" if args.raxml_bfgs else "no-bfgs", args.raxml_num_runs, args.mode, args.garli_num_runs))
-    try:
-        working_dir.mkdir(parents=True, exist_ok=False)
-    except Exception as err:
-        raise ValueError("Cannot make {}: {}".format(working_dir, err))
-    return working_dir.resolve()
-
-# ----------------------------------------------------------------------
-
 with timeit(sys.argv[0]):
     try:
         import argparse
         parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
 
+        parser.add_argument('working_dir', nargs=1, help='directory to store working files.')
+        parser.add_argument('source', nargs=1, help='source fasta file.')
+
         parser.add_argument('--mode', action='store', dest='mode', default="all", help='"all", "best", "survived-best".')
-        parser.add_argument('--flu-lineage', action='store', dest='virus_type', required=True, help='Build tree for this virus type/subtype/lineage: BVIC, BYAM, H1, H3.')
-        # parser.add_argument('--gene', action='store', dest='gene', default="", help='HA or NA.')
-        # parser.add_argument('--hamming-distance-threshold', action='store', type=int, dest='hamming_distance_threshold', default=150, help='Select only sequences having hamming distance to the base sequence less than threshold. Use 150 for nucs (H3).')
-        parser.add_argument('--start-date', action='store', dest='start_date', default=None, help='Build tree for antigens isolated on or after that date (YYYYMMDD).')
-        parser.add_argument('--end-date', action='store', dest='end_date', default=None, help='Build tree for antigens isolated before that date (YYYYMMDD).')
-        parser.add_argument('--no-truncate-left', action='store_false', dest='truncate_left', default=True, help='Do not truncate left part of the sequence (e.g. signal peptide).')
 
         parser.add_argument('--raxml-kill-rate', action='store', type=float, dest='raxml_kill_rate', default=0.5, help='>0, <=1.')
         parser.add_argument('--raxml-no-bfgs', action='store_false', dest='raxml_bfgs', default=True, help='Disable bfgs in RAxML.')
@@ -120,7 +97,6 @@ with timeit(sys.argv[0]):
         parser.add_argument('--garli-stoptime', action='store', type=int, dest='garli_stoptime', default=60*60*24*7, help='GARLI termination condition: the maximum number of seconds for the run to continue.')
 
         parser.add_argument('--fg', action='store_true', dest='foreground_mode', default=False, help='Run in the foreground mode.')
-        parser.add_argument('--db', action='store', dest='path_to_seqdb', default='~/WHO/seqdb.json.xz', help='Path to sequence database.')
         parser.add_argument('--email', action='store', dest='email', default=getpass.getuser(), help='Email to report status of the tasks running in the cluster.')
         parser.add_argument('--machines', action='store', dest='machines', default=None, help="Comma separated list: odette,i19,i20,i21,o16,o17") # odette.antigenic-cartography.org
 

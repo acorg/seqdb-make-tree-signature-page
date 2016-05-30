@@ -5,6 +5,7 @@
 
 import os, re, pprint
 import logging; module_logger = logging.getLogger(__name__)
+from pathlib import Path
 from . import acmacs, open_file, hidb as hidb_m
 
 # ----------------------------------------------------------------------
@@ -13,20 +14,20 @@ class SeqdbUpdater:
 
     def __init__(self, seqdb, filename, normalize_names=True, load=False, hidb=None):
         self.seqdb = seqdb
-        self.filename = filename
+        self.filename = Path(filename)
         self.normalize_names = normalize_names
         self.hidb = hidb
         if load:
             self.load()
 
     def load(self):
-        if os.path.isfile(self.filename):
-            self.seqdb.load(filename=self.filename)
+        if self.filename.is_file():
+            self.seqdb.load(filename=str(self.filename))
 
     def save(self, indent):
-        if os.path.isfile(self.filename):
+        if self.filename.is_file():
             open_file.backup_file(self.filename)
-        self.seqdb.save(filename=self.filename, indent=indent)
+        self.seqdb.save(filename=str(self.filename), indent=indent)
 
     def set_hidb(self, hidb):
         self.hidb = hidb
@@ -59,20 +60,21 @@ class SeqdbUpdater:
     def _add_sequence(self, data):
         name = data.get("name")
         if name:
-            if name[1] in ["/", "("] and data["virus_type"] and name[0] != data["virus_type"][0]:
+            if name[1] in ["/", "("] and data.get("virus_type") and name[0] != data["virus_type"][0]:
                 module_logger.warning('Virus type ({}) and name ({}) mismatch'.format(data["virus_type"], name))
             entry = self.seqdb.find_by_name(name)
             if entry is None:
                 if self.normalize_names and not self.sReName.match(name):
                     module_logger.warning('Suspicious name {!r}'.format(name))
                 entry = self.seqdb.new_entry(name)
-                entry.virus_type = data["virus_type"] # entry = {"N": name, "s": [], "v": data["virus_type"]}
+                if data.get("virus_type"):
+                    entry.virus_type = data["virus_type"] # entry = {"N": name, "s": [], "v": data["virus_type"]}
             self._update_db_entry(entry, data)
         else:
             module_logger.warning('Cannot add entry without name: {}'.format(data["lab_id"]))
 
     def _update_db_entry(self, entry, data):
-        if data["virus_type"] and entry.virus_type != data["virus_type"]:
+        if data.get("virus_type") and entry.virus_type != data["virus_type"]:
             raise RuntimeError("Cannot add {!r} to {!r}".format(data["virus_type"], entry.virus_type))
         if data.get("location", {}).get("country"):
             entry.country = data["location"]["country"]
@@ -82,7 +84,7 @@ class SeqdbUpdater:
             entry.add_date(data["date"])
         if data.get("annotatitions"):
             module_logger.warning('Sequence {} has annotatitions {}'.format(data["name"], data["annotatitions"]))
-        message = entry.add_or_update_sequence(sequence=data["sequence"], passage=data.get("passage", ""), reassortant=data.get("reassortant", ""), lab=data["lab"], lab_id=data.get("lab_id", ""), gene=data.get("gene", ""))
+        message = entry.add_or_update_sequence(sequence=data["sequence"], passage=data.get("passage", ""), reassortant=data.get("reassortant", ""), lab=data.get("lab", ""), lab_id=data.get("lab_id", ""), gene=data.get("gene", ""))
         if message:
             module_logger.warning("{}: {}".format(data["name"], message))
         # if self.hidb:

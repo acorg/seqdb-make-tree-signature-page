@@ -25,12 +25,14 @@ AlignAminoAcidsData translate_and_align(std::string aNucleotides, Messages& aMes
         size_t prefix_len = 0;
         for (const auto& part: aa_parts) {
             if (part.size() >= MINIMUM_SEQUENCE_AA_LENGTH) {
-                auto align_data = align(part, aMessages);
+                Messages messages;
+                auto align_data = align(part, messages);
                 if (!align_data.shift.alignment_failed()) {
                     if (align_data.shift.aligned() && prefix_len > 0) {
                         align_data.shift -= prefix_len;
                     }
                     r.push_back(AlignAminoAcidsData(align_data, amino_acids, offset));
+                    aMessages.add(messages);
                     break;
                 }
                 else {
@@ -178,7 +180,7 @@ AlignData align(std::string aAminoAcids, Messages& aMessages)
         }
     }
     if (results.empty()) {
-        std::cerr << "Not aligned: " << aAminoAcids << std::endl;
+        aMessages.warning() << "Not aligned: " << aAminoAcids << std::endl;
         return AlignData();
     }
     else if (results.size() > 1) {
