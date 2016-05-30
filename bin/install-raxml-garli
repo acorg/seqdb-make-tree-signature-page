@@ -110,7 +110,25 @@ iqtree()
 }
 
 # ----------------------------------------------------------------------
+# fasttree http://www.microbesonline.org/fasttree/
+# ----------------------------------------------------------------------
+
+fasttree()
+{
+    BUILD_DIR_FASTTREE="$BUILD_DIR_ROOT"/fasttree
+
+    if [ ! -d "$BUILD_DIR_FASTTREE" ]; then
+        mkdir -p "$BUILD_DIR_FASTTREE"
+    fi
+    cd "$BUILD_DIR_FASTTREE"
+    rm -f fasttree.c
+    curl -sL -O http://www.microbesonline.org/fasttree/FastTree.c
+    gcc $OPT -funroll-loops -Wall -o fasttree FastTree.c -lm
+    install ./fasttree "$BIN_DIR"/fasttree
+}
+
+# ----------------------------------------------------------------------
 
 raxml
 garli
-#iqtree
+fasttree
