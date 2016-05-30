@@ -61,7 +61,7 @@ class Fasttree (tree_maker.Maker):
         from . import htcondor
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
-        args = [(self.default_args + ["-out", ri + self.tree_file_suffix, "-seed", str(self._random_seed()), str(source.resolve())]) for ri in run_ids]
+        args = [(self.default_args + ["-out", ri + self.tree_file_suffix, "-seed", str(self.random_seed()), str(source.resolve())]) for ri in run_ids]
         job = htcondor.submit(program=self.program,
                               program_args=args,
                               description="Fasttree {run_id} {num_runs}".format(run_id=run_id, num_runs=num_runs),

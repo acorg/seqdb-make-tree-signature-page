@@ -52,9 +52,10 @@ class IqtreeTask (tree_maker.Task):
 
 # ----------------------------------------------------------------------
 
-class Iqtree:
+class Iqtree (tree_maker.Maker):
 
     def __init__(self, email):
+        super().__init__(email, "iqtree", "-h", re.compile(r"IQ-TREE\s+version\s+([\d\.]+(?:-beta)?)", re.I))
         self.email = email
         self._find_program()
         self.random_gen = random.SystemRandom()
@@ -70,7 +71,7 @@ class Iqtree:
         if outgroups:
             general_args += ["-o", ",".join(outgroups)]
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
-        args = [(general_args + ["-pre", ri, "-seed", str(self._random_seed())]) for ri in run_ids]
+        args = [(general_args + ["-pre", ri, "-seed", str(self.random_seed())]) for ri in run_ids]
         job = htcondor.submit(program=self.program,
                               program_args=args,
                               description="IQTREE {run_id} {num_runs}".format(run_id=run_id, num_runs=num_runs),
@@ -127,28 +128,6 @@ class Iqtree:
         with conf_filename.open("w") as f:
             f.write(conf)
         return conf_filename
-
-    # ----------------------------------------------------------------------
-
-    def _find_program(self):
-        import socket
-        hostname = socket.getfqdn()
-        # module_logger.debug('hostname {}'.format(hostname))
-        if hostname == "jagd":
-            self.program = "/Users/eu/ac/bin/iqtree"
-        elif hostname == "albertine.antigenic-cartography.org":
-            self.program = "/syn/bin/iqtree"
-        else:
-            self.program = "iqtree"
-        output = subprocess.check_output(self.program + " -h", shell=True, stderr=subprocess.STDOUT).decode("utf-8")
-        m = re.search(r"IQ-TREE\s+version\s+([\d\.]+(?:-beta)?)", output)
-        if m:
-            module_logger.info('IQTREE {}'.format(m.group(1)))
-        else:
-            raise ValueError("Unrecognized IQTREE version\n" + output)
-
-    def _random_seed(self):
-        return self.random_gen.randint(1, 0x7FFFFFFF) # iqtree accepts 31-bit random number seed
 
 # ----------------------------------------------------------------------
 
