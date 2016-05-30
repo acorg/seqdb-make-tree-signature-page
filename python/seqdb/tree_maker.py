@@ -128,7 +128,7 @@ class Maker:
         else:
             prog_ver = program
         # output = subprocess.check_output(prog_ver, shell=True, stderr=subprocess.STDOUT).decode("utf-8")
-        output = subprocess.run(prog_ver, shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).decode("utf-8")
+        output = subprocess.run(prog_ver, shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.decode("utf-8")
         m = version_rex.search(output)
         if m:
             module_logger.info('{} {}'.format(progname, m.group(1)))
