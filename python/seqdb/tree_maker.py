@@ -4,7 +4,7 @@
 
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
-import time as time_m, datetime, operator, random, subprocess
+import os, time as time_m, datetime, operator, random, subprocess
 from . import json
 
 # ----------------------------------------------------------------------
@@ -99,13 +99,13 @@ class Maker:
 
     def __init__(self, email, progname, version_switch, version_rex):
         self.email = email
-        self.find_program(progname, version_rex)
+        self.find_program(progname, version_switch, version_rex)
         self.random_gen = random.SystemRandom()
 
     def random_seed(self):
         return self.random_gen.randint(1, 0xFFFFFFFF)
 
-    def find_program(self, progname, version_rex):
+    def find_program(self, progname, version_switch, version_rex):
         import socket
         hostname = socket.getfqdn()
         # module_logger.debug('hostname {}'.format(hostname))
