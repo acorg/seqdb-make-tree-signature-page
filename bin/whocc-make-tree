@@ -50,6 +50,7 @@ def main(args):
     elif args.mode == "survived-best":
         f = seqdb_m.run_raxml_survived_best_garli
     elif args.mode == "fasttree-survived-best":
+        raise RuntimeError("Cannot pass a tree made by fasttree to raxml: fasttree produces multifurcating tree while raxml can read only bifurcating ones.")
         f = seqdb_m.run_fasttree_raxml_survived_best_garli
     else:
         raise RuntimeError("Unrecognized mode: " + args.mode)

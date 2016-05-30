@@ -45,7 +45,7 @@ class Results:
 
     def __init__(self, results=None, overall_time=None, submitted_tasks=None, survived_tasks=None):
         self.results = sorted(results, key=operator.attrgetter("score")) if results else []
-        self.longest_time = max(self.results, key=operator.attrgetter("time")).time if results else 0
+        self.longest_time = max(self.results, key=operator.attrgetter("time")).time if self.results else 0
         self.overall_time = overall_time
         self.submitted_tasks = submitted_tasks
         self.survived_tasks = survived_tasks
