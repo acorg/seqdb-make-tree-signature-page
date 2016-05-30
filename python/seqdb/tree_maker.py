@@ -63,7 +63,8 @@ class Results:
     def make_txt(self, filepath :Path):
         with filepath.open("w") as f:
             f.write("Longest time:    " + self.longest_time_str()+ "\n")
-            f.write("Overall time:    " + Result.time_str(self.overall_time)+ "\n")
+            if self.overall_time:
+                f.write("Overall time:    " + Result.time_str(self.overall_time)+ "\n")
             if self.submitted_tasks:
                 f.write("Submitted tasks: " + str(self.submitted_tasks) + "\n")
             if self.survived_tasks and self.survived_tasks != self.submitted_tasks:
@@ -103,7 +104,7 @@ class Maker:
         self.random_gen = random.SystemRandom()
 
     def random_seed(self):
-        return self.random_gen.randint(1, 0xFFFFFFFF)
+        return self.random_gen.randint(1, 0xFFFFFFF)   # note max for garli is 0x7ffffffe
 
     def find_program(self, progname, version_switch, version_rex):
         import socket

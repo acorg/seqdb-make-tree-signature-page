@@ -59,23 +59,21 @@ class Fasttree (tree_maker.Maker):
 
     def __init__(self, email):
         super().__init__(email, "fasttree", "", re.compile(r"FastTree\s+version\s+([\d\.]+)"))
-        self.default_args = ["-nt", "-gtr", "-gamma", "-quiet"]
+        self.default_args = ["-nt", "-gtr", "-gamma", "-nopr"]
 
     # ----------------------------------------------------------------------
 
     def submit_htcondor(self, source, output_dir, run_id, num_runs, machines=None):
         from . import htcondor
         Path(output_dir).mkdir(parents=True, exist_ok=True)
-        general_args = ["-s", str(source.resolve()), "-w", str(output_dir.resolve()), "-m", self.model, "-e", str(model_optimization_precision), "-T", "1", "-N", "1"] + self.default_args
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
-        args = [(general_args + ["-n", ri, "-p", str(self._random_seed())]) for ri in run_ids]
+        args = [(self.default_args + ["-out", ri + ".phy", "-seed", str(self._random_seed()), str(source.resolve())]) for ri in run_ids]
         job = htcondor.submit(program=self.program,
                               program_args=args,
-                              description="Fasttree {run_id} {num_runs} {bfgs}".format(run_id=run_id, num_runs=num_runs, bfgs="" if bfgs else "no-bfgs"),
+                              description="Fasttree {run_id} {num_runs}".format(run_id=run_id, num_runs=num_runs),
                               current_dir=output_dir,
                               capture_stdout=False, email=self.email, notification="Error", machines=machines)
         module_logger.info('Submitted Fasttree: {}'.format(job))
-        module_logger.info('Fasttree parameters: bfgs:{} model_optimization_precision: {} outgroups:{}'.format(bfgs, model_optimization_precision, outgroups))
         return FasttreeTask(job=job, output_dir=output_dir, run_ids=run_ids)
 
     # ----------------------------------------------------------------------
