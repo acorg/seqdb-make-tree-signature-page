@@ -28,7 +28,7 @@ def main(args):
         else:
             r_garli = None
         if r_raxml and r_garli:
-            results = make_tree.make_results(Path(args.dir[0]), r_raxml=r_raxml, r_garli=r_garli)
+            results = make_tree.make_results(Path(args.dir[0]), r_raxml=r_raxml, r_garli=r_garli, path_to_seqdb=args.path_to_seqdb)
         else:
             results = None
     if results:
@@ -42,6 +42,7 @@ try:
     parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
 
     parser.add_argument('dir', nargs=1, help='directory where tree data stored.')
+    parser.add_argument('--db', action='store', dest='path_to_seqdb', default="/Users/eu/WHO/seqdb.json.xz", help='Path to sequence database.')
 
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")

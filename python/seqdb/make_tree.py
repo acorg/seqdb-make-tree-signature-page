@@ -127,7 +127,7 @@ def run_garli_multi(working_dir, run_id, fasta_file, trees, garli_num_runs, garl
 
 # ----------------------------------------------------------------------
 
-def make_results(working_dir, r_raxml, r_garli):
+def make_results(working_dir, r_raxml, r_garli, path_to_seqdb):
     longest_time = r_raxml.longest_time + r_garli.longest_time
     longest_time_s = RaxmlResult.time_str(longest_time)
     module_logger.info('Longest time: ' + longest_time_s)
@@ -171,7 +171,7 @@ def make_results(working_dir, r_raxml, r_garli):
 
     from .draw_tree import draw_tree
     draw_tree(tree_file=r_best["tree"],
-              path_to_seqdb="/Users/eu/WHO/seqdb.json.xz",
+              path_to_seqdb=path_to_seqdb,
               output_file=Path(working_dir, "tree.pdf"),
               title="{{virus_type}} GARLI-score: {} Time: {} ({})".format(r_best["score"], overall_time_s, longest_time_s),
               pdf_width=1000, pdf_height=850

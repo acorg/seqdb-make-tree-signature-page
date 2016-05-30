@@ -30,7 +30,10 @@ class Result:
 
     @classmethod
     def time_str(cls, time):
-        s = str(datetime.timedelta(seconds=time))
+        if time is not None:
+            s = str(datetime.timedelta(seconds=time))
+        else:
+            s = ""
         try:
             return s[:s.index('.')]
         except:
