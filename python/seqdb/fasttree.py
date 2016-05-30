@@ -77,7 +77,7 @@ class Fasttree (tree_maker.Maker):
 
     @classmethod
     def get_result(cls, output_dir, run_id):
-        return FasttreeResult(run_id=run_id, tree=str(Path(output_dir, run_id + self.tree_file_suffix)), score=0, time=None)
+        return FasttreeResult(run_id=run_id, tree=str(Path(output_dir, run_id + cls.tree_file_suffix)), score=0, time=None)
 
 # ----------------------------------------------------------------------
 
