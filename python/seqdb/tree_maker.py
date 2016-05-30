@@ -123,7 +123,11 @@ class Maker:
             program = os.path.join(bin_dir, progname)
         else:
             program = progname
-        output = subprocess.check_output(program + " " + version_switch, shell=True, stderr=subprocess.STDOUT).decode("utf-8")
+        if version_switch:
+            prog_ver = program + " " + version_switch
+        else:
+            prog_ver = program
+        output = subprocess.check_output(prog_ver, shell=True, stderr=subprocess.STDOUT).decode("utf-8")
         m = version_rex.search(output)
         if m:
             module_logger.info('{} {}'.format(progname, m.group(1)))
