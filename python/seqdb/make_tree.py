@@ -90,10 +90,10 @@ def run_raxml(working_dir, run_id, fasta_file, source_tree, base_seq_name, raxml
 
 # ----------------------------------------------------------------------
 
-def run_raxml_survived(working_dir, run_id, fasta_file, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, email, machines):
+def run_raxml_survived(working_dir, run_id, fasta_file, source_tree, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, email, machines):
     raxml_output_dir = Path(working_dir, "raxml")
     raxml = Raxml(email=email)
-    raxml_job = raxml.submit_htcondor(num_runs=raxml_num_runs, source=fasta_file, source_tree=None, output_dir=raxml_output_dir,
+    raxml_job = raxml.submit_htcondor(num_runs=raxml_num_runs, source=fasta_file, source_tree=source_tree, output_dir=raxml_output_dir,
                                       run_id=run_id, bfgs=raxml_bfgs, model_optimization_precision=raxml_model_optimization_precision,
                                       outgroups=[base_seq_name], machines=machines)
     r_raxml = raxml_job.wait(kill_rate=raxml_kill_rate, wait_timeout=60)
