@@ -52,7 +52,7 @@ class Fasttree (tree_maker.Maker):
     tree_file_suffix = ".phy"
 
     def __init__(self, email):
-        super().__init__(email, "fasttree", "", re.compile(r"FastTree\s+version\s+([\d\.]+)"))
+        super().__init__(email, "fasttree", "", re.compile(r"FastTree\s+Version\s+([\d\.]+)", re.I))
         self.default_args = ["-nt", "-gtr", "-gamma", "-nopr", "-nosupport"]
 
     # ----------------------------------------------------------------------
