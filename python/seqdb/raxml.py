@@ -71,10 +71,12 @@ class Raxml (tree_maker.Maker):
 
     # ----------------------------------------------------------------------
 
-    def submit_htcondor(self, source, output_dir, run_id, num_runs, bfgs, model_optimization_precision, outgroups :list, machines=None):
+    def submit_htcondor(self, source, source_tree, output_dir, run_id, num_runs, bfgs, model_optimization_precision, outgroups :list, machines=None):
         from . import htcondor
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         general_args = ["-s", str(source.resolve()), "-w", str(output_dir.resolve()), "-m", self.model, "-e", str(model_optimization_precision), "-T", "1", "-N", "1"] + self.default_args
+        if source_tree is not None:
+            general_args += ["-t", str(source_tree)]
         if outgroups:
             general_args += ["-o", ",".join(outgroups)]
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
