@@ -4,7 +4,7 @@
 
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
-import time as time_m, datetime, operator
+import time as time_m, datetime, operator, random, subprocess
 from . import json
 
 # ----------------------------------------------------------------------
@@ -95,7 +95,37 @@ class Task:
 
 # ----------------------------------------------------------------------
 
+class Maker:
 
+    def __init__(self, email, progname, version_switch, version_rex):
+        self.email = email
+        self.find_program(progname, version_rex)
+        self.random_gen = random.SystemRandom()
+
+    def random_seed(self):
+        return self.random_gen.randint(1, 0xFFFFFFFF)
+
+    def find_program(self, progname, version_rex):
+        import socket
+        hostname = socket.getfqdn()
+        # module_logger.debug('hostname {}'.format(hostname))
+        if hostname == "jagd":
+            bin_dir = "/Users/eu/ac/bin"
+        elif hostname == "albertine.antigenic-cartography.org":
+            bin_dir = "/syn/bin"
+        else:
+            bin_dir = None
+        if bin_dir:
+            program = os.path.join(bin_dir, progname)
+        else:
+            program = progname
+        output = subprocess.check_output(program + " " + version_switch, shell=True, stderr=subprocess.STDOUT).decode("utf-8")
+        m = version_rex.search(output)
+        if m:
+            module_logger.info('{} {}'.format(progname, m.group(1)))
+        else:
+            raise ValueError("Unrecognized {} version\n{}".format(progname, output))
+        self.program = program
 
 # ======================================================================
 ### Local Variables:

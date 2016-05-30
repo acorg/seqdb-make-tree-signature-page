@@ -52,12 +52,10 @@ class GarliTask (tree_maker.Task):
 
 # ----------------------------------------------------------------------
 
-class Garli:
+class Garli (tree_maker.Maker):
 
     def __init__(self, email):
-        self.email = email
-        self._find_program()
-        self.random_gen = random.SystemRandom()
+        super().__init__(email, "garli", "-v", re.compile(r"GARLI\s+Version\s+([\d\.]+)"))
         # self.model = "GTRGAMMAI"
         # self.default_args = ["-c", "4", "-f", "d", "--silent", "--no-seq-check"]
 
@@ -65,7 +63,7 @@ class Garli:
         from . import htcondor
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
-        conf_files = [self._make_conf(run_id, source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir, attachmentspertaxon=attachmentspertaxon, randseed=self._random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=stoptime, strip_comments=strip_comments) for run_id in run_ids]
+        conf_files = [self._make_conf(run_id, source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir, attachmentspertaxon=attachmentspertaxon, randseed=self.random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=stoptime, strip_comments=strip_comments) for run_id in run_ids]
         module_logger.info('{} garli conf files saved to {}'.format(len(conf_files), output_dir))
         args=[[str(Path(c).resolve())] for c in conf_files]
         start = time_m.time()
@@ -124,28 +122,6 @@ class Garli:
         with conf_filename.open("w") as f:
             f.write(conf)
         return conf_filename
-
-    # ----------------------------------------------------------------------
-
-    def _find_program(self):
-        import socket
-        hostname = socket.getfqdn()
-        # module_logger.debug('hostname {}'.format(hostname))
-        if hostname == "jagd":
-            self.program = "/Users/eu/ac/bin/garli"
-        elif hostname == "albertine.antigenic-cartography.org":
-            self.program = "/syn/bin/garli"
-        else:
-            self.program = "Garli"
-        output = subprocess.check_output(self.program + " -v", shell=True, stderr=subprocess.STDOUT).decode("utf-8")
-        m = re.search(r"GARLI\s+Version\s+([\d\.]+)", output)
-        if m:
-            module_logger.info('GARLI {}'.format(m.group(1)))
-        else:
-            raise ValueError("Unrecognized GARLI version\n" + output)
-
-    def _random_seed(self):
-        return self.random_gen.randint(1, 0x7FFFFFFF) # garli accepts 31-bit random number seed
 
 # ----------------------------------------------------------------------
 
