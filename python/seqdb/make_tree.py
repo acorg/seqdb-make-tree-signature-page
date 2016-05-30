@@ -131,20 +131,27 @@ def make_results(working_dir, r_raxml, r_garli):
     longest_time = r_raxml.longest_time + r_garli.longest_time
     longest_time_s = RaxmlResult.time_str(longest_time)
     module_logger.info('Longest time: ' + longest_time_s)
-    overall_time = r_raxml.overall_time + r_garli.overall_time
-    overall_time_s = RaxmlResult.time_str(overall_time)
-    module_logger.info('Overall time: ' + overall_time_s)
+    if r_raxml.overall_time and r_garli.overall_time:
+        overall_time = r_raxml.overall_time + r_garli.overall_time
+        overall_time_s = RaxmlResult.time_str(overall_time)
+        module_logger.info('Overall time: ' + overall_time_s)
+    else:
+        overall_time = None
+        overall_time_s = ""
 
     r_best = vars(r_garli.results[0])
     r_best["longest_time"] = longest_time
     r_best["longest_time_s"] = longest_time_s
-    r_best["overall_time"] = overall_time
-    r_best["overall_time_s"] = overall_time_s
+    if overall_time:
+        r_best["overall_time"] = overall_time
+    if overall_time_s:
+        r_best["overall_time_s"] = overall_time_s
     json.dumpf(Path(working_dir, "result.best.json"), r_best)
 
     with Path(working_dir, "result.all.txt").open("w") as f:
         f.write("Longest time: " + longest_time_s + "\n")
-        f.write("Overall time: " + overall_time_s + "\n")
+        if overall_time_s:
+            f.write("Overall time: " + overall_time_s + "\n")
         f.write("GARLI score : " + str(r_best["score"]) + "\n")
         f.write("Tree        : " + str(r_best["tree"]) + "\n")
 
