@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------
 
 HzLineSection::HzLineSection(const Node& aNode, Color aColor)
-    : first_name(aNode.name), first_line(aNode.line_no), last_line(0), color(aColor), line_width(2)
+    : first_name(aNode.name), first_line(aNode.line_no), color(aColor), line_width(2)
 {
 } // HzLineSection::HzLineSection
 

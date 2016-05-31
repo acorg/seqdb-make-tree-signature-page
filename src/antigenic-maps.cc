@@ -39,12 +39,13 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
         const auto chart_viewport = aChart->viewport();
 
         const double scale = aSurface.set_clip_region(map_viewport, chart_viewport.size.width);
-        std::cerr << "map scale " << scale << std::endl;
+          // std::cerr << "map scale " << scale << std::endl;
         aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
 
         aChart->draw_points_reset(aSettings);
-        aChart->tracked_antigens(mNamesPerMap[section_no], aSections[section_no].color, aSettings);
+        const auto num_antigens = aChart->tracked_antigens(mNamesPerMap[section_no], aSections[section_no].color, aSettings);
         aChart->draw(aSurface, scale, aSettings);
+        std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << aSections[section_no].color << " names: " << mNamesPerMap[section_no].size() << " antigens: " << num_antigens << std::endl;
     }
 
 } // AntigenicMaps::draw

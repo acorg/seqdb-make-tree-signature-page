@@ -174,7 +174,7 @@ void Tree::init_hz_line_sections(bool reset)
     if (hz_line_sections.empty()) {
         const auto first = find_first_leaf(*this);
           // const auto last = find_last_leaf(*this);
-        hz_line_sections.emplace_back(first.name, first.line_no, 0);
+        hz_line_sections.emplace_back(first.name, first.line_no);
     }
 
 } // Tree::init_hz_line_sections

@@ -131,7 +131,9 @@ class Chart
 
     void preprocess(const SettingsAntigenicMaps& aSettings);
     void draw_points_reset(const SettingsAntigenicMaps& aSettings) const;
-    void tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const;
+
+      // returns number of antigens from aNames list found in the chart
+    size_t tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const;
 
     const Viewport& viewport() const { return mViewport; }
     void draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;

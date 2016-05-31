@@ -197,15 +197,6 @@ DrawHzLines& DrawHzLines::prepare(Tree& aTree, HzLineSections& aSections)
         section.first_line = first.back()->line_no;
         if (section_no == 0 && section.first_line != 0)
             throw std::runtime_error("Cannot process hz-line-section: line_no for the first section is not 0");
-        if (section_no < (aSections.size() - 1)) {
-            const auto last = aTree.find_name(aSections[section_no + 1].first_name);
-            if (last.empty())
-                throw std::runtime_error("Cannot process hz-line-section: \"" + aSections[section_no + 1].first_name + "\" not found in the tree");
-            section.last_line = last.back()->line_no - 1;
-        }
-        else {
-            section.last_line = find_last_leaf(aTree).line_no;
-        }
     }
 
     std::sort(aSections.begin(), aSections.end(), [](const auto& a, const auto& b) -> bool { return a.first_line < b.first_line; });
@@ -229,7 +220,7 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
         else {
             first_y = aTimeSeries.origin.y;
         }
-        double last_y = section_no == (aSections.size() - 1) ? aTimeSeries.bottom() : aTimeSeries.origin.y + vertical_step * section.last_line + vertical_step * 0.5;
+        double last_y = section_no == (aSections.size() - 1) ? aTimeSeries.bottom() : aTimeSeries.origin.y + vertical_step * aSections[section_no+1].first_line + vertical_step * 0.5;
         aSurface.line({aAntigenicMaps.origin.x, first_y}, {aAntigenicMaps.origin.x, last_y}, section.color, section.line_width);
     }
 

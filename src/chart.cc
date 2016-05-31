@@ -210,14 +210,16 @@ void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/) const
 
 // ----------------------------------------------------------------------
 
-void Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& /*aSettings*/) const
+size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& /*aSettings*/) const
 {
+    size_t tracked = 0;
     mDrawTrackedAntigen.color(aFillColor);
 
     for (const auto& name: aNames) {
         const auto p = mPointByName.find(name);
         if (p != mPointByName.end()) {
             mDrawPoints[p->second] = &mDrawTrackedAntigen;
+            ++tracked;
         }
         else {
             const std::string prefix(name, 0, name.find(1, ' '));
@@ -225,6 +227,7 @@ void Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFill
                 std::cerr << "Error: cannot find chart antigen by name: " << name << std::endl;
         }
     }
+    return tracked;
 
 } // Chart::tracked_antigens
 
