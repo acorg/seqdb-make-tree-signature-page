@@ -29,6 +29,7 @@ class Clades
 
     void add_clade(int aBegin, int aEnd, std::string aLabel, std::string aId, const SettingsClades& aSettings);
     void assign_slots(const SettingsClades& aSettings);
+    void hide_old_clades(SettingsClade& aClade);
 
 }; // class Clades
 

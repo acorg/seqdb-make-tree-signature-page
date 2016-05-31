@@ -38,9 +38,21 @@ void Clades::add_clade(int aBegin, int aEnd, std::string aLabel, std::string aId
     const auto found = std::find_if(aSettings.per_clade.begin(), aSettings.per_clade.end(), [&](const auto& e) -> bool { return aId == e.id; });
     if (found != aSettings.per_clade.end())
         clade.update(*found);
+    else
+        hide_old_clades(clade);
     mClades.push_back(clade);
 
 } // Clades::add_clade
+
+// ----------------------------------------------------------------------
+
+void Clades::hide_old_clades(SettingsClade& aClade)
+{
+      // Hide currently  unused H3 clades by default
+    if (aClade.id == "gly" || aClade.id == "no-gly" || aClade.id == "3C3b")
+        aClade.show = false;
+
+} // Clades::hide_old_clades
 
 // ----------------------------------------------------------------------
 
