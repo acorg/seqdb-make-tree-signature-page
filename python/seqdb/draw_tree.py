@@ -6,16 +6,18 @@
 
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
-import seqdb
+import seqdb as seqdb_m
 
 # ----------------------------------------------------------------------
 
-def draw_tree(tree_file, path_to_seqdb, output_file, title, pdf_width=600, pdf_height=850):
-    tree = seqdb.import_tree(str(tree_file))
-    if path_to_seqdb:
-        seq_db = seqdb.Seqdb()
-        seq_db.load(filename=str(path_to_seqdb))
-        tree.match_seqdb(seq_db)
+def draw_tree(tree_file, seqdb, output_file, title, pdf_width=600, pdf_height=850):
+    tree = seqdb_m.import_tree(str(tree_file))
+    if seqdb:
+        if isinstance(seqdb, (str, Path)):
+            seq_db = seqdb_m.Seqdb()
+            seq_db.load(filename=str(seqdb))
+            seqdb = seq_db
+        tree.match_seqdb(seqdb)
         tree.ladderize()        # must be before clade_setup()
         tree.clade_setup()
     else:
@@ -28,11 +30,11 @@ def draw_tree(tree_file, path_to_seqdb, output_file, title, pdf_width=600, pdf_h
     # tree.settings().draw_tree.aa_transition.number_strains_threshold = args.aa_transition_number_strains_threshold
 
     module_logger.info('Drawing tree into {}'.format(output_file))
-    surface = seqdb.Surface(str(output_file), pdf_width, pdf_height)
-    signature_page = seqdb.SignaturePage()
+    surface = seqdb_m.Surface(str(output_file), pdf_width, pdf_height)
+    signature_page = seqdb_m.SignaturePage()
     (signature_page
-     .select_parts(seqdb.Show.Title | seqdb.Show.Tree | seqdb.Show.Legend | seqdb.Show.TimeSeries | seqdb.Show.Clades)
-     .title(seqdb.Text(seqdb.Location(0, 10), title.format(virus_type=format_virus_type(tree)), 0, 20))
+     .select_parts(seqdb_m.Show.Title | seqdb_m.Show.Tree | seqdb_m.Show.Legend | seqdb_m.Show.TimeSeries | seqdb_m.Show.Clades)
+     .title(seqdb_m.Text(seqdb_m.Location(0, 10), title.format(virus_type=format_virus_type(tree)), 0, 20))
      .color_by_continent(True)
      .prepare(tree, surface)
      .draw(tree, surface))

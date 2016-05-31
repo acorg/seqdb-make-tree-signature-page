@@ -28,7 +28,7 @@ def main(args):
         else:
             r_garli = None
         if r_raxml and r_garli:
-            results = make_tree.make_results(Path(args.dir[0]), r_raxml=r_raxml, r_garli=r_garli, path_to_seqdb=args.path_to_seqdb)
+            results = make_tree.make_results(Path(args.dir[0]), r_raxml=r_raxml, r_garli=r_garli, seqdb=args.path_to_seqdb)
         else:
             results = None
     if results:

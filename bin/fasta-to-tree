@@ -57,7 +57,7 @@ def main(args):
             sort_by=None, with_hi_name=False, name_match=None)
         if not args.foreground_mode:
             run_in_background(working_dir=working_dir)
-        r = f(working_dir=working_dir, run_id=run_id, fasta_file=export_data["filename"],
+        r = f(working_dir=working_dir, seqdb=seqdb, run_id=run_id, fasta_file=export_data["filename"],
               number_of_sequences=export_data["number_of_sequences"], base_seq_name=export_data["base_seq"],
               raxml_kill_rate=args.raxml_kill_rate, raxml_bfgs=args.raxml_bfgs, raxml_model_optimization_precision=args.raxml_model_optimization_precision, raxml_num_runs=args.raxml_num_runs,
               garli_num_runs=args.garli_num_runs, garli_attachmentspertaxon=args.garli_attachmentspertaxon, garli_stoptime=args.garli_stoptime,

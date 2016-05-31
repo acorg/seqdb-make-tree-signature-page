@@ -14,44 +14,44 @@ from .fasttree import Fasttree, FasttreeResults
 
 # ======================================================================
 
-def run_raxml_best_garli(working_dir, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, garli_num_runs, garli_attachmentspertaxon, garli_stoptime, email, machines):
+def run_raxml_best_garli(working_dir, seqdb, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, garli_num_runs, garli_attachmentspertaxon, garli_stoptime, email, machines):
     """Run RAxML raxml_num_runs times, take the best result and run GARLI garli_num_runs times starting with that best result."""
     run_id = run_id.replace(' ', '-').replace('/', '-') # raxml cannot handle spaces and slashes in run-id
     save_settings(working_dir=working_dir, run_id=run_id, mode="best", fasta_file=Path(fasta_file).resolve(), number_of_sequences=number_of_sequences, base_seq_name=base_seq_name, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
     r_raxml = run_raxml(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, source_tree=None, base_seq_name=base_seq_name, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, email=email, machines=machines)
     r_garli = run_garli(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, tree=r_raxml.best_tree(), garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
-    return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli)
+    return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli, seqdb=seqdb)
 
 # ----------------------------------------------------------------------
 
-def run_raxml_survived_best_garli(working_dir, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, garli_num_runs, garli_attachmentspertaxon, garli_stoptime, email, machines):
+def run_raxml_survived_best_garli(working_dir, seqdb, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, garli_num_runs, garli_attachmentspertaxon, garli_stoptime, email, machines):
     """Run RAxML raxml_num_runs times with raxml_kill_rate, take the best result and run GARLI garli_num_runs times starting with that best result."""
     run_id = run_id.replace(' ', '-').replace('/', '-') # raxml cannot handle spaces and slashes in run-id
     save_settings(working_dir=working_dir, run_id=run_id, mode="survived-best", fasta_file=Path(fasta_file).resolve(), number_of_sequences=number_of_sequences, base_seq_name=base_seq_name, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
     r_raxml = run_raxml_survived(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, source_tree=None, base_seq_name=base_seq_name, raxml_kill_rate=raxml_kill_rate, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, email=email, machines=machines)
     r_garli = run_garli(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, tree=r_raxml.best_tree(), garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
-    return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli)
+    return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli, seqdb=seqdb)
 
 # ----------------------------------------------------------------------
 
-def run_fasttree_raxml_survived_best_garli(working_dir, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, garli_num_runs, garli_attachmentspertaxon, garli_stoptime, email, machines):
+def run_fasttree_raxml_survived_best_garli(working_dir, seqdb, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, garli_num_runs, garli_attachmentspertaxon, garli_stoptime, email, machines):
     """Runs fasttree once, run RAxML raxml_num_runs times with raxml_kill_rate, take the best result and run GARLI garli_num_runs times starting with that best result."""
     run_id = run_id.replace(' ', '-').replace('/', '-') # raxml cannot handle spaces and slashes in run-id
     save_settings(working_dir=working_dir, run_id=run_id, mode="fasttree-survived-best", fasta_file=Path(fasta_file).resolve(), number_of_sequences=number_of_sequences, base_seq_name=base_seq_name, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
     r_fasttree = run_fasttree(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, email=email, machines=machines)
     r_raxml = run_raxml_survived(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, source_tree=r_fasttree.best_tree(), base_seq_name=base_seq_name, raxml_kill_rate=raxml_kill_rate, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, email=email, machines=machines)
     r_garli = run_garli(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, tree=r_raxml.best_tree(), garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
-    return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli)
+    return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli, seqdb=seqdb)
 
 # ----------------------------------------------------------------------
 
-def run_raxml_all_garli(working_dir, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, garli_num_runs, garli_attachmentspertaxon, garli_stoptime, email, machines):
+def run_raxml_all_garli(working_dir, seqdb, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_kill_rate, raxml_bfgs, raxml_model_optimization_precision, raxml_num_runs, garli_num_runs, garli_attachmentspertaxon, garli_stoptime, email, machines):
     """Run RAxML raxml_num_runs times, take all the results and run GARLI garli_num_runs times starting with each result."""
     run_id = run_id.replace(' ', '-').replace('/', '-') # raxml cannot handle spaces and slashes in run-id
     save_settings(working_dir=working_dir, run_id=run_id, mode="all", fasta_file=Path(fasta_file).resolve(), number_of_sequences=number_of_sequences, base_seq_name=base_seq_name, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
     r_raxml = run_raxml(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, source_tree=None, base_seq_name=base_seq_name, raxml_kill_rate=raxml_kill_rate, raxml_bfgs=raxml_bfgs, raxml_model_optimization_precision=raxml_model_optimization_precision, raxml_num_runs=raxml_num_runs, email=email, machines=machines)
     r_garli = run_garli_multi(working_dir=working_dir, run_id=run_id, fasta_file=fasta_file, trees=[r.tree for r in r_raxml.results], garli_num_runs=garli_num_runs, garli_attachmentspertaxon=garli_attachmentspertaxon, garli_stoptime=garli_stoptime, email=email, machines=machines)
-    return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli)
+    return make_results(working_dir=working_dir, r_raxml=r_raxml, r_garli=r_garli, seqdb=seqdb)
 
 # ======================================================================
 
@@ -152,7 +152,7 @@ def run_fasttree(working_dir, run_id, fasta_file, email, machines):
 
 # ----------------------------------------------------------------------
 
-def make_results(working_dir, r_raxml, r_garli, path_to_seqdb):
+def make_results(working_dir, r_raxml, r_garli, seqdb):
     longest_time = r_raxml.longest_time + r_garli.longest_time
     longest_time_s = RaxmlResult.time_str(longest_time)
     module_logger.info('Longest time: ' + longest_time_s)
@@ -196,7 +196,7 @@ def make_results(working_dir, r_raxml, r_garli, path_to_seqdb):
 
     from .draw_tree import draw_tree
     draw_tree(tree_file=r_best["tree"],
-              path_to_seqdb=path_to_seqdb,
+              seqdb=seqdb,
               output_file=Path(working_dir, "tree.pdf"),
               title="{{virus_type}} GARLI-score: {} Time: {} ({})".format(r_best["score"], overall_time_s, longest_time_s),
               pdf_width=1000, pdf_height=850
