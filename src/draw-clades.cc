@@ -59,11 +59,15 @@ void Clades::hide_old_clades(SettingsClade& aClade)
 void Clades::assign_slots(const SettingsClades& /*aSettings*/)
 {
     std::sort(mClades.begin(), mClades.end(), [](const auto& a, const auto& b) -> bool { return a.begin == b.begin ? a.end > b.end : a.begin < b.begin; });
-    int slot = 0;
+    decltype(mClades.front().slot) slot = 0;
+    decltype(mClades.front().begin) last_end = 0;
     for (auto& clade: mClades) {
-        if (clade.slot < 0 && clade.show)
+        if (clade.slot < 0 && clade.show) {
+            if (last_end > clade.begin)
+                ++slot;         // increase slot in case of overlapping
             clade.slot = slot;
-        ++slot;
+            last_end = clade.end;
+        }
     }
 
 } // Clades::assign_slots
