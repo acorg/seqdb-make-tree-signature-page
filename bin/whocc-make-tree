@@ -19,7 +19,7 @@ from seqdb import Seqdb, timeit, email, run_in_background
 
 sBaseSeq = {
     "BVIC": "VICTORIA/830/2013 MDCK2",
-    "BYAM": "CAMBODIA/FSS29374/2014 MDCK1",
+    "BYAM": "B/PHUKET/3073/2013 E4/E2", # "CAMBODIA/FSS29374/2014 MDCK1", # David used for 201602 SSM B/HUMAN/PHUKET/3073/2013%20E4/E1/SPF12%20%2A%20CDC-LV11B%20%28%20YAMAGATA-2013-01-01, current hidb match for it is E4/E2
     "H3":   "HAWAII/22/2012 MDCK1",
     "H1":   "SWITZERLAND/9772556/2013 SIAT2",
     }
