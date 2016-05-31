@@ -64,7 +64,11 @@ def main(args):
         parts |= seqdb.Show.Clades
 
     if args.chart:
-        chart = seqdb.import_chart(args.chart)
+        try:
+            chart = seqdb.import_chart(args.chart)
+        except Exception as err:
+            module_logger.error('chart {} import failed:\n{}'.format(args.chart, err))
+            exit(1)
         parts |= seqdb.Show.AntigenicMaps
     else:
         chart = None

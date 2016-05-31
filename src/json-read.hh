@@ -92,9 +92,20 @@ namespace jsonr
         return (axe::r_str("true") >> yes) | (axe::r_str("1") >> yes) | (axe::r_str("false") >> no) | (axe::r_str("0") >> no) | axe::r_fail("true or 1 or false or 0 expected");
     };
 
+    inline auto r_null(std::string& target)
+    {
+        return axe::r_lit("null") >> axe::e_ref([&](auto, auto) { target.clear(); });
+    };
+
     inline auto r_string(std::string& target)
     {
-        return doublequotes >= axe::r_named(string_content >> target, "string_content to target") >= doublequotes;
+        return (doublequotes >= axe::r_named(string_content >> target, "string_content to target") >= doublequotes) | r_null(target);
+    };
+
+    template <typename T> inline auto r_assign_string_to(T& target)
+    {
+        return (doublequotes >= (string_content >> axe::e_ref([&](auto b, auto e) { target = std::string(b, e); })) >= doublequotes)
+                | (axe::r_lit("null") >> axe::e_ref([&](auto, auto) { target = std::string(); }));
     };
 
     inline auto r_double(double& target)
@@ -243,10 +254,7 @@ namespace jsonr
 
         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
         {
-            auto read_value = [this](auto b, auto e) {
-                mTarget = std::string(b, e);
-            };
-            return axe::r_named(skey(mKey) >= doublequotes >= (string_content >> axe::e_ref(read_value)) >= doublequotes, "jsonr::object_string_value")(i1, i2);
+            return (skey(mKey) >= r_assign_string_to(mTarget))(i1, i2);
         }
 
       private:

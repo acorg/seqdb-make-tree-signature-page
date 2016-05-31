@@ -122,22 +122,26 @@ constexpr const char* SDB_VERSION = "acmacs-sdb-v1";
 
 Chart Chart::from_json(std::string data)
 {
+    using namespace jsonr;
     Chart chart;
-    auto parse_chart = jsonr::object(
-        jsonr::version(SDB_VERSION)
-      | jsonr::object_string_ignore_value(" created")
-      | jsonr::object_string_ignore_value("?points")
+    auto parse_chart = object(
+        version(SDB_VERSION)
+      | object_string_ignore_value(" created")
+      | object_string_ignore_value("?points")
       | json_parser_ChartInfo(chart.mInfo)
-      | jsonr::object_value("minimum_column_basis", chart.mMinimumColumnBasis)
-      | jsonr::object_array_value("points", chart.mPoints)
-      | jsonr::object_value("stress", chart.mStress)
-      | jsonr::object_value("column_bases", chart.mColumnBases)
+      | object_value("minimum_column_basis", chart.mMinimumColumnBasis)
+      | object_array_value("points", chart.mPoints)
+      | object_value("stress", chart.mStress)
+      | object_value("column_bases", chart.mColumnBases)
         );
     try {
         parse_chart(std::begin(data), std::end(data));
     }
     catch (axe::failure<char>& err) {
-        throw jsonr::JsonParsingError(err.message());
+        throw JsonParsingError(err.message());
+    }
+    catch (failure& err) {
+        throw JsonParsingError(err.message(std::begin(data)));
     }
     return chart;
 
