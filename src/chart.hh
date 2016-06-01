@@ -9,6 +9,7 @@
 
 class Point;
 class SettingsAntigenicMaps;
+class Node;
 
 // ----------------------------------------------------------------------
 
@@ -141,7 +142,8 @@ class Chart
 
       // returns number of antigens from aNames list found in the chart
     size_t tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const;
-    void sequenced_antigens(const std::vector<std::string>& aNames);
+      // returns line_no for each antigen from aLeaves found in the chart
+    std::vector<size_t> sequenced_antigens(const std::vector<const Node*>& aLeaves);
 
     const Viewport& viewport() const { return mViewport; }
     void draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;

@@ -1,6 +1,7 @@
 #include "draw-tree.hh"
 
 #include "tree.hh"
+#include "antigenic-maps.hh"
 
 // ----------------------------------------------------------------------
 
@@ -207,7 +208,7 @@ DrawHzLines& DrawHzLines::prepare(Tree& aTree, HzLineSections& aSections)
 
 // ----------------------------------------------------------------------
 
-void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMaps, const DrawTree& aDrawTree, const HzLineSections& aSections)
+void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps& aAntigenicMaps, const HzLineSections& aSections)
 {
     const auto vertical_step = aDrawTree.vertical_step();
     for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
@@ -215,13 +216,22 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
         double first_y;
         if (section_no != 0) {
             first_y = aTimeSeries.origin.y + vertical_step * section.first_line - vertical_step * 0.5;
+              // draw hz line in the time series area
             aSurface.line({aTimeSeries.origin.x, first_y}, {aTimeSeries.right(), first_y}, aSections.hz_line_color, aSections.hz_line_width);
         }
         else {
             first_y = aTimeSeries.origin.y;
         }
+
+          // draw section vertical colored bar
         double last_y = section_no == (aSections.size() - 1) ? aTimeSeries.bottom() : aTimeSeries.origin.y + vertical_step * aSections[section_no+1].first_line + vertical_step * 0.5;
-        aSurface.line({aAntigenicMaps.origin.x, first_y}, {aAntigenicMaps.origin.x, last_y}, section.color, section.line_width);
+        aSurface.line({aAntigenicMapsViewport.origin.x, first_y}, {aAntigenicMapsViewport.origin.x, last_y}, section.color, section.line_width);
+    }
+
+      // draw sequenced antigen marks
+    for (auto line_no: aAntigenicMaps.lines_of_sequenced_antigens_in_chart()) {
+        const double y = aTimeSeries.origin.y + vertical_step * line_no;
+        aSurface.line({aAntigenicMapsViewport.origin.x, y}, {aAntigenicMapsViewport.origin.x - 5, y}, GREY, 0.5);
     }
 
 } // DrawHzLines::draw

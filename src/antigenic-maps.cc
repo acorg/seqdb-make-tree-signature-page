@@ -16,7 +16,7 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageAr
         mNamesPerMap.push_back(aTree.names());
     }
 
-    aChart->sequenced_antigens(aTree.names());
+    mLinesOfSequencedAntigensInChart = aChart->sequenced_antigens(aTree.leaves());
 
     mGap = aSettings.gap_between_maps * aPageArea.size.width;
     std::tie(mGridWidth, mGridHeight) = grid();

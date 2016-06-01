@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "chart.hh"
+#include "tree.hh"
 #include "read-file.hh"
 #include "xz.hh"
 #include "settings.hh"
@@ -213,15 +214,18 @@ void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/) const
 
 // ----------------------------------------------------------------------
 
-void Chart::sequenced_antigens(const std::vector<std::string>& aNames)
+std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aLeaves)
 {
     mSequencedAntigens.clear();
-    for (const auto& name: aNames) {
-        const auto p = mPointByName.find(name);
+    std::vector<size_t> lines;
+    for (const auto& leaf: aLeaves) {
+        const auto p = mPointByName.find(leaf->name);
         if (p != mPointByName.end()) {
             mSequencedAntigens.insert(p->second);
+            lines.push_back(leaf->line_no);
         }
     }
+    return lines;
 
 } // Chart::sequenced_antigens
 

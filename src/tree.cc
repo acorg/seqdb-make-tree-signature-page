@@ -423,6 +423,19 @@ std::vector<std::string> Tree::names_between(std::string first, std::string last
 
 // ----------------------------------------------------------------------
 
+std::vector<const Node*> Tree::leaves() const
+{
+    std::vector<const Node*> leaves;
+    auto get_leaf = [&](const Node& aNode) {
+        leaves.push_back(&aNode);
+    };
+    iterate_leaf(*this, get_leaf);
+    return leaves;
+
+} // Tree::leaves
+
+// ----------------------------------------------------------------------
+
 void Tree::make_aa_transitions(const std::vector<size_t>& aPositions)
 {
     std::vector<const Node*> leaf_nodes = leaf_nodes_sorted_by_cumulative_edge_length();

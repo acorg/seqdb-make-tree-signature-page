@@ -234,6 +234,7 @@ class Tree : public Node
 
     std::vector<std::string> names() const;
     std::vector<std::string> names_between(std::string first, std::string last) const;
+    std::vector<const Node*> leaves() const;
 
       // aa transitions
     void make_aa_transitions();
