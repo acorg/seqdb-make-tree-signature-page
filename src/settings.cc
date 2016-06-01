@@ -176,6 +176,9 @@ jsonw::IfPrependComma SettingsAntigenicMaps::json(std::string& target, jsonw::If
     comma = jsonw::json(target, comma, "test_antigen_fill_color", test_antigen_fill_color, indent, prefix);
     comma = jsonw::json(target, comma, "vaccine_antigen_outline_color", vaccine_antigen_outline_color, indent, prefix);
     comma = jsonw::json(target, comma, "tracked_antigen_outline_color", tracked_antigen_outline_color, indent, prefix);
+    comma = jsonw::json(target, comma, "sequenced_antigen_outline_width", sequenced_antigen_outline_width, indent, prefix);
+    comma = jsonw::json(target, comma, "sequenced_antigen_outline_color", sequenced_antigen_outline_color, indent, prefix);
+    comma = jsonw::json(target, comma, "sequenced_antigen_fill_color", sequenced_antigen_fill_color, indent, prefix);
       // comma = jsonw::json(target, comma, "?", "", indent, prefix);
     return  jsonw::json_end(target, '}', indent, prefix);
 

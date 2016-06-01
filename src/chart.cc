@@ -194,6 +194,9 @@ void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/) const
             if (p.vaccine) {
                 mDrawPoints[point_no] = &mDrawVaccineAntigen;
             }
+            else if (mSequencedAntigens.find(point_no) != mSequencedAntigens.end()) {
+                mDrawPoints[point_no] = &mDrawSequencedAntigen;
+            }
             else if (p.reference) {
                 mDrawPoints[point_no] = &mDrawReferenceAntigen;
             }
@@ -207,6 +210,20 @@ void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/) const
     }
 
 } // Chart::draw_points_reset
+
+// ----------------------------------------------------------------------
+
+void Chart::sequenced_antigens(const std::vector<std::string>& aNames)
+{
+    mSequencedAntigens.clear();
+    for (const auto& name: aNames) {
+        const auto p = mPointByName.find(name);
+        if (p != mPointByName.end()) {
+            mSequencedAntigens.insert(p->second);
+        }
+    }
+
+} // Chart::sequenced_antigens
 
 // ----------------------------------------------------------------------
 
@@ -294,6 +311,16 @@ void DrawTestAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjec
                            aSettings.test_antigen_outline_width * aObjectScale, aSettings.test_antigen_fill_color);
 
 } // DrawTestAntigen::draw
+
+// ----------------------------------------------------------------------
+
+void DrawSequencedAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+{
+    aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+                           aSettings.sequenced_antigen_outline_color,
+                           aSettings.sequenced_antigen_outline_width * aObjectScale, aSettings.sequenced_antigen_fill_color);
+
+} // DrawSequencedAntigen::draw
 
 // ----------------------------------------------------------------------
 

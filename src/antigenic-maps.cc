@@ -4,7 +4,7 @@
 
 // ----------------------------------------------------------------------
 
-AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageArea, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
+AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
 {
     if (!aSections.empty()) {
         for (size_t section_no = 0; section_no < (aSections.size() - 1); ++section_no) {
@@ -15,6 +15,8 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageAr
     else {
         mNamesPerMap.push_back(aTree.names());
     }
+
+    aChart->sequenced_antigens(aTree.names());
 
     mGap = aSettings.gap_between_maps * aPageArea.size.width;
     std::tie(mGridWidth, mGridHeight) = grid();

@@ -17,7 +17,7 @@ class AntigenicMaps
  public:
     inline AntigenicMaps() : mGap(0) {}
 
-    AntigenicMaps& prepare(const Tree& aTree, const Viewport& aPageArea, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+    AntigenicMaps& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
     void draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const;
 
     inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const

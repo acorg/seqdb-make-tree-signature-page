@@ -93,7 +93,7 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
             if (aChart == nullptr)
                 throw std::runtime_error("Antigenic maps part requested but no chart provided to SignaturePage.prepare");
             aChart->preprocess(aTree.settings().antigenic_maps);
-            mAntigenicMaps->prepare(aTree, mPageArea, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
+            mAntigenicMaps->prepare(aTree, mPageArea, aChart, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
         }
     }
     return *this;
