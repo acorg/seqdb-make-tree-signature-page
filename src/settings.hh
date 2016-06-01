@@ -160,6 +160,109 @@ class SettingsAATransition
 
 // ----------------------------------------------------------------------
 
+class SettingsVaccineOnTree
+{
+ private:
+    class json_parser_t AXE_RULE
+        {
+          public:
+            inline json_parser_t(SettingsVaccineOnTree& aVaccine) : mVaccine(aVaccine) {}
+
+            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
+            {
+                using namespace jsonr;
+                return (object(
+                    object_value("id", mVaccine.id)
+                  | object_value("label", mVaccine.label)
+                  | object_value("label_style", mVaccine.label_style)
+                  | object_value("label_size", mVaccine.label_size)
+                  | object_value("label_offset_x", mVaccine.label_offset_x)
+                  | object_value("label_offset_y", mVaccine.label_offset_y)
+                  | object_string_value("label_color", mVaccine.label_color)
+                  | object_string_value("line_color", mVaccine.line_color)
+                  | object_value("line_width", mVaccine.line_width)
+                  | object_string_ignore_value("?")
+                    ))(i1, i2);
+            }
+
+          private:
+            SettingsVaccineOnTree& mVaccine;
+        };
+
+ public:
+    inline SettingsVaccineOnTree() : label_size(10), label_offset_x(-50), label_offset_y(50), label_color(BLACK), line_color(BLACK), line_width(1) {}
+
+    inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
+        {
+            comma = jsonw::json_begin(target, comma, '{', indent, prefix);
+            comma = jsonw::json(target, comma, "id", id, 0, prefix);
+            comma = jsonw::json(target, comma, "label", label, 0, prefix);
+            comma = jsonw::json(target, comma, "label_style", label_style, 0, prefix);
+            comma = jsonw::json(target, comma, "label_size", label_size, 0, prefix);
+            comma = jsonw::json(target, comma, "label_offset_x", label_offset_x, 0, prefix);
+            comma = jsonw::json(target, comma, "label_offset_y", label_offset_y, 0, prefix);
+            comma = jsonw::json(target, comma, "label_color", label_color, 0, prefix);
+            comma = jsonw::json(target, comma, "line_color", line_color, 0, prefix);
+            comma = jsonw::json(target, comma, "line_width", line_width, 0, prefix);
+            return  jsonw::json_end(target, '}', 0, prefix);
+        }
+
+    inline auto json_parser() { return json_parser_t(*this); }
+
+    std::string id;
+    std::string label;
+    TextStyle label_style;
+    double label_size;
+    double label_offset_x;
+    double label_offset_y;
+    Color label_color;
+    Color line_color;
+    double line_width;
+
+}; // class SettingsVaccineOnTree
+
+// ----------------------------------------------------------------------
+
+class SettingsVaccinesOnTree : public std::vector<SettingsVaccineOnTree>
+{
+ public:
+    static constexpr const char* json_name = "vaccines";
+
+ private:
+    class json_parser_t AXE_RULE
+        {
+          public:
+            inline json_parser_t(SettingsVaccinesOnTree& aSettings) : mSettings(aSettings) {}
+
+            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
+            {
+                using namespace jsonr;
+                return (skey(json_name) > object(
+                      object_value(SettingsVaccinesOnTree::json_name, static_cast<std::vector<SettingsVaccineOnTree>&>(mSettings))
+                    | object_string_ignore_value("?")
+                      ))(i1, i2);
+            }
+
+          private:
+            SettingsVaccinesOnTree& mSettings;
+        };
+
+ public:
+    inline SettingsVaccinesOnTree() {}
+
+    inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
+        {
+            comma = jsonw::json_begin(target, comma, '{', indent, prefix);
+            comma = jsonw::json(target, comma, SettingsVaccinesOnTree::json_name, static_cast<const std::vector<SettingsVaccineOnTree>&>(*this), indent, prefix);
+            return  jsonw::json_end(target, '}', indent, prefix);
+        }
+
+    inline auto json_parser() { return json_parser_t(*this); }
+
+}; // class SettingsVaccinesOnTree
+
+// ----------------------------------------------------------------------
+
 class HzLineSection
 {
  private:
@@ -294,6 +397,7 @@ class SettingsDrawTree
                   | object_double_value("name_offset", mSettings.name_offset)
                   | object_value("label_style", mSettings.label_style)
                   | mSettings.aa_transition.json_parser()
+                  | mSettings.vaccines.json_parser()
                   | object_value("grid_step", mSettings.grid_step)
                   | object_string_value("grid_color", mSettings.grid_color)
                   | object_double_non_negative_value("grid_width", mSettings.grid_width)
@@ -321,6 +425,7 @@ class SettingsDrawTree
     TextStyle label_style;
     double name_offset;
     SettingsAATransition aa_transition;
+    SettingsVaccinesOnTree vaccines;
     size_t grid_step;           // 0 - no grid, N - use N*vertical_step as grid cell height
     Color grid_color;
     double grid_width;
