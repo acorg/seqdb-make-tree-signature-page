@@ -228,6 +228,10 @@ class HzLineSections : public std::vector<HzLineSection>
                 return (skey(HzLineSections::json_name) > object(
                     object_value("hz_line_width", mSections.hz_line_width)
                   | object_string_value("hz_line_color", mSections.hz_line_color)
+                  | object_value("sequenced_antigen_line_show", mSections.sequenced_antigen_line_show)
+                  | object_value("sequenced_antigen_line_width", mSections.sequenced_antigen_line_width)
+                  | object_value("sequenced_antigen_line_length", mSections.sequenced_antigen_line_length)
+                  | object_string_value("sequenced_antigen_line_color", mSections.sequenced_antigen_line_color)
                   | object_value(HzLineSections::json_name, static_cast<std::vector<HzLineSection>&>(mSections))
                   | object_string_ignore_value("?")
                     ))(i1, i2);
@@ -240,7 +244,7 @@ class HzLineSections : public std::vector<HzLineSection>
  public:
     static constexpr const char* json_name = "hz_line_sections";
 
-    inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY) {}
+    inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY), sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY) {}
 
     inline void sort()
         {
@@ -252,6 +256,10 @@ class HzLineSections : public std::vector<HzLineSection>
             comma = jsonw::json_begin(target, comma, '{', indent, prefix);
             comma = jsonw::json(target, comma, "hz_line_width", hz_line_width, indent, prefix);
             comma = jsonw::json(target, comma, "hz_line_color", hz_line_color, indent, prefix);
+            comma = jsonw::json(target, comma, "sequenced_antigen_line_show", sequenced_antigen_line_show, indent, prefix);
+            comma = jsonw::json(target, comma, "sequenced_antigen_line_width", sequenced_antigen_line_width, indent, prefix);
+            comma = jsonw::json(target, comma, "sequenced_antigen_line_length", sequenced_antigen_line_length, indent, prefix);
+            comma = jsonw::json(target, comma, "sequenced_antigen_line_color", sequenced_antigen_line_color, indent, prefix);
             comma = jsonw::json(target, comma, HzLineSections::json_name, static_cast<const std::vector<HzLineSection>&>(*this), indent, prefix);
             return  jsonw::json_end(target, '}', indent, prefix);
         }
@@ -260,6 +268,9 @@ class HzLineSections : public std::vector<HzLineSection>
 
     double hz_line_width;
     Color hz_line_color;
+    bool sequenced_antigen_line_show;
+    double sequenced_antigen_line_width, sequenced_antigen_line_length;
+    Color sequenced_antigen_line_color;
 
 }; // class HzLineSections
 

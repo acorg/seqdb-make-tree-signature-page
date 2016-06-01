@@ -228,10 +228,14 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
         aSurface.line({aAntigenicMapsViewport.origin.x, first_y}, {aAntigenicMapsViewport.origin.x, last_y}, section.color, section.line_width);
     }
 
-      // draw sequenced antigen marks
-    for (auto line_no: aAntigenicMaps.lines_of_sequenced_antigens_in_chart()) {
-        const double y = aTimeSeries.origin.y + vertical_step * line_no;
-        aSurface.line({aAntigenicMapsViewport.origin.x, y}, {aAntigenicMapsViewport.origin.x - 5, y}, GREY, 0.5);
+    if (aSections.sequenced_antigen_line_show) {
+          // draw sequenced antigen marks
+        const double mark_x1 = aAntigenicMapsViewport.origin.x - aSections[0].line_width;
+        const double mark_x2 = mark_x1 - aSections.sequenced_antigen_line_length;
+        for (auto line_no: aAntigenicMaps.lines_of_sequenced_antigens_in_chart()) {
+            const double y = aTimeSeries.origin.y + vertical_step * line_no;
+            aSurface.line({mark_x1, y}, {mark_x2, y}, aSections.sequenced_antigen_line_color, aSections.sequenced_antigen_line_width);
+        }
     }
 
 } // DrawHzLines::draw
