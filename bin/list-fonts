@@ -1,0 +1,4 @@
+#! /bin/sh
+# lists fonts available for cairo in the system
+# http://stackoverflow.com/questions/28729589/how-to-select-fonts-more-specifically-in-cairo
+fc-list | sed 's/.*:\(.*,\|\s\)\(.*\):.*/\2/' | sort -u

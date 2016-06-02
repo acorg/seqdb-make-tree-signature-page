@@ -50,7 +50,7 @@ class SettingsAATransition
     class TransitionData
     {
      public:
-        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style(FontStyle::Monospace), interline(empty ? -1 : 1.2) {}
+        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("monospace"), interline(empty ? -1 : 1.2) {}
         inline TransitionData(std::string aBranchId, std::vector<std::string>&& aLabels) : TransitionData(true) { branch_id = aBranchId; labels = std::move(aLabels); }
 
         double size;
@@ -459,7 +459,7 @@ class SettingsLegend
 
  public:
     inline SettingsLegend()
-        : font_size(14), interline(1.2), style(FontStyle::Monospace) {}
+        : font_size(14), interline(1.2), style("monospace") {}
 
     jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
 

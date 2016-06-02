@@ -201,7 +201,33 @@ constexpr const Color COLOR_NOT_SET = 0xFFFFFFFF;
 
 // ----------------------------------------------------------------------
 
-enum class FontStyle { Default, Monospace };
+class FontStyle
+{
+ public:
+    inline FontStyle() : cairo_family("sans-serif") {}
+    inline FontStyle(std::string aFamily) { from_string(aFamily); }
+    inline FontStyle& operator=(std::string aFamily) { from_string(aFamily); return *this; }
+
+    inline void from_string(std::string aFamily)
+        {
+            if (aFamily == "default")
+                cairo_family = "sans-serif";
+            else
+                cairo_family = aFamily;
+        }
+
+    inline std::string to_string() const
+        {
+            return cairo_family;
+        }
+
+    inline operator const char*() const { return cairo_family.c_str(); }
+
+ private:
+    std::string cairo_family;
+};
+
+// ----------------------------------------------------------------------
 
 class TextStyle
 {
@@ -213,7 +239,7 @@ class TextStyle
 
             template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
             {
-                auto r_font = jsonr::object_enum_value("font", mTextStyle.mFontStyle, &TextStyle::font_style_from_string);
+                auto r_font = jsonr::object_string_value("font", mTextStyle.mFontStyle);
                 auto r_slant = jsonr::object_enum_value("slant", mTextStyle.mSlant, &TextStyle::slant_from_string);
                 auto r_weight = jsonr::object_enum_value("weight", mTextStyle.mWeight, &TextStyle::weight_from_string);
                 auto r_comment = jsonr::object_string_ignore_value("?");
@@ -225,10 +251,10 @@ class TextStyle
         };
 
  public:
-    inline TextStyle() : mFontStyle(FontStyle::Default), mSlant(CAIRO_FONT_SLANT_NORMAL), mWeight(CAIRO_FONT_WEIGHT_NORMAL) {}
-    inline TextStyle(FontStyle aFontStyle) : mFontStyle(aFontStyle), mSlant(CAIRO_FONT_SLANT_NORMAL), mWeight(CAIRO_FONT_WEIGHT_NORMAL) {}
+    inline TextStyle() : mSlant(CAIRO_FONT_SLANT_NORMAL), mWeight(CAIRO_FONT_WEIGHT_NORMAL) {}
+    inline TextStyle(std::string aFontFamily) : mFontStyle(aFontFamily), mSlant(CAIRO_FONT_SLANT_NORMAL), mWeight(CAIRO_FONT_WEIGHT_NORMAL) {}
 
-    inline FontStyle font_style() const { return mFontStyle; }
+    inline const FontStyle& font_style() const { return mFontStyle; }
     inline cairo_font_slant_t slant() const { return mSlant; }
     inline cairo_font_weight_t weight() const { return mWeight; }
 
@@ -240,7 +266,6 @@ class TextStyle
     cairo_font_slant_t mSlant;
     cairo_font_weight_t mWeight;
 
-    static FontStyle font_style_from_string(std::string source);
     static cairo_font_slant_t slant_from_string(std::string source);
     static cairo_font_weight_t weight_from_string(std::string source);
 

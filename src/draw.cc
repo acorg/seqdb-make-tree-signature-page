@@ -197,14 +197,7 @@ void Surface::text(const Location& a, std::string aText, Color aColor, double aS
 
 void Surface::prepare_for_text(double aSize, const TextStyle& aTextStyle)
 {
-    switch (aTextStyle.font_style()) {
-      case FontStyle::Monospace:
-          cairo_select_font_face(mContext, "monospace", aTextStyle.slant(), aTextStyle.weight());
-          break;
-      case FontStyle::Default:
-          cairo_select_font_face(mContext, "sans-serif", aTextStyle.slant(), aTextStyle.weight());
-          break;
-    }
+    cairo_select_font_face(mContext, aTextStyle.font_style(), aTextStyle.slant(), aTextStyle.weight());
     cairo_set_font_size(mContext, aSize);
 
 } // Surface::prepare_for_text
@@ -247,14 +240,7 @@ jsonw::IfPrependComma TextStyle::json(std::string& target, jsonw::IfPrependComma
 {
     indent = 0;                 // store in the single line
     comma = json_begin(target, comma, '{', indent, prefix);
-    switch (font_style()) {
-      case FontStyle::Default:
-          comma = jsonw::json(target, comma, "font", "default", indent, prefix);
-          break;
-      case FontStyle::Monospace:
-          comma = jsonw::json(target, comma, "font", "monospace", indent, prefix);
-          break;
-    }
+    comma = jsonw::json(target, comma, "font", font_style(), indent, prefix);
     switch (slant()) {
       case CAIRO_FONT_SLANT_NORMAL:
           comma = jsonw::json(target, comma, "slant", "normal", indent, prefix);
@@ -278,19 +264,6 @@ jsonw::IfPrependComma TextStyle::json(std::string& target, jsonw::IfPrependComma
     return jsonw::json_end(target, '}', indent, prefix);
 
 } // TextStyle::json
-
-// ----------------------------------------------------------------------
-
-FontStyle TextStyle::font_style_from_string(std::string source)
-{
-    if (source == "monospace")
-        return FontStyle::Monospace;
-    else if (source == "default")
-        return FontStyle::Default;
-    else
-        throw std::invalid_argument("cannot infer font style from " + source);
-
-} // TextStyle::font_style_from_string
 
 // ----------------------------------------------------------------------
 
