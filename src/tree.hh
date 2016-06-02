@@ -277,6 +277,8 @@ class Tree : public Node
         }
 
 
+    void add_vaccine(std::string aId, std::string aLabel);
+
  private:
     Settings mSettings;
     std::string mVirusType;     // set in match_seqdb

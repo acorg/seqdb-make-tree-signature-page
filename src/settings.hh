@@ -191,6 +191,7 @@ class SettingsVaccineOnTree
 
  public:
     inline SettingsVaccineOnTree() : label_size(10), label_offset_x(-50), label_offset_y(50), label_color(BLACK), line_color(BLACK), line_width(1) {}
+    inline SettingsVaccineOnTree(std::string aId, std::string aLabel) : id(aId), label(aLabel), label_size(10), label_offset_x(-50), label_offset_y(50), label_color(BLACK), line_color(BLACK), line_width(1) {}
 
     inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         {
@@ -468,7 +469,7 @@ class SettingsLegend
     double interline;
     TextStyle style;
 
-}; // class SettingsDrawTree
+}; // class SettingsLegend
 
 // ----------------------------------------------------------------------
 

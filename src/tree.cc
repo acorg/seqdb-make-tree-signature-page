@@ -741,6 +741,20 @@ void Tree::make_hz_line_sections(double tolerance)
 } // Tree::make_hz_line_sections
 
 // ----------------------------------------------------------------------
+
+void Tree::add_vaccine(std::string aId, std::string aLabel)
+{
+    const size_t id_len = aId.size();
+    auto find_nodes = [this,id_len,&aId,&aLabel](const Node& aNode) {
+        if (std::string(aNode.name, 0, id_len) == aId) {
+            settings().draw_tree.vaccines.emplace_back(aNode.name, aLabel);
+        }
+    };
+    iterate_leaf(*this, find_nodes);
+
+} // Tree::add_vaccine
+
+// ----------------------------------------------------------------------
 // json
 // ----------------------------------------------------------------------
 

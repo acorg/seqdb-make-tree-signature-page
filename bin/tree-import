@@ -12,6 +12,51 @@ from seqdb import open_file
 
 # ----------------------------------------------------------------------
 
+sVaccines = {
+    "A(H3N2)": [
+        # 'TEXAS/50/2012 {CELL} {WILDTYPE}' blue
+        # 'SWITZERLAND/9715293/2013 {CELL} {WILDTYPE}' blue
+        # "HONG KONG/4801/2014 {EGG} {WILDTYPE}" red
+        # "HONG KONG/4801/2014 cell" red
+        # 'HONG KONG/4801/2014 NYMC-263A' green
+        # "SAITAMA/103/2014" pink niid
+        # "HONG KONG/7295/2014" pink nimr
+
+        # fake, for debugging purposes
+        {"id": "A(H3N2)/SWITZERLAND/15983141/2015", "label": ""},
+        ],
+    "A(H1N1)": [
+        # 'CALIFORNIA/7/2009 {CELL} -> egg' red
+        # 'CALIFORNIA/7/2009 NYMC-179A' green
+        ],
+    "BVIC": [
+        # 'MALAYSIA/2506/2004 {EGG} {WILDTYPE}' blue
+        # 'BRISBANE/60/2008 {CELL} {WILDTYPE}' red
+        # 'PARIS/1762/2009 {CELL} {WILDTYPE}' red nimr
+        # 'B/SOUTH AUSTRALIA/81/2012 {EGG}' 0x00FFFF
+        ],
+    "BYAM": [
+        # 'MASSACHUSETTS/2/2012 {CELL} {WILDTYPE}' blue
+        # 'MASSACHUSETTS/2/2012 {EGG} {WILDTYPE}' blue
+        # 'B/PHUKET/3073/2013 {CELL} {WILDTYPE}' red
+        # 'B/PHUKET/3073/2013 {EGG} {WILDTYPE}' green
+        ],
+    }
+
+def mark_vaccines(tree):
+    for vaccine_data in sVaccines[make_vt(tree)]:
+        tree.add_vaccine(**vaccine_data)
+
+# ----------------------------------------------------------------------
+
+def make_vt(tree):
+    vt = tree.virus_type()
+    if vt == "B":
+        vt += tree.lineage()[:3]
+    return vt
+
+# ----------------------------------------------------------------------
+
 def main(args):
     tree = seqdb.import_tree(args.input[0])
     seq_db = seqdb.Seqdb()
@@ -23,6 +68,7 @@ def main(args):
     tree.make_aa_transitions()
     if args.hz_line_section_tolerance > 0:
         tree.make_hz_line_sections(args.hz_line_section_tolerance)
+    mark_vaccines(tree)
     open_file.write_binary(filename=args.output[0], data=tree.json(indent=1).encode("utf-8"))
 
 # ----------------------------------------------------------------------
