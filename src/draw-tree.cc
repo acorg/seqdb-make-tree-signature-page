@@ -84,6 +84,10 @@ void DrawTree::draw_vaccines(Surface& aSurface)
         const auto text_origin = vaccine.location + Location(vaccine.vaccine.label_offset_x, vaccine.vaccine.label_offset_y);
         const auto label = vaccine.vaccine.label.empty() ? vaccine.vaccine.id : vaccine.vaccine.label;
         aSurface.text(text_origin, label, vaccine.vaccine.label_color, vaccine.vaccine.label_size, vaccine.vaccine.label_style);
+
+        const auto tsize = aSurface.text_size(label, vaccine.vaccine.label_size, vaccine.vaccine.label_style);
+        const auto line_origin = text_origin + Size(tsize.width / 2, vaccine.vaccine.label_offset_y > 0 ? -tsize.height : 0);
+        aSurface.line(line_origin, vaccine.location, vaccine.vaccine.line_color, vaccine.vaccine.line_width);
     }
 
 } // DrawTree::draw_vaccines
