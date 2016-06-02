@@ -35,6 +35,7 @@ void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewp
     draw_grid(aSurface, aViewport, aSettings);
     draw_node(aTree, aSurface, aViewport.origin, aSettings, aSettings.root_edge);
 
+    draw_vaccines(aSurface);
       // aSurface.line(aViewport.origin, aViewport.bottom_right(), 0xFF00A5, 5, CAIRO_LINE_CAP_ROUND);
 
 } // DrawTree::draw
@@ -52,7 +53,11 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
         const std::string text = aNode.display_name();
         const auto font_size = mVerticalStep * mLabelScale;
         const auto tsize = aSurface.text_size(text, font_size, aSettings.label_style);
-        aSurface.text(viewport.top_right() + Size(aSettings.name_offset, tsize.height * 0.5), text, mColoring->color(aNode), font_size, aSettings.label_style);
+        const auto text_origin = viewport.top_right() + Size(aSettings.name_offset, tsize.height * 0.5);
+        aSurface.text(text_origin, text, mColoring->color(aNode), font_size, aSettings.label_style);
+        auto vaccine = mVaccines.find(aNode.name);
+        if (vaccine != mVaccines.end())
+            vaccine->second.set(text_origin, aNode);
     }
     else {
         // if (aShowBranchIds && !aNode.branch_id.empty()) {
@@ -69,6 +74,19 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
     }
 
 } // DrawTree::draw_node
+
+// ----------------------------------------------------------------------
+
+void DrawTree::draw_vaccines(Surface& aSurface)
+{
+    for (const auto& vaccine_entry: mVaccines) {
+        const auto& vaccine = vaccine_entry.second;
+        const auto text_origin = vaccine.location + Location(vaccine.vaccine.label_offset_x, vaccine.vaccine.label_offset_y);
+        const auto label = vaccine.vaccine.label.empty() ? vaccine.vaccine.id : vaccine.vaccine.label;
+        aSurface.text(text_origin, label, vaccine.vaccine.label_color, vaccine.vaccine.label_size, vaccine.vaccine.label_style);
+    }
+
+} // DrawTree::draw_vaccines
 
 // ----------------------------------------------------------------------
 

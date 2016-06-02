@@ -48,6 +48,7 @@ class DrawTree
     void draw_node(const Node& aNode, Surface& surface, const Location& aOrigin, const SettingsDrawTree& aSettings, double aEdgeLength = -1.0);
     void draw_aa_transition(const Node& aNode, Surface& aSurface, const Viewport& aViewport, const SettingsAATransition& aSettings);
     void draw_grid(Surface& aSurface, const Viewport& aViewport, const SettingsDrawTree& aSettings);
+    void draw_vaccines(Surface& aSurface);
 
       // to implement clone mColoring
     DrawTree(const DrawTree&) = default;
@@ -55,10 +56,11 @@ class DrawTree
     class VaccineToMark
     {
      public:
-        inline VaccineToMark(const SettingsVaccineOnTree& aVaccine) : node(nullptr), x(0), y(0), vaccine(aVaccine) {}
+        inline VaccineToMark(const SettingsVaccineOnTree& aVaccine) : node(nullptr), vaccine(aVaccine) {}
+        inline void set(const Location& aLocation, const Node& aNode) { location = aLocation; node = &aNode; }
 
         const Node* node;
-        double x, y;
+        Location location;
         const SettingsVaccineOnTree& vaccine;
 
     }; // class VaccineToMark
