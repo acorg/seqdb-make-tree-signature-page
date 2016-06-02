@@ -1,4 +1,26 @@
 #! /bin/sh
 # lists fonts available for cairo in the system
 # http://stackoverflow.com/questions/28729589/how-to-select-fonts-more-specifically-in-cairo
-fc-list | sed 's/.*:\(.*,\|\s\)\(.*\):.*/\2/' | sort -u
+# fc-list :lang=en family | sed 's/.*:\(.*,\|\s\)\(.*\):.*/\2/' | sort -u
+
+# man 3 FcPatternFormat
+FORMAT='%{?fullname{%{fullname[0]}}{%{family}}}\n'
+
+list_all()
+{
+    fc-list :lang=en -f "$FORMAT" | sort -u
+}
+
+list_monospace()
+{
+    fc-list :lang=en:spacing=mono -f "$FORMAT" | sort -u
+}
+
+if [ $# -lt 1 ]; then
+    list_all
+elif [[ "$1" == "-m" ]]; then
+    list_monospace
+else
+    echo 'Usage: $0 [-m (monospace)]' >&2
+    exit 1
+fi
