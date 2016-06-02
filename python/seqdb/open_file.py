@@ -145,10 +145,11 @@ def write_binary(filename, data, compressed=None, backup=True, makedirs=True):
 
 def backup_file(filename, backup_dir=None):
     """Backup the file, if it exists. Backups versioning is supported."""
+    filename = str(filename)
     if isinstance(backup_dir, str):
-        newname = os.path.join(backup_dir, os.path.basename(str(filename)))
+        newname = os.path.join(backup_dir, os.path.basename(filename))
     else:
-        newname = str(filename)
+        newname = filename
     version = 1
     while os.access(newname, os.F_OK):
         newname = '{}.~{:02d}~'.format(filename, version)
