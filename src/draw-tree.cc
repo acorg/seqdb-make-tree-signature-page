@@ -10,6 +10,12 @@ DrawTree& DrawTree::prepare(Tree& aTree)
     aTree.prepare_for_drawing();
     const auto tre_wh = aTree.width_height();
     mNumberOfLines = tre_wh.second;
+
+    mVaccines.clear();
+    for (const auto& vaccine_data: aTree.settings().draw_tree.vaccines) {
+        mVaccines.emplace(vaccine_data.id, vaccine_data);
+    }
+
     return *this;
 
 } // DrawTree::prepare

@@ -173,12 +173,12 @@ class SettingsVaccineOnTree
                 using namespace jsonr;
                 return (object(
                     object_value("id", mVaccine.id)
-                  | object_value("label", mVaccine.label)
                   | object_value("label_style", mVaccine.label_style)
                   | object_value("label_size", mVaccine.label_size)
                   | object_value("label_offset_x", mVaccine.label_offset_x)
                   | object_value("label_offset_y", mVaccine.label_offset_y)
                   | object_string_value("label_color", mVaccine.label_color)
+                  | object_value("label", mVaccine.label)
                   | object_string_value("line_color", mVaccine.line_color)
                   | object_value("line_width", mVaccine.line_width)
                   | object_string_ignore_value("?")

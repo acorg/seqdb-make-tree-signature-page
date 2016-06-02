@@ -52,6 +52,19 @@ class DrawTree
       // to implement clone mColoring
     DrawTree(const DrawTree&) = default;
 
+    class VaccineToMark
+    {
+     public:
+        inline VaccineToMark(const SettingsVaccineOnTree& aVaccine) : node(nullptr), x(0), y(0), vaccine(aVaccine) {}
+
+        const Node* node;
+        double x, y;
+        const SettingsVaccineOnTree& vaccine;
+
+    }; // class VaccineToMark
+
+    std::map<std::string, VaccineToMark> mVaccines;
+
 }; // class DrawTree
 
 // ----------------------------------------------------------------------
