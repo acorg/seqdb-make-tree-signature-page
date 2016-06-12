@@ -18,7 +18,6 @@
 #include "string.hh"
 #include "stream.hh"
 #include "draw-clades.hh"
-#include "json-struct.hh"
 
 // ----------------------------------------------------------------------
 

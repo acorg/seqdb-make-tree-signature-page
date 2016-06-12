@@ -5,6 +5,7 @@
 
 // #include "json-write.hh"
 // #include "json-read.hh"
+#include "json-struct.hh"
 #include "date.hh"
 #include "settings.hh"
 
@@ -191,7 +192,7 @@ class Node
     friend inline auto json_fields(Node& a)
         {
             return std::make_tuple("aa", &a.aa, "clades", &a.clades, "continent", &a.continent,
-                                     // "date", &a.date,
+                                   "date", json::field(&a.date, &Date::display, &Date::parse),
                                    "edge_length", &a.edge_length, "id", &a.branch_id, "name", &a.name,
                                    "number_strains", &a.number_strains,
                                      // "aa_transitions", "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated")
