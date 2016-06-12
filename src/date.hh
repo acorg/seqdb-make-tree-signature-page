@@ -60,6 +60,9 @@ class Date
     //         return buf;
     //     }
 
+    // if this different from a date that was reset
+    // inline operator bool() const { return *this != Date(); }
+
     inline std::string month_3() const
         {
             char buf[4];

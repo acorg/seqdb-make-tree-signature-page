@@ -32,10 +32,10 @@ class AA_Transition
     size_t pos;
     const Node* for_left;       // node used to set left part, for debugging transition labels
 
-    // friend inline auto json_fields(AA_Transition& a)
-    //     {
-    //         return std::make_tuple();
-    //     }
+    friend inline auto json_fields(AA_Transition& a)
+        {
+            return std::make_tuple("t", json::field_output_only(&a, &AA_Transition::display_name));
+        }
 
 }; // class AA_Transition
 
@@ -191,11 +191,16 @@ class Node
 
     friend inline auto json_fields(Node& a)
         {
-            return std::make_tuple("aa", &a.aa, "clades", &a.clades, "continent", &a.continent,
+            return std::make_tuple("aa", &a.aa,
+                                   "clades", &a.clades,
+                                   "continent", &a.continent,
                                    "date", json::field(&a.date, &Date::display, &Date::parse),
-                                   "edge_length", &a.edge_length, "id", &a.branch_id, "name", &a.name,
+                                   "edge_length", &a.edge_length,
+                                   "id", &a.branch_id,
+                                   "name", &a.name,
                                    "number_strains", &a.number_strains,
-                                     // "aa_transitions", "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated")
+                                   "aa_transitions", static_cast<std::vector<AA_Transition>*>(&a.aa_transitions),
+                                     // "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated")
                                    "subtree", &a.subtree);
         }
 
