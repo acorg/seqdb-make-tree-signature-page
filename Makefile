@@ -83,6 +83,7 @@ $(BUILD)/%.o: $(SOURCES_DIR)/%.cc | $(BUILD) $(BUILD)/submodules
 $(BUILD)/submodules:
 	git submodule init
 	git submodule update
+	git submodule update --remote
 	touch $@
 
 # ----------------------------------------------------------------------
