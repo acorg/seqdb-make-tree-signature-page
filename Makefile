@@ -35,14 +35,14 @@ PYTHON_VERSION = $(shell python3 -c 'import sys; print("{0.major}.{0.minor}".for
 PYTHON_CONFIG = python$(PYTHON_VERSION)-config
 PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 
-# -fvisibility=hidden and -flto make resulting lib smaller (pybind11)
-OPTIMIZATION = -O3 -fvisibility=hidden -flto
+# -fvisibility=hidden and -flto make resulting lib smaller (pybind11) but linking is much slower
+OPTIMIZATION = -O3 #-fvisibility=hidden -flto
 CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
 LDFLAGS =
 TEST_LDLIBS = $$(pkg-config --libs liblzma)
 SEQDB_LDLIBS = $$(pkg-config --libs cairo) $$(pkg-config --libs liblzma) $$($(PYTHON_CONFIG) --ldflags)
 
-MODULES_INCLUDE = -Imodules/json/src -Imodules/axe/include -Imodules/pybind11/include
+MODULES_INCLUDE = -Imodules/json/src -Imodules/axe/include -Imodules/pybind11/include -Imodules/json-struct
 PKG_INCLUDES = $$(pkg-config --cflags cairo) $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
 
 # ----------------------------------------------------------------------

@@ -18,6 +18,7 @@
 #include "string.hh"
 #include "stream.hh"
 #include "draw-clades.hh"
+#include "json-struct.hh"
 
 // ----------------------------------------------------------------------
 
@@ -758,78 +759,102 @@ void Tree::add_vaccine(std::string aId, std::string aLabel)
 // json
 // ----------------------------------------------------------------------
 
-constexpr const char* TREE_JSON_DUMP_VERSION = "phylogenetic-tree-v1";
+// constexpr const char* TREE_JSON_DUMP_VERSION = "phylogenetic-tree-v1";
 
-std::string Tree::json(size_t indent) const
+// std::string Tree::json(size_t indent) const
+// {
+//     std::string target;
+//     size_t prefix = 0;
+//     jsonw::json_begin(target, jsonw::NoCommaNoIndent, '{', indent, prefix);
+//     auto comma = jsonw::json(target, jsonw::NoComma, "  version", TREE_JSON_DUMP_VERSION, indent, prefix);
+//     comma = jsonw::json(target, comma, "settings", mSettings, indent, prefix);
+//     jsonw::json(target, comma, "tree", *this, indent, prefix);
+//     jsonw::json_end(target, '}', indent, prefix);
+//       // std::cerr << target << std::endl;
+//     return target;
+
+// } // Tree::json
+
+// ----------------------------------------------------------------------
+
+// jsonw::IfPrependComma Node::json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
+// {
+//     comma = json_begin(target, comma, '{', indent, prefix);
+//     comma = jsonw::json_if(target, comma, "aa", aa, indent, prefix);
+//     comma = jsonw::json_if(target, comma, "clades", clades, indent, prefix);
+//     comma = jsonw::json_if(target, comma, "continent", continent, indent, prefix);
+//     comma = jsonw::json_if(target, comma, "date", date, indent, prefix);
+//     comma = jsonw::json(target, comma, "edge_length", edge_length, indent, prefix);
+//     comma = jsonw::json_if(target, comma, "id", branch_id, indent, prefix);
+//     comma = jsonw::json_if(target, comma, "name", name, indent, prefix);
+//     comma = jsonw::json(target, comma, "number_strains", number_strains, indent, prefix);
+//     if (aa_transitions) {
+//         comma = jsonw::json(target, comma, "?", "aa_transitions is for information only, ignored on reading and re-calculated", indent, prefix);
+//         jsonw::json(target, comma, "aa_transitions", indent, prefix);
+//         target.append(": ");
+//         comma = aa_transitions.json(target, jsonw::NoCommaNoIndent, indent, prefix);
+//     }
+//     comma = jsonw::json_if(target, comma, "subtree", subtree, indent, prefix);
+//     return jsonw::json_end(target, '}', indent, prefix);
+
+// } // Node::json
+
+// ----------------------------------------------------------------------
+
+// jsonw::IfPrependComma AA_Transitions::json(std::string& target, jsonw::IfPrependComma comma, size_t /*indent*/, size_t prefix) const
+// {
+//     comma = json_begin(target, comma, '[', 0, prefix);
+//     for (const auto& aat: *this) {
+//         if (!aat.empty_left() && !aat.left_right_same()) {
+//             comma = json_begin(target, comma, '{', 0, prefix);
+//             comma = jsonw::json(target, comma, "t", aat.display_name(), 0, prefix);
+//             if (aat.for_left)
+//                 comma = jsonw::json(target, comma, "n", aat.for_left->branch_id, 0, prefix);
+//             comma = jsonw::json_end(target, '}', 0, prefix);
+//         }
+//     }
+//     return jsonw::json_end(target, ']', 0, prefix);
+
+// } // AA_Transitions::json
+
+// ----------------------------------------------------------------------
+
+// Tree Tree::from_json(std::string data)
+// {
+//     Tree tree;
+//     auto parse_tree = jsonr::object(jsonr::version(TREE_JSON_DUMP_VERSION) | (jsonr::skey("tree") > tree.json_parser()) | tree.settings().json_parser());
+//     try {
+//         parse_tree(std::begin(data), std::end(data));
+//     }
+//     catch (jsonr::failure& err) {
+//         throw jsonr::JsonParsingError(err.message(std::begin(data)));
+//     }
+//     catch (axe::failure<char>& err) {
+//         throw jsonr::JsonParsingError(err.message());
+//     }
+//     return tree;
+
+// } // Tree::from_json
+
+// ----------------------------------------------------------------------
+
+std::string Tree::json(int indent) const
 {
-    std::string target;
-    size_t prefix = 0;
-    jsonw::json_begin(target, jsonw::NoCommaNoIndent, '{', indent, prefix);
-    auto comma = jsonw::json(target, jsonw::NoComma, "  version", TREE_JSON_DUMP_VERSION, indent, prefix);
-    comma = jsonw::json(target, comma, "settings", mSettings, indent, prefix);
-    jsonw::json(target, comma, "tree", *this, indent, prefix);
-    jsonw::json_end(target, '}', indent, prefix);
-      // std::cerr << target << std::endl;
-    return target;
+    return json::dump(*this, indent);
 
 } // Tree::json
-
-// ----------------------------------------------------------------------
-
-jsonw::IfPrependComma Node::json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
-{
-    comma = json_begin(target, comma, '{', indent, prefix);
-    comma = jsonw::json_if(target, comma, "aa", aa, indent, prefix);
-    comma = jsonw::json_if(target, comma, "clades", clades, indent, prefix);
-    comma = jsonw::json_if(target, comma, "continent", continent, indent, prefix);
-    comma = jsonw::json_if(target, comma, "date", date, indent, prefix);
-    comma = jsonw::json(target, comma, "edge_length", edge_length, indent, prefix);
-    comma = jsonw::json_if(target, comma, "id", branch_id, indent, prefix);
-    comma = jsonw::json_if(target, comma, "name", name, indent, prefix);
-    comma = jsonw::json(target, comma, "number_strains", number_strains, indent, prefix);
-    if (aa_transitions) {
-        comma = jsonw::json(target, comma, "?", "aa_transitions is for information only, ignored on reading and re-calculated", indent, prefix);
-        jsonw::json(target, comma, "aa_transitions", indent, prefix);
-        target.append(": ");
-        comma = aa_transitions.json(target, jsonw::NoCommaNoIndent, indent, prefix);
-    }
-    comma = jsonw::json_if(target, comma, "subtree", subtree, indent, prefix);
-    return jsonw::json_end(target, '}', indent, prefix);
-
-} // Node::json
-
-// ----------------------------------------------------------------------
-
-jsonw::IfPrependComma AA_Transitions::json(std::string& target, jsonw::IfPrependComma comma, size_t /*indent*/, size_t prefix) const
-{
-    comma = json_begin(target, comma, '[', 0, prefix);
-    for (const auto& aat: *this) {
-        if (!aat.empty_left() && !aat.left_right_same()) {
-            comma = json_begin(target, comma, '{', 0, prefix);
-            comma = jsonw::json(target, comma, "t", aat.display_name(), 0, prefix);
-            if (aat.for_left)
-                comma = jsonw::json(target, comma, "n", aat.for_left->branch_id, 0, prefix);
-            comma = jsonw::json_end(target, '}', 0, prefix);
-        }
-    }
-    return jsonw::json_end(target, ']', 0, prefix);
-
-} // AA_Transitions::json
 
 // ----------------------------------------------------------------------
 
 Tree Tree::from_json(std::string data)
 {
     Tree tree;
-    auto parse_tree = jsonr::object(jsonr::version(TREE_JSON_DUMP_VERSION) | (jsonr::skey("tree") > tree.json_parser()) | tree.settings().json_parser());
     try {
-        parse_tree(std::begin(data), std::end(data));
+        json::parse(data, tree);
     }
-    catch (jsonr::failure& err) {
-        throw jsonr::JsonParsingError(err.message(std::begin(data)));
-    }
-    catch (axe::failure<char>& err) {
-        throw jsonr::JsonParsingError(err.message());
+    catch (json::parsing_error& err) {
+        std::cerr << "tree parsing error: "<< err.what() << std::endl;
+        throw;
     }
     return tree;
 

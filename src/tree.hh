@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "json-write.hh"
-#include "json-read.hh"
+// #include "json-write.hh"
+// #include "json-read.hh"
 #include "date.hh"
 #include "settings.hh"
 
@@ -31,28 +31,15 @@ class AA_Transition
     size_t pos;
     const Node* for_left;       // node used to set left part, for debugging transition labels
 
+    // friend inline auto json_fields(AA_Transition& a)
+    //     {
+    //         return std::make_tuple();
+    //     }
+
 }; // class AA_Transition
 
 class AA_Transitions : public std::vector<AA_Transition>
 {
- private:
-    class json_parser_t AXE_RULE
-        {
-          public:
-            inline json_parser_t(AA_Transitions& a) : mAA_Transitions(a) {}
-
-            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-            {
-                  // AA_Transitions ignored! they will be re-calculated.
-                using namespace jsonr;
-                auto item = object(object_string_ignore_value("t") | object_string_ignore_value("n"));
-                return (array_begin > ~(item & *(comma > item) ) > array_end)(i1, i2);
-            }
-
-          private:
-            AA_Transitions& mAA_Transitions;
-        };
-
  public:
     inline void add(size_t aPos, char aRight) { emplace_back(aPos, aRight); }
 
@@ -99,43 +86,39 @@ class AA_Transitions : public std::vector<AA_Transition>
             return labels;
         }
 
-      // serialize
-    jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-    inline auto json_parser() { return json_parser_t(*this); }
-
 }; // class AA_Transitions
 
 // ----------------------------------------------------------------------
 
 class Node
 {
- private:
-    class json_parser_t AXE_RULE
-        {
-          public:
-            inline json_parser_t(Node& aNode) : mNode(aNode) {}
+ // private:
+ //    class json_parser_t AXE_RULE
+ //        {
+ //          public:
+ //            inline json_parser_t(Node& aNode) : mNode(aNode) {}
 
-            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-            {
-                using namespace jsonr;
-                return object(
-                    object_value("subtree", mNode.subtree)
-                  | object_value("id", mNode.branch_id)
-                  | object_value("clades", mNode.clades)
-                  | object_value("continent", mNode.continent)
-                  | object_value("edge_length", mNode.edge_length)
-                  | object_value("name", mNode.name)
-                  | object_value("number_strains", mNode.number_strains)
-                  | (skey("aa_transitions") > mNode.aa_transitions.json_parser()) // must be before "aa"!
-                  | object_value("aa", mNode.aa)
-                  | object_string_value("date", mNode.date)
-                  | object_string_ignore_value("?")
-                    )(i1, i2);
-            }
+ //            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
+ //            {
+ //                using namespace jsonr;
+ //                return object(
+ //                    object_value("subtree", mNode.subtree)
+ //                  | object_value("id", mNode.branch_id)
+ //                  | object_value("clades", mNode.clades)
+ //                  | object_value("continent", mNode.continent)
+ //                  | object_value("edge_length", mNode.edge_length)
+ //                  | object_value("name", mNode.name)
+ //                  | object_value("number_strains", mNode.number_strains)
+ //                  | (skey("aa_transitions") > mNode.aa_transitions.json_parser()) // must be before "aa"!
+ //                  | object_value("aa", mNode.aa)
+ //                  | object_string_value("date", mNode.date)
+ //                  | object_string_ignore_value("?")
+ //                    )(i1, i2);
+ //            }
 
-          private:
-            Node& mNode;
-        };
+ //          private:
+ //            Node& mNode;
+ //        };
 
  public:
     typedef std::vector<Node> Subtree;
@@ -186,9 +169,9 @@ class Node
       // for hz line sections
     double edge_length_to_next;
 
-      // serialize
-    jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-    inline auto json_parser() { return json_parser_t(*this); }
+//      // serialize
+//    jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
+//    inline auto json_parser() { return json_parser_t(*this); }
 
     inline Node* find_path_to_first_leaf(std::vector<std::pair<size_t, Node*>>& path)
         {
@@ -204,6 +187,16 @@ class Node
  protected:
     void ladderize();
     bool find_name_r(std::string aName, std::vector<const Node*>& aPath) const;
+
+    friend inline auto json_fields(Node& a)
+        {
+            return std::make_tuple("aa", &a.aa, "clades", &a.clades, "continent", &a.continent,
+                                     // "date", &a.date,
+                                   "edge_length", &a.edge_length, "id", &a.branch_id, "name", &a.name,
+                                   "number_strains", &a.number_strains,
+                                     // "aa_transitions", "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated")
+                                   "subtree", &a.subtree);
+        }
 
 }; // class Node
 
@@ -224,9 +217,7 @@ class Tree : public Node
     std::string virus_type() const { return mVirusType; }
     std::string lineage() const { return mLineage; }
 
-    using Node::json;
-    std::string json(size_t indent) const;
-
+    std::string json(int indent) const;
     static Tree from_json(std::string data);
 
     void match_seqdb(const Seqdb& aSeqdb);
@@ -303,6 +294,16 @@ class Tree : public Node
     std::pair<Node*,Node*> find_path_to_next_leaf(std::vector<std::pair<size_t, Node*>>& aPath);
 
     std::vector<const Node*> leaf_nodes_sorted_by(const std::function<bool(const Node*,const Node*)>& cmp) const;
+
+    static constexpr const char* TREE_JSON_DUMP_VERSION = "phylogenetic-tree-v1";
+    std::string mJsonDumpVersion = TREE_JSON_DUMP_VERSION;
+
+    friend inline auto json_fields(Tree& a)
+        {
+            return std::make_tuple("  version", &a.mJsonDumpVersion,
+                                     // "settings", &a.mSettings,
+                                   "tree", static_cast<Node*>(&a));
+        }
 
 }; // class Tree
 

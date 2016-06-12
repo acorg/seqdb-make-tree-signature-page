@@ -207,7 +207,8 @@ PYBIND11_PLUGIN(seqdb_backend)
             ;
 
     py::class_<Tree>(m, "Tree", py::base<Node>())
-            .def("json", static_cast<std::string (Tree::*)(size_t) const>(&Tree::json), py::arg("indent") = 0)
+              //.def("json", static_cast<std::string (Tree::*)(int) const>(&Tree::json), py::arg("indent") = 0)
+            .def("json", &Tree::json, py::arg("indent") = 0)
             .def("ladderize", &Tree::ladderize)
             .def("make_hz_line_sections", &Tree::make_hz_line_sections, py::arg("tolerance"))
             .def("match_seqdb", &Tree::match_seqdb, py::arg("seqdb"))

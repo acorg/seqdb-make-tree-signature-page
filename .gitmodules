@@ -4,3 +4,6 @@
 [submodule "modules/pybind11"]
 	path = modules/pybind11
 	url = https://github.com/pybind/pybind11.git
+[submodule "modules/json-struct"]
+	path = modules/json-struct
+	url = https://github.com/skepner/json-struct.git
