@@ -285,7 +285,7 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def("double_arrow", &Surface::double_arrow, py::arg("a"), py::arg("b"), py::arg("color"), py::arg("line_width"), py::arg("arrow_width"))
             .def("text", static_cast<void (Surface::*)(const Location&, std::string, Color, double, const TextStyle&, double)>(&Surface::text), py::arg("a"), py::arg("text"), py::arg("color"), py::arg("size"), py::arg("style") = TextStyle(), py::arg("rotation") = 0.0)
             .def("text", static_cast<void (Surface::*)(const Text&, const Viewport&)>(&Surface::text), py::arg("text"), py::arg("viewport"))
-            .def("text_size", &Surface::text_size, py::arg("text"), py::arg("size"), py::arg("style") = TextStyle(), py::arg("x_bearing") = static_cast<double*>(nullptr))
+            .def("text_size", static_cast<Size (Surface::*)(std::string, double, const TextStyle&)>(&Surface::text_size), py::arg("text"), py::arg("size"), py::arg("style") = TextStyle()) //, py::arg("x_bearing") = static_cast<double*>(0))
             ;
 
       // ----------------------------------------------------------------------

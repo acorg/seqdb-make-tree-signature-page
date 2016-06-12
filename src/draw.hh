@@ -338,7 +338,8 @@ class Surface
       // width*ratio.
     double set_clip_region(const Viewport& aViewport, double aWidthScale);
 
-    Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing = nullptr);
+    Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing);
+    inline Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle) { return text_size(aText, aSize, aTextStyle, nullptr); } // for pybind11 to avoid exposing double* to python
 
     class PushContext
     {
