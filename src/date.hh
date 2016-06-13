@@ -16,7 +16,11 @@ class Date
       // inline Date& operator =(const Date&) = default;
     inline Date& operator =(std::string aText) { if (!aText.empty()) parse(aText); return *this; }
 
+    inline bool operator < (const Date& d) const { return year() == d.year() ? (month() == d.month() ? day() < d.day() : month() < d.month()) : year() < d.year(); }
+    inline bool operator == (const Date& d) const { return year() == d.year() && month() == d.month() && day() == d.day(); }
+
     inline bool empty() const { return mTime.tm_year == 0; }
+    inline operator bool() const { return !operator==(Date()); }
     inline int year() const { return mTime.tm_year; }
     inline int month() const { return mTime.tm_mon; }
     inline int day() const { return mTime.tm_mday; }
@@ -61,7 +65,6 @@ class Date
     //     }
 
     // if this different from a date that was reset
-    // inline operator bool() const { return *this != Date(); }
 
     inline std::string month_3() const
         {
@@ -123,17 +126,6 @@ class Date
                 mTime.tm_mon = 11;
                 --mTime.tm_year;
             }
-        }
-
-    inline bool operator < (const Date& d) const
-        {
-              // return std::mktime(const_cast<std::tm*>(&mTime)) < std::mktime(const_cast<std::tm*>(&d.mTime));
-            return year() == d.year() ? (month() == d.month() ? day() < d.day() : month() < d.month()) : year() < d.year();
-        }
-
-    inline bool operator == (const Date& d) const
-        {
-            return year() == d.year() && month() == d.month() && day() == d.day();
         }
 
  private:

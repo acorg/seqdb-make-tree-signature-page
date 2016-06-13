@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-// #include "json-write.hh"
-// #include "json-read.hh"
 #include "json-struct.hh"
 #include "date.hh"
 #include "settings.hh"
@@ -34,7 +32,7 @@ class AA_Transition
 
     friend inline auto json_fields(AA_Transition& a)
         {
-            return std::make_tuple("t", json::field_output_only(&a, &AA_Transition::display_name));
+            return std::make_tuple("t", json::field(&a, &AA_Transition::display_name));
         }
 
 }; // class AA_Transition
@@ -93,34 +91,6 @@ class AA_Transitions : public std::vector<AA_Transition>
 
 class Node
 {
- // private:
- //    class json_parser_t AXE_RULE
- //        {
- //          public:
- //            inline json_parser_t(Node& aNode) : mNode(aNode) {}
-
- //            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
- //            {
- //                using namespace jsonr;
- //                return object(
- //                    object_value("subtree", mNode.subtree)
- //                  | object_value("id", mNode.branch_id)
- //                  | object_value("clades", mNode.clades)
- //                  | object_value("continent", mNode.continent)
- //                  | object_value("edge_length", mNode.edge_length)
- //                  | object_value("name", mNode.name)
- //                  | object_value("number_strains", mNode.number_strains)
- //                  | (skey("aa_transitions") > mNode.aa_transitions.json_parser()) // must be before "aa"!
- //                  | object_value("aa", mNode.aa)
- //                  | object_string_value("date", mNode.date)
- //                  | object_string_ignore_value("?")
- //                    )(i1, i2);
- //            }
-
- //          private:
- //            Node& mNode;
- //        };
-
  public:
     typedef std::vector<Node> Subtree;
 
@@ -170,10 +140,6 @@ class Node
       // for hz line sections
     double edge_length_to_next;
 
-//      // serialize
-//    jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-//    inline auto json_parser() { return json_parser_t(*this); }
-
     inline Node* find_path_to_first_leaf(std::vector<std::pair<size_t, Node*>>& path)
         {
             if (is_leaf()) {
@@ -191,17 +157,18 @@ class Node
 
     friend inline auto json_fields(Node& a)
         {
-            return std::make_tuple("aa", &a.aa,
-                                   "clades", &a.clades,
+            return std::make_tuple("aa_transitions", json::field(static_cast<std::vector<AA_Transition>*>(&a.aa_transitions), json::output_only_if_not_empty),
+                                   "aa", &a.aa,
+                                   "clades", json::field(&a.clades, json::output_if_not_empty),
                                    "continent", &a.continent,
-                                   "date", json::field(&a.date, &Date::display, &Date::parse),
+                                   "date", json::field(&a.date, &Date::display, &Date::parse, json::output_if_true),
                                    "edge_length", &a.edge_length,
                                    "id", &a.branch_id,
                                    "name", &a.name,
                                    "number_strains", &a.number_strains,
-                                   "aa_transitions", static_cast<std::vector<AA_Transition>*>(&a.aa_transitions),
-                                     // "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated")
-                                   "subtree", &a.subtree);
+                                   "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated"),
+                                   "subtree", json::field(&a.subtree, json::output_if_not_empty)
+                                   );
         }
 
 }; // class Node
