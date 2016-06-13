@@ -152,45 +152,11 @@ class HzLineSection
  private:
     constexpr static size_t LINE_NOT_SET = static_cast<size_t>(-1);
 
-    // class json_parser_t AXE_RULE
-    //     {
-    //       public:
-    //         inline json_parser_t(HzLineSection& aSection) : mSection(aSection) {}
-
-    //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-    //         {
-    //             using namespace jsonr;
-    //             return (object(
-    //                 object_value("first_name", mSection.first_name)
-    //               | object_value("first_line", mSection.first_line)
-    //               | object_string_value("color", mSection.color)
-    //               | object_value("line_width", mSection.line_width)
-    //               | object_string_ignore_value("?")
-    //                 ))(i1, i2);
-    //         }
-
-    //       private:
-    //         HzLineSection& mSection;
-    //     };
-
  public:
     inline HzLineSection() : first_line(LINE_NOT_SET), color(COLOR_NOT_SET), line_width(2) {}
     inline HzLineSection(std::string aFirstName, size_t aFirstLine, Color aColor = COLOR_NOT_SET)
         : first_name(aFirstName), first_line(aFirstLine), color(aColor), line_width(2) {}
     HzLineSection(const Node& aNode, Color aColor = COLOR_NOT_SET);
-
-    // inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
-    //     {
-    //         comma = jsonw::json_begin(target, comma, '{', indent, prefix);
-    //         comma = jsonw::json_if(target, comma, "first_name", first_name, 0, prefix);
-    //         // if (first_line != LINE_NOT_SET)
-    //         //     comma = jsonw::json(target, comma, "first_line", first_line, 0, prefix);
-    //         comma = jsonw::json(target, comma, "color", color, 0, prefix);
-    //         comma = jsonw::json(target, comma, "line_width", line_width, 0, prefix);
-    //         return  jsonw::json_end(target, '}', 0, prefix);
-    //     }
-
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     std::string first_name;
     size_t first_line;
@@ -201,7 +167,7 @@ class HzLineSection
         {
             return std::make_tuple(
                 "first_name", &a.first_name,
-                "first_line", &a.first_line,
+                  // "first_line", &a.first_line,
                 "color", json::field(&a.color, &Color::to_string, &Color::from_string),
                 "line_width", &a.line_width
                                    );
@@ -211,57 +177,13 @@ class HzLineSection
 
 class HzLineSections : public std::vector<HzLineSection>
 {
- private:
-    constexpr static size_t LINE_NOT_SET = static_cast<size_t>(-1);
-
-    // class json_parser_t AXE_RULE
-    //     {
-    //       public:
-    //         inline json_parser_t(HzLineSections& aSections) : mSections(aSections) {}
-
-    //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-    //         {
-    //             using namespace jsonr;
-    //             return (skey(HzLineSections::json_name) > object(
-    //                 object_value("hz_line_width", mSections.hz_line_width)
-    //               | object_string_value("hz_line_color", mSections.hz_line_color)
-    //               | object_value("sequenced_antigen_line_show", mSections.sequenced_antigen_line_show)
-    //               | object_value("sequenced_antigen_line_width", mSections.sequenced_antigen_line_width)
-    //               | object_value("sequenced_antigen_line_length", mSections.sequenced_antigen_line_length)
-    //               | object_string_value("sequenced_antigen_line_color", mSections.sequenced_antigen_line_color)
-    //               | object_value(HzLineSections::json_name, static_cast<std::vector<HzLineSection>&>(mSections))
-    //               | object_string_ignore_value("?")
-    //                 ))(i1, i2);
-    //         }
-
-    //       private:
-    //         HzLineSections& mSections;
-    //     };
-
  public:
-    // static constexpr const char* json_name = "hz_line_sections";
-
     inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY), sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY) {}
 
     inline void sort()
         {
             std::sort(begin(), end(), [](const auto& a, const auto& b) { return a.first_line < b.first_line; });
         }
-
-    // inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
-    //     {
-    //         comma = jsonw::json_begin(target, comma, '{', indent, prefix);
-    //         comma = jsonw::json(target, comma, "hz_line_width", hz_line_width, indent, prefix);
-    //         comma = jsonw::json(target, comma, "hz_line_color", hz_line_color, indent, prefix);
-    //         comma = jsonw::json(target, comma, "sequenced_antigen_line_show", sequenced_antigen_line_show, indent, prefix);
-    //         comma = jsonw::json(target, comma, "sequenced_antigen_line_width", sequenced_antigen_line_width, indent, prefix);
-    //         comma = jsonw::json(target, comma, "sequenced_antigen_line_length", sequenced_antigen_line_length, indent, prefix);
-    //         comma = jsonw::json(target, comma, "sequenced_antigen_line_color", sequenced_antigen_line_color, indent, prefix);
-    //         comma = jsonw::json(target, comma, HzLineSections::json_name, static_cast<const std::vector<HzLineSection>&>(*this), indent, prefix);
-    //         return  jsonw::json_end(target, '}', indent, prefix);
-    //     }
-
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     double hz_line_width;
     Color hz_line_color;
@@ -329,36 +251,22 @@ class SettingsDrawTree
 
 class SettingsLegend
 {
- private:
-    // class json_parser_t AXE_RULE
-    //     {
-    //       public:
-    //         inline json_parser_t(SettingsLegend& aSettings) : mSettings(aSettings) {}
-
-    //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-    //         {
-    //             auto r_font_size = jsonr::object_double_non_negative_value("font_size", mSettings.font_size);
-    //             auto r_interline = jsonr::object_double_non_negative_value("interline", mSettings.interline);
-    //             auto r_style = jsonr::object_value("style", mSettings.style);
-    //             auto r_comment = jsonr::object_string_ignore_value("?");
-    //             return (jsonr::skey("legend") > jsonr::object(r_font_size | r_interline | r_style | r_comment))(i1, i2);
-    //         }
-
-    //       private:
-    //         SettingsLegend& mSettings;
-    //     };
-
  public:
     inline SettingsLegend()
         : font_size(14), interline(1.2), style("monospace") {}
 
-    // jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-
-    // inline auto json_parser() { return json_parser_t(*this); }
-
     double font_size;
     double interline;
     TextStyle style;
+
+    friend inline auto json_fields(SettingsLegend& a)
+        {
+            return std::make_tuple(
+                "font_size", &a.font_size, // object_double_non_negative_value
+                "interline", &a.interline, // object_double_non_negative_value
+                "style", &a.style
+                                   );
+        }
 
 }; // class SettingsLegend
 
@@ -366,38 +274,25 @@ class SettingsLegend
 
 class SettingsSignaturePage
 {
- private:
-    // class json_parser_t AXE_RULE
-    //     {
-    //       public:
-    //         inline json_parser_t(SettingsSignaturePage& aSettings) : mSettings(aSettings) {}
-
-    //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-    //         {
-    //             auto r_outer_padding = jsonr::object_double_non_negative_value("outer_padding", mSettings.outer_padding);
-    //             auto r_tree_time_series_space = jsonr::object_double_non_negative_value("tree_time_series_space", mSettings.tree_time_series_space);
-    //             auto r_time_series_clades_space = jsonr::object_double_non_negative_value("time_series_clades_space", mSettings.time_series_clades_space);
-    //             auto r_clades_antigenic_maps_space = jsonr::object_double_non_negative_value("clades_antigenic_maps_space", mSettings.clades_antigenic_maps_space);
-    //             auto r_comment = jsonr::object_string_ignore_value("?");
-    //             return (jsonr::skey("signature_page") > jsonr::object(r_outer_padding | r_tree_time_series_space | r_time_series_clades_space | r_clades_antigenic_maps_space | r_comment))(i1, i2);
-    //         }
-
-    //       private:
-    //         SettingsSignaturePage& mSettings;
-    //     };
-
  public:
     inline SettingsSignaturePage()
         : outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
-
-    // jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     double outer_padding;             // relative to the canvas width
     double tree_time_series_space;    // relative to the canvas width
     double time_series_clades_space;  // relative to the canvas width
     double clades_antigenic_maps_space; // relative to the canvas width
+
+    friend inline auto json_fields(SettingsSignaturePage& a)
+        {
+            return std::make_tuple(
+                "outer_padding", &a.outer_padding, // object_double_non_negative_value
+                "tree_time_series_space", &a.tree_time_series_space, // object_double_non_negative_value
+                "time_series_clades_space", &a.time_series_clades_space, // object_double_non_negative_value
+                "clades_antigenic_maps_space", &a.clades_antigenic_maps_space, // object_double_non_negative_value
+                "?", json::comment("outer_padding: size of space around the image, fraction of canvas width, default: 0.01; tree_time_series_space: fraction of canvas width")
+                                   );
+        }
 
 }; // class SettingsSignaturePage
 
@@ -405,40 +300,10 @@ class SettingsSignaturePage
 
 class SettingsTimeSeries
 {
- private:
-    // class json_parser_t AXE_RULE
-    //     {
-    //       public:
-    //         inline json_parser_t(SettingsTimeSeries& aSettings) : mSettings(aSettings) {}
-
-    //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-    //         {
-    //             auto r_begin = jsonr::object_string_value("begin", mSettings.begin);
-    //             auto r_end = jsonr::object_string_value("end", mSettings.end);
-    //             auto r_dash_width = jsonr::object_double_non_negative_value("dash_width", mSettings.dash_width);
-    //             auto r_dash_line_width = jsonr::object_double_non_negative_value("dash_line_width", mSettings.dash_line_width);
-    //             auto r_max_number_of_months = jsonr::object_int_value("max_number_of_months", mSettings.max_number_of_months, 10, &jsonr::validator_size_t_positive);
-    //             auto r_month_label_scale = jsonr::object_double_non_negative_value("month_label_scale", mSettings.month_label_scale);
-    //             auto r_month_separator_color = jsonr::object_string_value("month_separator_color", mSettings.month_separator_color);
-    //             auto r_month_separator_width = jsonr::object_double_non_negative_value("month_separator_width", mSettings.month_separator_width);
-    //             auto r_month_width = jsonr::object_double_non_negative_value("month_width", mSettings.month_width);
-    //             auto r_month_label_style = jsonr::object_value("month_label_style", mSettings.month_label_style);
-    //             auto r_comment = jsonr::object_string_ignore_value("?");
-    //             return (jsonr::skey("time_series") > jsonr::object(r_begin | r_end | r_dash_width | r_dash_line_width | r_max_number_of_months | r_month_label_scale | r_month_separator_color | r_month_separator_width | r_month_width | r_month_label_style | r_comment))(i1, i2);
-    //         }
-
-    //       private:
-    //         SettingsTimeSeries& mSettings;
-    //     };
-
  public:
     inline SettingsTimeSeries()
         : dash_width(0.5), dash_line_width(1), max_number_of_months(20), month_label_scale(0.9), month_separator_color(0),
           month_separator_width(0.1), month_width(10) {}
-
-    // jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     Date begin;
     Date end;
@@ -451,71 +316,37 @@ class SettingsTimeSeries
     double month_separator_width;
     double month_width;
 
+    friend inline auto json_fields(SettingsTimeSeries& a)
+        {
+            return std::make_tuple(
+                "begin", json::field(&a.begin, &Date::display, &Date::parse, json::output_if_true),
+                "end", json::field(&a.end, &Date::display, &Date::parse, json::output_if_true),
+                "dash_width", &a.dash_width, // object_double_non_negative_value
+                "dash_line_width", &a.dash_line_width, // object_double_non_negative_value
+                "max_number_of_months", &a.max_number_of_months, // validator_size_t_positive);
+                "month_label_scale", &a.month_label_scale, // object_double_non_negative_value
+                "month_separator_color", json::field(&a.month_separator_color, &Color::to_string, &Color::from_string, json::output_if_true),
+                "month_separator_width", &a.month_separator_width, // object_double_non_negative_value
+                "month_width", &a.month_width, // object_double_non_negative_value
+                "month_label_style", &a.month_label_style
+                                   );
+        }
+
 }; // class SettingsTimeSeries
-
-// ----------------------------------------------------------------------
-
-enum class CladeLabelPosition { Middle, Top, Bottom };
-
-inline std::string to_string(CladeLabelPosition a)
-{
-    switch (a) {
-      case CladeLabelPosition::Middle: return "middle";
-      case CladeLabelPosition::Top: return "top";
-      case CladeLabelPosition::Bottom: return "bottom";
-    }
-    return "middle";            // to shut compiler up
-}
-
-inline CladeLabelPosition CladeLabelPosition_from_string(std::string source)
-{
-    if (source == "middle") return CladeLabelPosition::Middle;
-    if (source == "top") return CladeLabelPosition::Top;
-    if (source == "bottom") return CladeLabelPosition::Bottom;
-    throw std::invalid_argument("cannot parse CladeLabelPosition from " + source);
-}
 
 // ----------------------------------------------------------------------
 
 class SettingsClade
 {
- private:
-    // class json_parser_t AXE_RULE
-    //     {
-    //       public:
-    //         inline json_parser_t(SettingsClade& aSettings) : mSettings(aSettings) {}
-
-    //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-    //         {
-    //             auto r_show = jsonr::object_value("show", mSettings.show);
-    //             auto r_begin = jsonr::object_int_value("begin", mSettings.begin);
-    //             auto r_end = jsonr::object_int_value("end", mSettings.end);
-    //             auto r_id = jsonr::object_value("id", mSettings.id);
-    //             auto r_label = jsonr::object_value("label", mSettings.label);
-    //             auto r_slot = jsonr::object_int_value("slot", mSettings.slot);
-    //             auto r_label_position = jsonr::object_enum_value("label_position", mSettings.label_position, &CladeLabelPosition_from_string);
-    //             auto r_label_position_offset = jsonr::object_double_value("label_position_offset", mSettings.label_position_offset);
-    //             auto r_label_rotation = jsonr::object_double_value("label_rotation", mSettings.label_rotation);
-    //             auto r_label_offset = jsonr::object_double_value("label_offset", mSettings.label_offset);
-    //             auto r_comment = jsonr::object_string_ignore_value("?");
-    //             return jsonr::object(r_show | r_begin | r_end | r_id | r_slot | r_label_position_offset | r_label_position | r_label_rotation | r_label_offset | r_label | r_comment)(i1, i2);
-    //         }
-
-    //       private:
-    //         SettingsClade& mSettings;
-    //     };
-
  public:
+    enum class LabelPosition { Middle, Top, Bottom };
+
     inline SettingsClade()
-        : show(false), begin(-1), end(-1), slot(-1), label_position(CladeLabelPosition::Middle),
+        : show(false), begin(-1), end(-1), slot(-1), label_position(LabelPosition::Middle),
           label_position_offset(0.0), label_rotation(0.0), label_offset(3.0) {}
     inline SettingsClade(int aBegin, int aEnd, std::string aLabel, std::string aId)
-        : show(true), begin(aBegin), end(aEnd), label(aLabel), id(aId), slot(-1), label_position(CladeLabelPosition::Middle),
+        : show(true), begin(aBegin), end(aEnd), label(aLabel), id(aId), slot(-1), label_position(LabelPosition::Middle),
           label_position_offset(0.0), label_rotation(0.0), label_offset(3.0) {}
-
-    // jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     void update(const SettingsClade& source);
 
@@ -525,10 +356,45 @@ class SettingsClade
     std::string label;
     std::string id;
     int slot;
-    CladeLabelPosition label_position;
+    LabelPosition label_position;
     double label_position_offset;
     double label_rotation;
     double label_offset;
+
+ private:
+    inline static std::string LabelPosition_to_string(const LabelPosition* a)
+        {
+            switch (*a) {
+              case LabelPosition::Middle: return "middle";
+              case LabelPosition::Top: return "top";
+              case LabelPosition::Bottom: return "bottom";
+            }
+            return "middle";            // to shut compiler up
+        }
+
+    inline static void LabelPosition_from_string(LabelPosition* target, std::string source)
+        {
+            if (source == "middle") *target = LabelPosition::Middle;
+            else if (source == "top") *target = LabelPosition::Top;
+            else if (source == "bottom") *target = LabelPosition::Bottom;
+            else throw std::invalid_argument("cannot parse SettingsClade::LabelPosition from " + source);
+        }
+
+    friend inline auto json_fields(SettingsClade& a)
+        {
+            return std::make_tuple(
+                "show", &a.show,
+                "begin", &a.begin,
+                "end", &a.end,
+                "id", &a.id,
+                "slot", &a.slot,
+                "label_position_offset", &a.label_position_offset,
+                "label_position", json::field(&a.label_position, &SettingsClade::LabelPosition_to_string, &SettingsClade::LabelPosition_from_string),
+                "label_rotation", &a.label_rotation,
+                "label_offset", &a.label_offset,
+                "label", &a.label
+                                   );
+        }
 
 }; // class SettingsClade
 
@@ -536,41 +402,10 @@ class SettingsClade
 
 class SettingsClades
 {
- private:
-    // class json_parser_t AXE_RULE
-    //     {
-    //       public:
-    //         inline json_parser_t(SettingsClades& aSettings) : mSettings(aSettings) {}
-
-    //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-    //         {
-    //             auto r_slot_width = jsonr::object_double_non_negative_value("slot_width", mSettings.slot_width);
-    //             auto r_arrow_color = jsonr::object_string_value("arrow_color", mSettings.arrow_color);
-    //             auto r_arrow_extra = jsonr::object_double_non_negative_value("arrow_extra", mSettings.arrow_extra);
-    //             auto r_arrow_width = jsonr::object_double_non_negative_value("arrow_width", mSettings.arrow_width);
-    //             auto r_line_width = jsonr::object_double_non_negative_value("line_width", mSettings.line_width);
-    //             auto r_label_color = jsonr::object_string_value("label_color", mSettings.label_color);
-    //             auto r_label_size = jsonr::object_double_non_negative_value("label_size", mSettings.label_size);
-    //             auto r_separator_color = jsonr::object_string_value("separator_color", mSettings.separator_color);
-    //             auto r_separator_width = jsonr::object_double_non_negative_value("separator_width", mSettings.separator_width);
-    //             auto r_label_style = jsonr::object_value("label_style", mSettings.label_style);
-    //             auto r_per_clade = jsonr::object_array_value("per_clade", mSettings.per_clade);
-    //             auto r_comment = jsonr::object_string_ignore_value("?");
-    //             return (jsonr::skey("clades") > jsonr::object(r_slot_width | r_arrow_color | r_arrow_extra | r_arrow_width | r_line_width | r_label_color | r_label_size | r_separator_color | r_separator_width | r_label_style | r_per_clade | r_comment))(i1, i2);
-    //         }
-
-    //       private:
-    //         SettingsClades& mSettings;
-    //     };
-
  public:
     inline SettingsClades()
         : slot_width(5), arrow_color(BLACK), arrow_extra(0.5), arrow_width(3), line_width(1),
           label_color(0), label_size(10), separator_color(GREY), separator_width(1) {}
-
-    // jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     void extract(const Clades& aClades);
 
@@ -586,57 +421,30 @@ class SettingsClades
     double separator_width;
     std::vector<SettingsClade> per_clade;
 
+    friend inline auto json_fields(SettingsClades& a)
+        {
+            return std::make_tuple(
+                "slot_width", &a.slot_width, // object_double_non_negative_value
+                "arrow_color", json::field(&a.arrow_color, &Color::to_string, &Color::from_string),
+                "arrow_extra", &a.arrow_extra, // object_double_non_negative_value
+                "arrow_width", &a.arrow_width, // object_double_non_negative_value
+                "line_width", &a.line_width, // object_double_non_negative_value
+                "label_color", json::field(&a.label_color, &Color::to_string, &Color::from_string),
+                "label_size", &a.label_size, // object_double_non_negative_value
+                "separator_color", json::field(&a.separator_color, &Color::to_string, &Color::from_string),
+                "separator_width", &a.separator_width, // object_double_non_negative_value
+                "label_style", &a.label_style,
+                "per_clade", &a.per_clade,
+                "?", json::comment("arrow_extra: fraction of vertical_step to extend arrow up and down")
+                                   );
+        }
+
 }; // class SettingsClades
 
 // ----------------------------------------------------------------------
 
 class SettingsAntigenicMaps
 {
- private:
-    // class json_parser_t AXE_RULE
-    //     {
-    //       public:
-    //         inline json_parser_t(SettingsAntigenicMaps& aSettings) : mSettings(aSettings) {}
-
-    //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-    //         {
-    //             using namespace jsonr;
-    //             return (jsonr::skey("antigenic_maps") > jsonr::object(
-    //                   object_double_non_negative_value("border_width", mSettings.border_width)
-    //                 | object_string_value("border_color", mSettings.border_color)
-    //                 | object_double_non_negative_value("grid_line_width", mSettings.grid_line_width)
-    //                 | object_string_value("grid_color", mSettings.grid_color)
-    //                 | object_value("gap_between_maps", mSettings.gap_between_maps)
-    //                 | object_value("map_zoom", mSettings.map_zoom)
-    //                 | object_value("egg_antigen_aspect", mSettings.egg_antigen_aspect)
-    //                 | object_value("reassortant_rotation", mSettings.reassortant_rotation)
-    //                 | object_value("serum_scale", mSettings.serum_scale)
-    //                 | object_value("reference_antigen_scale", mSettings.reference_antigen_scale)
-    //                 | object_value("test_antigen_scale", mSettings.test_antigen_scale)
-    //                 | object_value("vaccine_antigen_scale", mSettings.vaccine_antigen_scale)
-    //                 | object_value("tracked_antigen_scale", mSettings.tracked_antigen_scale)
-    //                 | object_value("serum_outline_width", mSettings.serum_outline_width)
-    //                 | object_value("reference_antigen_outline_width", mSettings.reference_antigen_outline_width)
-    //                 | object_value("test_antigen_outline_width", mSettings.test_antigen_outline_width)
-    //                 | object_value("vaccine_antigen_outline_width", mSettings.vaccine_antigen_outline_width)
-    //                 | object_value("tracked_antigen_outline_width", mSettings.tracked_antigen_outline_width)
-    //                 | object_string_value("serum_outline_color", mSettings.serum_outline_color)
-    //                 | object_string_value("reference_antigen_outline_color", mSettings.reference_antigen_outline_color)
-    //                 | object_string_value("test_antigen_outline_color", mSettings.test_antigen_outline_color)
-    //                 | object_string_value("test_antigen_fill_color", mSettings.test_antigen_fill_color)
-    //                 | object_string_value("vaccine_antigen_outline_color", mSettings.vaccine_antigen_outline_color)
-    //                 | object_string_value("tracked_antigen_outline_color", mSettings.tracked_antigen_outline_color)
-    //                 | object_value("sequenced_antigen_outline_width", mSettings.sequenced_antigen_outline_width)
-    //                 | object_string_value("sequenced_antigen_outline_color", mSettings.sequenced_antigen_outline_color)
-    //                 | object_string_value("sequenced_antigen_fill_color", mSettings.sequenced_antigen_fill_color)
-    //                 | object_string_ignore_value("?")
-    //                   ))(i1, i2);
-    //         }
-
-    //       private:
-    //         SettingsAntigenicMaps& mSettings;
-    //     };
-
  public:
     inline SettingsAntigenicMaps()
         : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), gap_between_maps(0.005), map_zoom(1.1),
@@ -648,10 +456,6 @@ class SettingsAntigenicMaps
           tracked_antigen_outline_color(BLACK),
           egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0)
         {}
-
-    // jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     double border_width, grid_line_width;
     Color border_color, grid_color;
@@ -715,10 +519,10 @@ class Settings
         {
             return std::make_tuple(
                 "tree", &a.draw_tree,
-                // "legend", &a.legend,
-                // "signature_page", &a.signature_page,
-                // "time_series", &a.time_series,
-                // "clades", &a.clades,
+                "legend", &a.legend,
+                "signature_page", &a.signature_page,
+                "time_series", &a.time_series,
+                "clades", &a.clades,
                 "antigenic_maps", &a.antigenic_maps);
         }
 

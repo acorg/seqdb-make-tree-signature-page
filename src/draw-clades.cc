@@ -86,13 +86,13 @@ void Clades::draw(Surface& aSurface, const Viewport& aViewport, const Viewport& 
 
             double label_vpos;
             switch (clade.label_position) {
-              case CladeLabelPosition::Top:
+              case SettingsClade::LabelPosition::Top:
                   label_vpos = top;
                   break;
-              case CladeLabelPosition::Bottom:
+              case SettingsClade::LabelPosition::Bottom:
                   label_vpos = bottom;
                   break;
-              case CladeLabelPosition::Middle:
+              case SettingsClade::LabelPosition::Middle:
                   label_vpos = (top + bottom) / 2.0;
                   break;
             }
