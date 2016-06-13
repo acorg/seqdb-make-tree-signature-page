@@ -7,12 +7,9 @@
 #include <string>
 #include <stdexcept>
 #include <cmath>
-// #include <functional>
 
 #include "cairo.hh"
-#include "json-read.hh"
-#include "json-write.hh"
-// #include "date.hh"
+#include "json-struct.hh"
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wweak-vtables"
@@ -231,25 +228,6 @@ class FontStyle
 
 class TextStyle
 {
- private:
-    class json_parser_t AXE_RULE
-        {
-          public:
-            inline json_parser_t(TextStyle& aTextStyle) : mTextStyle(aTextStyle) {}
-
-            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-            {
-                auto r_font = jsonr::object_string_value("font", mTextStyle.mFontStyle);
-                auto r_slant = jsonr::object_enum_value("slant", mTextStyle.mSlant, &TextStyle::slant_from_string);
-                auto r_weight = jsonr::object_enum_value("weight", mTextStyle.mWeight, &TextStyle::weight_from_string);
-                auto r_comment = jsonr::object_string_ignore_value("?");
-                return jsonr::object(r_font | r_slant | r_weight | r_comment)(i1, i2);
-            }
-
-          private:
-            TextStyle& mTextStyle;
-        };
-
  public:
     inline TextStyle() : mSlant(CAIRO_FONT_SLANT_NORMAL), mWeight(CAIRO_FONT_WEIGHT_NORMAL) {}
     inline TextStyle(std::string aFontFamily) : mFontStyle(aFontFamily), mSlant(CAIRO_FONT_SLANT_NORMAL), mWeight(CAIRO_FONT_WEIGHT_NORMAL) {}
@@ -258,18 +236,25 @@ class TextStyle
     inline cairo_font_slant_t slant() const { return mSlant; }
     inline cairo_font_weight_t weight() const { return mWeight; }
 
-    jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-    inline auto json_parser() { return json_parser_t(*this); }
-
  private:
     FontStyle mFontStyle;
     cairo_font_slant_t mSlant;
     cairo_font_weight_t mWeight;
 
-    static cairo_font_slant_t slant_from_string(std::string source);
-    static cairo_font_weight_t weight_from_string(std::string source);
+    static std::string slant_to_string(cairo_font_slant_t a);
+    static std::string weight_to_string(cairo_font_weight_t a);
+    static void slant_from_string(cairo_font_slant_t& a, std::string source);
+    static void weight_from_string(cairo_font_weight_t& a, std::string source);
 
-    friend class json_parser_t;
+    friend inline auto json_fields(TextStyle& a)
+        {
+            return std::make_tuple(
+                "?", json::comment("font: default monospace; slant: normal italic oblique; weight: normal bold"),
+                "font", json::field(&a.mFontStyle, &FontStyle::to_string, &FontStyle::from_string)
+                // "slant", json::field(&a.mSlant, &TextStyle::slant_to_string, &TextStyle::slant_from_string),
+                // "weight", json::field(&a.mWeight, &TextStyle::weight_to_string, &TextStyle::weight_from_string)
+                                   );
+        }
 
 }; // class TextStyle
 
