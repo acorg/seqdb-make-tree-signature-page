@@ -72,6 +72,18 @@ class SettingsAATransition
                     labels = source.labels;
             }
 
+        friend inline auto json_fields(TransitionData& a)
+        {
+            return std::make_tuple(
+                "branch_id", &a.branch_id,
+                "labels", &a.labels,
+                "size", &a.size,
+                "color", json::field(&a.color, &Color::to_string, &Color::from_string),
+                "style", json::field(&a.style, json::output_if_true),
+                "interline", &a.interline
+                                   );
+        }
+
         // inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
         //     {
         //         comma = jsonw::json_begin(target, comma, '{', indent, prefix);
@@ -154,6 +166,23 @@ class SettingsAATransition
     Color node_for_left_line_color;
     double node_for_left_line_width;
     size_t number_strains_threshold; // Do not show aa transition label if number_strains (leaf nodes) for the branch is less than this value.
+
+    friend inline auto json_fields(SettingsAATransition& a)
+        {
+            return std::make_tuple(
+                "size", &a.data.size,
+                "color", json::field(&a.data.color, &Color::to_string, &Color::from_string),
+                "style", &a.data.style,
+                "interline", &a.data.interline,
+                "show_empty_left", &a.show_empty_left,
+                "show_node_for_left_line", &a.show_node_for_left_line,
+                "node_for_left_line_color", json::field(&a.node_for_left_line_color, &Color::to_string, &Color::from_string),
+                "node_for_left_line_width", &a.node_for_left_line_width,
+                "number_strains_threshold", &a.number_strains_threshold,
+                "?per_branch", json::comment("add size, color, style, interline, if different from the default listed above."),
+                "per_branch", json::field(&a.per_branch, json::output_if_not_empty)
+                                   );
+        }
 
 }; // class SettingsAATransition
 
@@ -406,7 +435,7 @@ class SettingsDrawTree
                 "line_width", &a.line_width, // object_double_non_negative_value
                 "name_offset", &a.name_offset,
                 "label_style", &a.label_style,
-                //   | &a.aa_transition.json_parser()
+                "aa_transition", &a.aa_transition,
                 //   | &a.vaccines.json_parser()
                 "?grid_step", json::comment("grid_step: 0 - off, N - use N*vertical_step as grid cell height"),
                 "grid_step", &a.grid_step,

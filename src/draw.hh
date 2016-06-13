@@ -201,14 +201,16 @@ constexpr const Color COLOR_NOT_SET = 0xFFFFFFFF;
 class FontStyle
 {
  public:
-    inline FontStyle() : cairo_family("sans-serif") {}
+    static constexpr const char* default_family = "sans-serif";
+
+    inline FontStyle() : cairo_family(default_family) {}
     inline FontStyle(std::string aFamily) { from_string(aFamily); }
     inline FontStyle& operator=(std::string aFamily) { from_string(aFamily); return *this; }
 
     inline void from_string(std::string aFamily)
         {
             if (aFamily == "default")
-                cairo_family = "sans-serif";
+                cairo_family = default_family;
             else
                 cairo_family = aFamily;
         }
@@ -219,6 +221,9 @@ class FontStyle
         }
 
     inline operator const char*() const { return cairo_family.c_str(); }
+
+      // to avoid saving to json, e.g. for settings.SettingsAATransition.TransitionData
+    inline operator bool() const { return cairo_family != default_family; }
 
  private:
     std::string cairo_family;
@@ -235,6 +240,9 @@ class TextStyle
     inline const FontStyle& font_style() const { return mFontStyle; }
     inline cairo_font_slant_t slant() const { return mSlant; }
     inline cairo_font_weight_t weight() const { return mWeight; }
+
+      // to avoid saving to json, e.g. for settings.SettingsAATransition.TransitionData
+    inline operator bool() const { return mSlant != CAIRO_FONT_SLANT_NORMAL || mWeight != CAIRO_FONT_WEIGHT_NORMAL || !mFontStyle; }
 
  private:
     FontStyle mFontStyle;
