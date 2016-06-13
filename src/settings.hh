@@ -13,38 +13,6 @@ class Node;
 
 class SettingsAATransition
 {
- // public:
- //    static constexpr const char* json_name = "aa_transition";
-
- // private:
- //    class json_parser_t AXE_RULE
- //        {
- //          public:
- //            inline json_parser_t(SettingsAATransition& aSettings) : mSettings(aSettings) {}
-
- //            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
- //            {
- //                using namespace jsonr;
- //                return (skey(json_name) > object(
- //                      object_value("size", mSettings.data.size)
- //                    | object_string_value("color", mSettings.data.color)
- //                    | object_value("style", mSettings.data.style)
- //                    | object_value("interline", mSettings.data.interline)
- //                    | object_value("show_empty_left", mSettings.show_empty_left)
- //                    | object_value("show_node_for_left_line", mSettings.show_node_for_left_line)
- //                    | object_string_value("node_for_left_line_color", mSettings.node_for_left_line_color)
- //                    | object_value("node_for_left_line_width", mSettings.node_for_left_line_width)
- //                    | object_value("number_strains_threshold", mSettings.number_strains_threshold)
- //                    | object_string_ignore_value("?per_branch")
- //                    | object_value("per_branch", mSettings.per_branch)
- //                    | object_string_ignore_value("?")
- //                      ))(i1, i2);
- //            }
-
- //          private:
- //            SettingsAATransition& mSettings;
- //        };
-
  public:
     class TransitionData
     {
@@ -78,68 +46,14 @@ class SettingsAATransition
                 "branch_id", &a.branch_id,
                 "labels", &a.labels,
                 "size", &a.size,
-                "color", json::field(&a.color, &Color::to_string, &Color::from_string),
+                "color", json::field(&a.color, &Color::to_string, &Color::from_string, json::output_if_true),
                 "style", json::field(&a.style, json::output_if_true),
                 "interline", &a.interline
                                    );
         }
-
-        // inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
-        //     {
-        //         comma = jsonw::json_begin(target, comma, '{', indent, prefix);
-        //         comma = jsonw::json(target, comma, "branch_id", branch_id, 0, prefix);
-        //         comma = jsonw::json(target, comma, "labels", labels, 0, prefix);
-        //         return  jsonw::json_end(target, '}', 0, prefix);
-        //     }
-
-        // class json_parser_t AXE_RULE
-        //     {
-        //       public:
-        //         inline json_parser_t(TransitionData& aData) : mData(aData) {}
-
-        //         template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-        //         {
-        //             using namespace jsonr;
-        //             return (object(
-        //                 object_value("size", mData.size)
-        //               | object_string_value("color", mData.color)
-        //               | object_value("style", mData.style)
-        //               | object_value("interline", mData.interline)
-        //               | object_value("branch_id", mData.branch_id)
-        //               | object_value("labels", mData.labels)
-        //               | object_string_ignore_value("?")
-        //                 ))(i1, i2);
-        //         }
-
-        //       private:
-        //         TransitionData& mData;
-        //     };
-
-        // inline auto json_parser() { return json_parser_t(*this); }
     };
 
     inline SettingsAATransition() : data(false), show_empty_left(false), show_node_for_left_line(false), node_for_left_line_color(0x00FF00), node_for_left_line_width(1), number_strains_threshold(20) {}
-
-    // inline jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
-    //     {
-    //         comma = jsonw::json_begin(target, comma, '{', indent, prefix);
-    //         comma = jsonw::json(target, comma, "size", data.size, indent, prefix);
-    //         comma = jsonw::json(target, comma, "color", data.color, indent, prefix);
-    //         comma = jsonw::json(target, comma, "style", data.style, indent, prefix);
-    //         comma = jsonw::json(target, comma, "interline", data.interline, indent, prefix);
-    //         if (!per_branch.empty()) {
-    //             comma = jsonw::json(target, comma, "?per_branch", "add size, color, style, interline, if different from the default listed above.", indent, prefix);
-    //             comma = jsonw::json(target, comma, "per_branch", per_branch, indent, prefix);
-    //         }
-    //         comma = jsonw::json(target, comma, "show_empty_left", show_empty_left, indent, prefix);
-    //         comma = jsonw::json(target, comma, "show_node_for_left_line", show_node_for_left_line, indent, prefix);
-    //         comma = jsonw::json(target, comma, "node_for_left_line_color", node_for_left_line_color, indent, prefix);
-    //         comma = jsonw::json(target, comma, "node_for_left_line_width", node_for_left_line_width, indent, prefix);
-    //         comma = jsonw::json(target, comma, "number_strains_threshold", number_strains_threshold, indent, prefix);
-    //         return  jsonw::json_end(target, '}', indent, prefix);
-    //     }
-
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     inline void add(std::string branch_id, const std::vector<std::pair<std::string, const Node*>>& aLabels)
         {

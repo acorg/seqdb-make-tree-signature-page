@@ -142,6 +142,8 @@ class Viewport
 class Color
 {
  public:
+    static constexpr uint32_t _not_set = 0xFFFFFFFF;
+
     inline Color() : mColor(0xFF00FF) {}
     template <typename Uint, typename std::enable_if<std::is_integral<Uint>::value>::type* = nullptr> constexpr inline Color(Uint aColor) : mColor(static_cast<uint32_t>(aColor)) {}
     inline Color(std::string aColor) { from_string(aColor); }
@@ -185,6 +187,9 @@ class Color
             }
         }
 
+      // to avoid serialing not set colors
+    inline operator bool() const { return mColor != _not_set; }
+
  private:
     uint32_t mColor; // 4 bytes, most->least significant: transparency-red-green-blue, 0x00FF0000 - opaque red, 0xFF000000 - fully transparent
 
@@ -194,7 +199,7 @@ constexpr const Color BLACK = 0;
 constexpr const Color GREY = 0xA0A0A0;
 constexpr const Color LIGHT_GREY = 0xE0E0E0;
 constexpr const Color TRANSPARENT = 0xFF000000;
-constexpr const Color COLOR_NOT_SET = 0xFFFFFFFF;
+constexpr const Color COLOR_NOT_SET = Color::_not_set;
 
 // ----------------------------------------------------------------------
 

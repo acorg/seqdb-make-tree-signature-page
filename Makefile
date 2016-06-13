@@ -2,7 +2,6 @@
 # Eugene Skepner 2016
 
 # submodules and git: https://git-scm.com/book/en/v2/Git-Tools-Submodules
-#             template <typename T, typename std::enable_if<std::is_integral<T>{} || std::is_floating_point<T>{} || std::is_convertible<T*, std::string*>{} || std::is_convertible<T*, bool*>{}>::type* = nullptr> inline output& append(T val)
 
 # ----------------------------------------------------------------------
 
