@@ -236,40 +236,9 @@ double Surface::set_clip_region(const Viewport& aViewport, double aWidthScale)
 
 // ----------------------------------------------------------------------
 
-// jsonw::IfPrependComma TextStyle::json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const
-// {
-//     indent = 0;                 // store in the single line
-//     comma = json_begin(target, comma, '{', indent, prefix);
-//     comma = jsonw::json(target, comma, "font", font_style(), indent, prefix);
-//     switch (slant()) {
-//       case CAIRO_FONT_SLANT_NORMAL:
-//           comma = jsonw::json(target, comma, "slant", "normal", indent, prefix);
-//           break;
-//       case CAIRO_FONT_SLANT_ITALIC:
-//           comma = jsonw::json(target, comma, "slant", "italic", indent, prefix);
-//           break;
-//       case CAIRO_FONT_SLANT_OBLIQUE:
-//           comma = jsonw::json(target, comma, "slant", "oblique", indent, prefix);
-//           break;
-//     }
-//     switch (weight()) {
-//       case CAIRO_FONT_WEIGHT_NORMAL:
-//           comma = jsonw::json(target, comma, "weight", "normal", indent, prefix);
-//           break;
-//       case CAIRO_FONT_WEIGHT_BOLD:
-//           comma = jsonw::json(target, comma, "weight", "bold", indent, prefix);
-//           break;
-//     }
-//       // comma = jsonw::json(target, comma, "?", "font: default monospace; slant: normal italic oblique; weight: normal bold", indent, prefix);
-//     return jsonw::json_end(target, '}', indent, prefix);
-
-// } // TextStyle::json
-
-// ----------------------------------------------------------------------
-
-std::string TextStyle::slant_to_string(cairo_font_slant_t a)
+std::string TextStyle::slant_to_string(const cairo_font_slant_t* a)
 {
-    switch (a) {
+    switch (*a) {
       case CAIRO_FONT_SLANT_NORMAL:
           return "normal";
       case CAIRO_FONT_SLANT_ITALIC:
@@ -282,9 +251,9 @@ std::string TextStyle::slant_to_string(cairo_font_slant_t a)
 
 // ----------------------------------------------------------------------
 
-std::string TextStyle::weight_to_string(cairo_font_weight_t a)
+std::string TextStyle::weight_to_string(const cairo_font_weight_t* a)
 {
-    switch (a) {
+    switch (*a) {
       case CAIRO_FONT_WEIGHT_NORMAL:
           return "normal";
       case CAIRO_FONT_WEIGHT_BOLD:
@@ -295,14 +264,14 @@ std::string TextStyle::weight_to_string(cairo_font_weight_t a)
 
 // ----------------------------------------------------------------------
 
-void TextStyle::slant_from_string(cairo_font_slant_t& a, std::string source)
+void TextStyle::slant_from_string(cairo_font_slant_t* a, std::string source)
 {
     if (source == "italic")
-        a = CAIRO_FONT_SLANT_ITALIC;
+        *a = CAIRO_FONT_SLANT_ITALIC;
     else if (source == "oblique")
-        a = CAIRO_FONT_SLANT_OBLIQUE;
+        *a = CAIRO_FONT_SLANT_OBLIQUE;
     else if (source == "normal")
-        a = CAIRO_FONT_SLANT_NORMAL;
+        *a = CAIRO_FONT_SLANT_NORMAL;
     else
         throw std::invalid_argument("cannot infer font slant from " + source);
 
@@ -310,12 +279,12 @@ void TextStyle::slant_from_string(cairo_font_slant_t& a, std::string source)
 
 // ----------------------------------------------------------------------
 
-void TextStyle::weight_from_string(cairo_font_weight_t& a, std::string source)
+void TextStyle::weight_from_string(cairo_font_weight_t* a, std::string source)
 {
     if (source == "bold")
-        a = CAIRO_FONT_WEIGHT_BOLD;
+        *a = CAIRO_FONT_WEIGHT_BOLD;
     else if (source == "normal")
-        a = CAIRO_FONT_WEIGHT_NORMAL;
+        *a = CAIRO_FONT_WEIGHT_NORMAL;
     else
         throw std::invalid_argument("cannot infer font weight from " + source);
 

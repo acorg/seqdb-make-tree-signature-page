@@ -241,18 +241,18 @@ class TextStyle
     cairo_font_slant_t mSlant;
     cairo_font_weight_t mWeight;
 
-    static std::string slant_to_string(cairo_font_slant_t a);
-    static std::string weight_to_string(cairo_font_weight_t a);
-    static void slant_from_string(cairo_font_slant_t& a, std::string source);
-    static void weight_from_string(cairo_font_weight_t& a, std::string source);
+    static std::string slant_to_string(const cairo_font_slant_t* a);
+    static std::string weight_to_string(const cairo_font_weight_t* a);
+    static void slant_from_string(cairo_font_slant_t* a, std::string source);
+    static void weight_from_string(cairo_font_weight_t* a, std::string source);
 
     friend inline auto json_fields(TextStyle& a)
         {
             return std::make_tuple(
                 "?", json::comment("font: default monospace; slant: normal italic oblique; weight: normal bold"),
-                "font", json::field(&a.mFontStyle, &FontStyle::to_string, &FontStyle::from_string)
-                // "slant", json::field(&a.mSlant, &TextStyle::slant_to_string, &TextStyle::slant_from_string),
-                // "weight", json::field(&a.mWeight, &TextStyle::weight_to_string, &TextStyle::weight_from_string)
+                "font", json::field(&a.mFontStyle, &FontStyle::to_string, &FontStyle::from_string),
+                "slant", json::field(&a.mSlant, &TextStyle::slant_to_string, &TextStyle::slant_from_string),
+                "weight", json::field(&a.mWeight, &TextStyle::weight_to_string, &TextStyle::weight_from_string)
                                    );
         }
 
