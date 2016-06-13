@@ -77,7 +77,7 @@ class DrawHzLines
     inline DrawHzLines() {}
 
     DrawHzLines& prepare(Tree& aTree, HzLineSections& aSections);
-    void draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps& aAntigenicMaps, const HzLineSections& aSections);
+    void draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections);
 
 }; // class DrawHzLines
 
