@@ -3,6 +3,7 @@
 #include "seqdb.hh"
 #include "clades.hh"
 #include "string.hh"
+#include "read-file.hh"
 
 // ----------------------------------------------------------------------
 
@@ -319,43 +320,29 @@ std::string Seqdb::report() const
     std::ostringstream os;
     os << "Entries: " << mEntries.size() << std::endl;
 
-    std::string buf;
-
     std::map<std::string, size_t> virus_types;
     for_each(mEntries.begin(), mEntries.end(), [&virus_types](auto& e) { ++virus_types[e.virus_type()]; });
-    jsonw::json(buf, jsonw::NoCommaNoIndent, virus_types, 0, 0);
-    os << "Virus types: " << buf << std::endl;
-    buf.clear();
+    os << "Virus types: " << json::dump(virus_types) << std::endl;
 
     std::map<std::string, size_t> lineages;
     for_each(mEntries.begin(), mEntries.end(), [&lineages](auto& e) { ++lineages[e.lineage()]; });
-    jsonw::json(buf, jsonw::NoCommaNoIndent, lineages, 0, 0);
-    os << "Lineages: " << buf << std::endl;
-    buf.clear();
+    os << "Lineages: " << json::dump(lineages) << std::endl;
 
     std::map<std::string, size_t> aligned;
     for_each(mEntries.begin(), mEntries.end(), [&aligned](auto& e) { if (any_of(e.mSeq.begin(), e.mSeq.end(), std::mem_fn(&SeqdbSeq::aligned))) ++aligned[e.virus_type()]; });
-    jsonw::json(buf, jsonw::NoCommaNoIndent, virus_types, 0, 0);
-    os << "Aligned: " << buf << std::endl;
-    buf.clear();
+    os << "Aligned: " << json::dump(aligned) << std::endl;
 
     std::map<std::string, size_t> matched;
     for_each(mEntries.begin(), mEntries.end(), [&matched](auto& e) { if (any_of(e.mSeq.begin(), e.mSeq.end(), std::mem_fn(&SeqdbSeq::matched))) ++matched[e.virus_type()]; });
-    jsonw::json(buf, jsonw::NoCommaNoIndent, matched, 0, 0);
-    os << "Matched: " << buf << std::endl;
-    buf.clear();
+    os << "Matched: " << json::dump(matched) << std::endl;
 
     std::map<std::string, size_t> have_dates;
     for_each(mEntries.begin(), mEntries.end(), [&have_dates](auto& e) { if (!e.mDates.empty()) ++have_dates[e.virus_type()]; });
-    jsonw::json(buf, jsonw::NoCommaNoIndent, have_dates, 0, 0);
-    os << "Have dates: " << buf << std::endl;
-    buf.clear();
+    os << "Have dates: " << json::dump(have_dates) << std::endl;
 
     std::map<std::string, size_t> have_clades;
     for_each(mEntries.begin(), mEntries.end(), [&have_clades](auto& e) { if (any_of(e.mSeq.begin(), e.mSeq.end(), [](auto& seq) { return !seq.mClades.empty(); })) ++have_clades[e.virus_type()]; });
-    jsonw::json(buf, jsonw::NoCommaNoIndent, have_clades, 0, 0);
-    os << "Have clades: " << buf << std::endl;
-    buf.clear();
+    os << "Have clades: " << json::dump(have_clades) << std::endl;
 
     return os.str();
 
@@ -493,6 +480,44 @@ SeqdbEntrySeq Seqdb::find_by_seq_id(std::string aSeqId) const
     return result;
 
 } // Seqdb::find_by_seq_id
+
+// ----------------------------------------------------------------------
+// json
+// ----------------------------------------------------------------------
+
+void Seqdb::from_json(std::string data)
+{
+    try {
+        json::parse(data, *this);
+    }
+    catch (json::parsing_error& err) {
+        std::cerr << "tree parsing error: "<< err.what() << std::endl;
+        throw;
+    }
+
+} // Seqdb::from_json
+
+// ----------------------------------------------------------------------
+
+void Seqdb::load(std::string filename)
+{
+    // if (filename.empty()) {
+    //     filename = std::string(getenv("HOME")) + "/WHO/seqdb.json.xz";
+    // }
+    from_json(read_file(filename));
+
+} // Seqdb::from_json_file
+
+// ----------------------------------------------------------------------
+
+void Seqdb::save(std::string filename, size_t indent) const
+{
+    // if (filename.empty()) {
+    //     filename = std::string(getenv("HOME")) + "/WHO/seqdb.json.xz";
+    // }
+    write_file(filename, to_json(indent));
+
+} // Seqdb::save
 
 // ----------------------------------------------------------------------
 /// Local Variables:

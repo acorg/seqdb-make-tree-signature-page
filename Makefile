@@ -12,7 +12,7 @@ MAKEFLAGS = -w
 SOURCES_DIR = src
 
 # TEST_SOURCES = test.cc seqdb.cc seqdb-json.cc read-file.cc xz.cc
-SEQDB_SOURCES = seqdb.cc seqdb-json.cc seqdb-py.cc amino-acids.cc clades.cc \
+SEQDB_SOURCES = seqdb.cc seqdb-py.cc amino-acids.cc clades.cc \
 		tree.cc tree-import.cc newick.cc settings.cc chart.cc \
 		draw.cc coloring.cc \
 		signature-page.cc draw-tree.cc time-series.cc draw-clades.cc antigenic-maps.cc \
