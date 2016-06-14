@@ -21,7 +21,7 @@ def main(args):
     with timeit("loading seqdb"):
         seq_db.load(filename=args.path_to_seqdb)
     with timeit("saving seqdb"):
-        seq_db.save(filename=args.output[0], indent=1)
+        seq_db.save(filename=args.output, indent=1)
 
 # ----------------------------------------------------------------------
 
