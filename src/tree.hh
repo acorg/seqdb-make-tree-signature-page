@@ -95,9 +95,9 @@ class Node
     typedef std::vector<Node> Subtree;
 
     inline Node() : edge_length(0), line_no(0), number_strains(1) {}
+    inline Node(std::string aName, double aEdgeLength, const Date& aDate = Date()) : edge_length(aEdgeLength), name(aName), date(aDate), line_no(0), number_strains(1) {}
     // inline Node(Node&&) = default;
     // inline Node(const Node&) = default;
-    inline Node(std::string aName, double aEdgeLength, const Date& aDate = Date()) : edge_length(aEdgeLength), name(aName), date(aDate), line_no(0), number_strains(1) {}
     // inline Node& operator=(Node&&) = default; // needed for swap needed for sort
 
     double edge_length;              // indent of node or subtree
@@ -158,6 +158,7 @@ class Node
     friend inline auto json_fields(Node& a)
         {
             return std::make_tuple("aa_transitions", json::field(static_cast<std::vector<AA_Transition>*>(&a.aa_transitions), json::output_only_if_not_empty),
+                                     // "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated"),
                                    "aa", &a.aa,
                                    "clades", json::field(&a.clades, json::output_if_not_empty),
                                    "continent", &a.continent,
@@ -166,7 +167,6 @@ class Node
                                    "id", &a.branch_id,
                                    "name", &a.name,
                                    "number_strains", &a.number_strains,
-                                   "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated"),
                                    "subtree", json::field(&a.subtree, json::output_if_not_empty)
                                    );
         }
@@ -273,9 +273,11 @@ class Tree : public Node
 
     friend inline auto json_fields(Tree& a)
         {
-            return std::make_tuple("  version", &a.mJsonDumpVersion,
-                                   "settings", &a.mSettings,
-                                   "tree", static_cast<Node*>(&a));
+            return std::make_tuple(
+                "  version", &a.mJsonDumpVersion,
+                "settings", &a.mSettings,
+                "tree", static_cast<Node*>(&a)
+                                   );
         }
 
 }; // class Tree

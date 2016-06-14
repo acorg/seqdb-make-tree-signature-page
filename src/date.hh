@@ -34,16 +34,14 @@ class Date
 
     inline void parse(std::string aText)
         {
+            reset();
             if (aText.size() == 10) {
                 strptime(aText.c_str(), "%Y-%m-%d", &mTime);
             }
             else if (aText.size() == 7) {
                 strptime(aText.c_str(), "%Y-%m", &mTime);
             }
-            else if (aText.size() == 0) {
-                reset();
-            }
-            else {
+            else if (!aText.empty()) {
                 throw std::runtime_error(std::string("cannot parse date from ") + aText);
             }
         }

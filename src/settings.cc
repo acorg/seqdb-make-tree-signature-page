@@ -43,6 +43,16 @@ void SettingsClades::extract(const Clades& aClades)
 } // SettingsClades::extract
 
 // ----------------------------------------------------------------------
+
+void SettingsVaccinesOnTree::add(std::string aId, std::string aLabel)
+{
+    const auto found = std::find_if(begin(), end(), [&](const auto& e) { return e.id == aId; });
+    if (found == end())
+        emplace_back(aId, aLabel);
+
+} // SettingsVaccinesOnTree::add
+
+// ----------------------------------------------------------------------
 /// Local Variables:
 /// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
 /// End:

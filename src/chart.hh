@@ -2,7 +2,6 @@
 
 #include <set>
 
-#include "json-read.hh"
 #include "draw.hh"
 
 // ----------------------------------------------------------------------
@@ -83,34 +82,38 @@ class DrawVaccineAntigen : public DrawAntigen
 
 // ----------------------------------------------------------------------
 
-class Point
+class VaccineData
 {
- private:
-    class json_parser_t AXE_RULE
-        {
-          public:
-            inline json_parser_t(Point& aPoint) : mPoint(aPoint) {}
-            axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const;
-          private:
-            Point& mPoint;
-        };
-
  public:
-    inline Point () : antigen(true), egg(false), reassortant(false), reference(false), vaccine(false), vaccine_fill_color(0xFFC0CB), vaccine_outline_color(0), vaccine_aspect(0.5) {}
+    inline VaccineData() : enabled(false), fill_color(0xFFC0CB), outline_color(0), aspect(0.5) {}
 
-    std::string name;
-    Location coordinates;
-    std::string lab_id;
+    bool enabled;
+    Color fill_color;
+    Color outline_color;
+    double aspect;
+};
+
+class PointAttributes
+{
+ public:
+    inline PointAttributes() : antigen(true), egg(false), reassortant(false), reference(false) {}
+
     bool antigen;
     bool egg;
     bool reassortant;
     bool reference;
-    bool vaccine;
-    Color vaccine_fill_color;
-    Color vaccine_outline_color;
-    double vaccine_aspect;
+    VaccineData vaccine;
+};
 
-    inline auto json_parser() { return json_parser_t(*this); }
+class Point
+{
+ public:
+    inline Point () {}
+
+    std::string name;
+    Location coordinates;
+    std::string lab_id;
+    PointAttributes attributes;
 
 }; // class Point
 
@@ -127,6 +130,18 @@ class ChartInfo
     std::string lineage;
     std::string name;
     std::string rbc_species;
+
+    friend inline auto json_fields(ChartInfo& a)
+        {
+            return std::make_tuple(
+                "date", &a.date,
+                "lab", &a.lab,
+                "virus_type", &a.virus_type,
+                "lineage", &a.lineage,
+                "name", &a.name,
+                "rbc_species", &a.rbc_species
+                                   );
+        }
 
 }; // class ChartInfo
 
@@ -170,6 +185,23 @@ class Chart
     Viewport mViewport;
 
     std::set<std::string> mPrefixName;
+
+      // constexpr const char* SDB_VERSION = "acmacs-sdb-v1";
+    std::string json_version;
+
+    friend inline auto json_fields(Chart& a)
+        {
+            return std::make_tuple(
+                "  version", &a.json_version,
+                " created", json::comment(""),
+                "?points", json::comment(""),
+                "info", &a.mInfo,
+                "minimum_column_basis", &a.mMinimumColumnBasis,
+                "points", &a.mPoints,
+                "stress", &a.mStress,
+                "column_bases", &a.mColumnBases
+                                   );
+        }
 
 }; // class Chart
 

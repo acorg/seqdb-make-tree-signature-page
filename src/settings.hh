@@ -137,13 +137,15 @@ class SettingsVaccineOnTree
 
 // ----------------------------------------------------------------------
 
-typedef std::vector<SettingsVaccineOnTree> SettingsVaccinesOnTree;
+// typedef std::vector<SettingsVaccineOnTree> SettingsVaccinesOnTree;
 
-// class SettingsVaccinesOnTree : public std::vector<SettingsVaccineOnTree>
-// {
-//  public:
-//     inline SettingsVaccinesOnTree() {}
-// }; // class SettingsVaccinesOnTree
+class SettingsVaccinesOnTree : public std::vector<SettingsVaccineOnTree>
+{
+ public:
+    inline SettingsVaccinesOnTree() {}
+    void add(std::string aId, std::string aLabel);
+
+}; // class SettingsVaccinesOnTree
 
 // ----------------------------------------------------------------------
 

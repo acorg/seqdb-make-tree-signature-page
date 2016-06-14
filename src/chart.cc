@@ -5,6 +5,7 @@
 #include "read-file.hh"
 #include "xz.hh"
 #include "settings.hh"
+#include "json-struct.hh"
 
 // ----------------------------------------------------------------------
 
@@ -24,129 +25,6 @@ Chart import_chart(std::string buffer)
     return chart;
 
 } // import_chart
-
-// ----------------------------------------------------------------------
-
-class json_parser_ChartInfo AXE_RULE
-{
-  public:
-    inline json_parser_ChartInfo(ChartInfo& aChartInfo) : mChartInfo(aChartInfo) {}
-
-    inline axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const
-    {
-        return (jsonr::skey("info") > jsonr::object(
-              jsonr::object_value("date", mChartInfo.date)
-            | jsonr::object_value("lab", mChartInfo.lab)
-            | jsonr::object_value("virus_type", mChartInfo.virus_type)
-            | jsonr::object_value("lineage", mChartInfo.lineage)
-            | jsonr::object_value("name", mChartInfo.name)
-            | jsonr::object_value("rbc_species", mChartInfo.rbc_species)
-            | jsonr::object_string_ignore_value("?")
-              ))(i1, i2);
-    }
-
-  private:
-    ChartInfo& mChartInfo;
-};
-
-class json_parser_PointVaccine AXE_RULE
-{
-  public:
-    inline json_parser_PointVaccine(Point& aPoint) : mPoint(aPoint) {}
-
-    inline axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const
-    {
-        auto set_vaccine = axe::e_ref([&](auto, auto) { mPoint.vaccine = true; });
-        return (jsonr::skey("v") > (jsonr::object(
-              jsonr::object_value("aspect", mPoint.vaccine_aspect)
-            | jsonr::object_string_value("fill_color", mPoint.vaccine_fill_color)
-            | jsonr::object_string_value("outline_color", mPoint.vaccine_outline_color)
-            | jsonr::object_string_ignore_value("?")
-              ) >> set_vaccine))(i1, i2);
-    }
-
-  private:
-    Point& mPoint;
-};
-
-class json_parser_PointAttributes AXE_RULE
-{
-  public:
-    inline json_parser_PointAttributes(Point& aPoint) : mPoint(aPoint) {}
-
-    inline axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const
-    {
-        auto get_point_type = axe::e_ref([&](auto b, auto e) { const std::string t(b, e); if (t == "a") mPoint.antigen = true; else if (t == "s") mPoint.antigen = false; else throw jsonr::JsonParsingError("invalid value for t point attribute: " + t); });
-        auto point_type = jsonr::doublequotes > (jsonr::string_content >> get_point_type) > jsonr::doublequotes;
-        return (jsonr::skey("a") > jsonr::object(
-              jsonr::object_value("r", mPoint.reassortant)
-            | jsonr::object_value("R", mPoint.reference)
-            | (jsonr::skey("t") > point_type)
-            | jsonr::object_value("e", mPoint.egg)
-            | json_parser_PointVaccine(mPoint)
-            | jsonr::object_string_ignore_value("?")
-              ))(i1, i2);
-    }
-
-  private:
-    Point& mPoint;
-};
-
-class json_parser_Location AXE_RULE
-{
-  public:
-    inline json_parser_Location(Location& aLocation) : mLocation(aLocation) {}
-
-    inline axe::result<std::string::iterator> operator()(std::string::iterator i1, std::string::iterator i2) const
-    {
-        using namespace jsonr;
-        return (skey("c") > array_begin > r_double(mLocation.x) > comma > r_double(mLocation.y) > array_end)(i1, i2);
-    }
-
-  private:
-    Location& mLocation;
-};
-
-axe::result<std::string::iterator> Point::json_parser_t::operator()(std::string::iterator i1, std::string::iterator i2) const
-{
-    return jsonr::object(axe::r_named(
-          jsonr::object_value("N", mPoint.name)
-            // | jsonr::object_value("c", mPoint.coordinates)
-        | json_parser_Location(mPoint.coordinates)
-        | jsonr::object_value("l", mPoint.lab_id)
-        | json_parser_PointAttributes(mPoint)
-        | jsonr::object_string_ignore_value("?")
-          , "point"))(i1, i2);
-}
-
-constexpr const char* SDB_VERSION = "acmacs-sdb-v1";
-
-Chart Chart::from_json(std::string data)
-{
-    using namespace jsonr;
-    Chart chart;
-    auto parse_chart = object(
-        version(SDB_VERSION)
-      | object_string_ignore_value(" created")
-      | object_string_ignore_value("?points")
-      | json_parser_ChartInfo(chart.mInfo)
-      | object_value("minimum_column_basis", chart.mMinimumColumnBasis)
-      | object_array_value("points", chart.mPoints)
-      | object_value("stress", chart.mStress)
-      | object_value("column_bases", chart.mColumnBases)
-        );
-    try {
-        parse_chart(std::begin(data), std::end(data));
-    }
-    catch (axe::failure<char>& err) {
-        throw JsonParsingError(err.message());
-    }
-    catch (failure& err) {
-        throw JsonParsingError(err.message(std::begin(data)));
-    }
-    return chart;
-
-} // Chart::from_json
 
 // ----------------------------------------------------------------------
 
@@ -191,14 +69,14 @@ void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/) const
     mDrawPoints.resize(mPoints.size(), nullptr);
     for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
         const auto& p = mPoints[point_no];
-        if (p.antigen) {
-            if (p.vaccine) {
+        if (p.attributes.antigen) {
+            if (p.attributes.vaccine.enabled) {
                 mDrawPoints[point_no] = &mDrawVaccineAntigen;
             }
             else if (mSequencedAntigens.find(point_no) != mSequencedAntigens.end()) {
                 mDrawPoints[point_no] = &mDrawSequencedAntigen;
             }
-            else if (p.reference) {
+            else if (p.attributes.reference) {
                 mDrawPoints[point_no] = &mDrawReferenceAntigen;
             }
             else {
@@ -274,7 +152,7 @@ void Chart::draw(Surface& aSurface, double aObjectScale, const SettingsAntigenic
 
 inline double DrawPoint::rotation(const Point& aPoint, const SettingsAntigenicMaps& aSettings) const
 {
-    return aPoint.reassortant ? aSettings.reassortant_rotation : 0.0;
+    return aPoint.attributes.reassortant ? aSettings.reassortant_rotation : 0.0;
 
 } // DrawPoint::rotation
 
@@ -292,7 +170,7 @@ void DrawSerum::draw(Surface& aSurface, const Point& aPoint, double aObjectScale
 
 double DrawAntigen::aspect(const Point& aPoint, const SettingsAntigenicMaps& aSettings) const
 {
-    return aPoint.egg ? aSettings.egg_antigen_aspect : 1.0;
+    return aPoint.attributes.egg ? aSettings.egg_antigen_aspect : 1.0;
 
 } // DrawAntigen::aspect
 
@@ -341,9 +219,72 @@ void DrawTrackedAntigen::draw(Surface& aSurface, const Point& aPoint, double aOb
 void DrawVaccineAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     aSurface.circle_filled(aPoint.coordinates, aSettings.vaccine_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
-                           aSettings.vaccine_antigen_outline_color, // aPoint.vaccine_outline_color,
-                           aSettings.vaccine_antigen_outline_width * aObjectScale, aPoint.vaccine_fill_color);
+                           aSettings.vaccine_antigen_outline_color, // aPoint.attributes.vaccine.outline_color,
+                           aSettings.vaccine_antigen_outline_width * aObjectScale, aPoint.attributes.vaccine.fill_color);
 
 } // DrawVaccineAntigen::draw
+
+// ----------------------------------------------------------------------
+// json
+// ----------------------------------------------------------------------
+
+static inline std::string make_PointAntigenSerializer(const bool*) { throw std::runtime_error("make_PointAntigenSerializer not implemented"); }
+
+static inline void make_PointAntigenDeserializer(bool* antigen, std::string& source)
+{
+    if (source == "a")
+        *antigen = true;
+    else if (source == "s")
+        *antigen = false;
+    else
+        throw json::parsing_error("invalid value for t point attribute: " + source);
+}
+
+inline auto json_fields(VaccineData& a)
+{
+    a.enabled = true;
+    return std::make_tuple(
+        "aspect", &a.aspect,
+        "fill_color", json::field(&a.fill_color, &Color::to_string, &Color::from_string),
+        "outline_color", json::field(&a.outline_color, &Color::to_string, &Color::from_string)
+                           );
+}
+
+inline auto json_fields(PointAttributes& a)
+{
+    return std::make_tuple(
+        "t", json::field(&a.antigen, &make_PointAntigenSerializer, &make_PointAntigenDeserializer),
+        "v", &a.vaccine,
+        "r", &a.reassortant,
+        "R", &a.reference,
+        "e", &a.egg
+                           );
+}
+
+inline auto json_fields(Point& a)
+{
+    return std::make_tuple(
+        "N", &a.name,
+        "c", json::field(&a.coordinates, &Location::to_vector, &Location::from_vector),
+        "l", &a.lab_id,
+        "a", &a.attributes
+                           );
+}
+
+// ----------------------------------------------------------------------
+
+Chart Chart::from_json(std::string data)
+{
+    Chart chart;
+    try {
+        json::parse(data, chart);
+    }
+    catch (json::parsing_error& err) {
+        std::cerr << "chart parsing error: "<< err.what() << std::endl;
+        throw;
+    }
+    return chart;
+
+} // Chart::from_json
 
 // ----------------------------------------------------------------------
