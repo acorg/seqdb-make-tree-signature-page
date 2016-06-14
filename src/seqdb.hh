@@ -55,32 +55,6 @@ class SequenceNotAligned : public std::runtime_error
 
 class SeqdbSeq
 {
- // private:
- //    class json_parser_t AXE_RULE
- //        {
- //          public:
- //            inline json_parser_t(SeqdbSeq& aSeqdbSeq) : mSeqdbSeq(aSeqdbSeq) {}
-
- //            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
- //            {
- //                auto r_passages = jsonr::object_value("p", mSeqdbSeq.mPassages);
- //                auto r_nucleotides = jsonr::object_value("n", mSeqdbSeq.mNucleotides);
- //                auto r_amino_acids = jsonr::object_value("a", mSeqdbSeq.mAminoAcids);
- //                auto r_nucleotides_shift = jsonr::object_value("t", mSeqdbSeq.mNucleotidesShift);
- //                auto r_amino_acids_shift = jsonr::object_value("s", mSeqdbSeq.mAminoAcidsShift);
- //                auto r_lab_ids = jsonr::object_value("l", mSeqdbSeq.mLabIds);
- //                auto r_gene = jsonr::object_value("g", mSeqdbSeq.mGene);
- //                auto r_hi_names = jsonr::object_value("h", mSeqdbSeq.mHiNames);
- //                auto r_reassortant = jsonr::object_value("r", mSeqdbSeq.mReassortant);
- //                auto r_clades = jsonr::object_value("c", mSeqdbSeq.mClades);
- //                auto r_comment = jsonr::object_string_ignore_value("?");
- //                return jsonr::object(r_passages | r_nucleotides | r_amino_acids | r_nucleotides_shift | r_amino_acids_shift | r_lab_ids | r_gene | r_hi_names| r_reassortant | r_clades | r_comment)(i1, i2);
- //            }
-
- //          private:
- //            SeqdbSeq& mSeqdbSeq;
- //        };
-
  public:
     inline SeqdbSeq() : mGene("HA") {}
 
@@ -97,9 +71,6 @@ class SeqdbSeq
         : SeqdbSeq(aNucleotides, std::string(), aGene)
         {
         }
-
-    // jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     AlignAminoAcidsData align(bool aForce, Messages& aMessages);
 
@@ -200,35 +171,9 @@ inline std::ostream& operator<<(std::ostream& out, const SeqdbSeq& seq)
 
 class SeqdbEntry
 {
- // private:
- //    class json_parser_t AXE_RULE
- //        {
- //          public:
- //            inline json_parser_t(SeqdbEntry& aSeqdbEntry) : mSeqdbEntry(aSeqdbEntry) {}
-
- //            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
- //            {
- //                auto r_name = jsonr::object_value("N", mSeqdbEntry.mName);
- //                auto r_country = jsonr::object_value("c", mSeqdbEntry.mCountry);
- //                auto r_continent = jsonr::object_value("C", mSeqdbEntry.mContinent);
- //                auto r_dates = jsonr::object_value("d", mSeqdbEntry.mDates);
- //                auto r_lineage = jsonr::object_value("l", mSeqdbEntry.mLineage);
- //                auto r_virus_type = jsonr::object_value("v", mSeqdbEntry.mVirusType);
- //                auto r_seq = jsonr::object_value("s", mSeqdbEntry.mSeq);
- //                auto r_comment = jsonr::object_string_ignore_value("?");
- //                return jsonr::object(r_name | r_country | r_continent | r_dates | r_lineage | r_virus_type | r_seq | r_comment)(i1, i2);
- //            }
-
- //          private:
- //            SeqdbEntry& mSeqdbEntry;
- //        };
-
  public:
     inline SeqdbEntry() {}
     inline SeqdbEntry(std::string aName) : mName(aName) {}
-
-    // jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-    // inline auto json_parser() { return json_parser_t(*this); }
 
     inline std::string name() const { return mName; }
     inline std::string country() const { return mCountry; }
@@ -304,7 +249,7 @@ class SeqdbEntry
                 "d", json::field(&a.mDates, json::output_if_not_empty),
                 "l", json::field(&a.mLineage, json::output_if_not_empty),
                 "v", json::field(&a.mVirusType, json::output_if_not_empty),
-                "s", json::field(&a.mSeq)
+                "s", &a.mSeq
                                    );
         }
 
@@ -343,6 +288,7 @@ class SeqdbEntrySeq
  private:
     SeqdbEntry* mEntry;
     SeqdbSeq* mSeq;
+
 }; // class SeqdbEntrySeq
 
 namespace std

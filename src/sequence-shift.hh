@@ -16,21 +16,6 @@ class InvalidShift : public std::runtime_error
 
 class Shift
 {
- // private:
- //    class json_parser_t AXE_RULE
- //        {
- //          public:
- //            inline json_parser_t(Shift& aShift) : mShift(aShift) {}
-
- //            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
- //            {
- //                return (axe::r_decimal() >> axe::e_ref([&](auto b, auto e) { mShift = std::stoi(std::string(b, e)); }))(i1, i2);
- //            }
-
- //          private:
- //            Shift& mShift;
- //        };
-
  public:
     typedef int ShiftT;
 
