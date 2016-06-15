@@ -246,6 +246,7 @@ std::string TextStyle::slant_to_string(const cairo_font_slant_t* a)
       case CAIRO_FONT_SLANT_OBLIQUE:
           return "oblique";
     }
+    return "normal";            // to avoid gcc complaining about having no return
 
 } // TextStyle::slant_to_string
 
@@ -259,6 +260,7 @@ std::string TextStyle::weight_to_string(const cairo_font_weight_t* a)
       case CAIRO_FONT_WEIGHT_BOLD:
           return "bold";
     }
+    return "normal";            // to avoid gcc complaining about having no return
 
 } // TextStyle::weight_to_string
 
