@@ -67,7 +67,7 @@ class Shift
                 return *this;
             }
             catch (InvalidShift&) {
-                throw json::_no_value();
+                throw json::no_value();
             }
         }
 

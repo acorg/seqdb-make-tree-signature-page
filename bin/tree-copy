@@ -14,6 +14,8 @@ from seqdb import open_file
 
 def main(args):
     tree = seqdb.import_tree(args.input[0])
+    if args.aa_transitions:
+        tree.make_aa_transitions()
     open_file.write_binary(filename=args.output[0], data=tree.json(indent=1).encode("utf-8"))
 
 # ----------------------------------------------------------------------
@@ -27,6 +29,7 @@ with seqdb.timeit(sys.argv[0]):
 
         parser.add_argument('input', nargs=1, help='source tree.')
         parser.add_argument('output', nargs=1, help='output tree.')
+        parser.add_argument('--aa-transitions', action='store_true', dest='aa_transitions', default=False, help='Generate aa transition labels')
 
         args = parser.parse_args()
         logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")

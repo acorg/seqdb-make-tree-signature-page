@@ -31,10 +31,10 @@ class AA_Transition
     size_t pos;
     const Node* for_left;       // node used to set left part, for debugging transition labels
 
-    friend inline auto json_fields(AA_Transition& a)
+    friend inline auto json_fields(AA_Transition& a, bool for_output)
         {
-            // if (!a)
-            //     throw json::_no_value();
+            if (for_output && !a)
+                throw json::no_value();
             return std::make_tuple("t", json::field(&a, &AA_Transition::display_name));
         }
 
