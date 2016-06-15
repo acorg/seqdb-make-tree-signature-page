@@ -23,6 +23,7 @@ class AA_Transition
     inline std::string display_name() const { return std::string(1, left) + std::to_string(pos + 1) + std::string(1, right); }
     inline bool empty_left() const { return left == Empty; }
     inline bool left_right_same() const { return left == right; }
+    inline operator bool() const { return !empty_left() && !left_right_same(); } // if transition is good for display
     friend inline std::ostream& operator<<(std::ostream& out, const AA_Transition& a) { return out << a.display_name(); }
 
     char left;
@@ -32,6 +33,8 @@ class AA_Transition
 
     friend inline auto json_fields(AA_Transition& a)
         {
+            // if (!a)
+            //     throw json::_no_value();
             return std::make_tuple("t", json::field(&a, &AA_Transition::display_name));
         }
 
@@ -71,7 +74,8 @@ class AA_Transitions : public std::vector<AA_Transition>
 
     inline operator bool() const
         {
-            return std::any_of(begin(), end(), [](const auto& a) -> bool { return !a.empty_left() && !a.left_right_same(); });
+              // return std::any_of(begin(), end(), std::mem_fn(&AA_Transition::operator bool));
+            return std::any_of(begin(), end(), [](const auto& a) -> bool { return a; });
         }
 
     inline std::vector<std::pair<std::string, const Node*>> make_labels(bool show_empty_left = false) const
@@ -157,17 +161,18 @@ class Node
 
     friend inline auto json_fields(Node& a)
         {
-            return std::make_tuple("aa_transitions", json::field(static_cast<std::vector<AA_Transition>*>(&a.aa_transitions), json::output_only_if_not_empty),
-                                     // "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated"),
-                                   "aa", &a.aa,
-                                   "clades", json::field(&a.clades, json::output_if_not_empty),
-                                   "continent", &a.continent,
-                                   "date", json::field(&a.date, &Date::display, &Date::parse, json::output_if_true),
-                                   "edge_length", &a.edge_length,
-                                   "id", &a.branch_id,
-                                   "name", &a.name,
-                                   "number_strains", &a.number_strains,
-                                   "subtree", json::field(&a.subtree, json::output_if_not_empty)
+            return std::make_tuple(
+                "aa_transitions", json::field(&a.aa_transitions, json::output_only_if_true),
+                  // "?", json::comment("aa_transitions is for information only, ignored on reading and re-calculated"),
+                "aa", json::field(&a.aa, json::output_if_not_empty),
+                "clades", json::field(&a.clades, json::output_if_not_empty),
+                "continent", json::field(&a.continent, json::output_if_not_empty),
+                "date", json::field(&a.date, &Date::display, &Date::parse, json::output_if_true),
+                "edge_length", &a.edge_length,
+                "id", &a.branch_id,
+                "name", json::field(&a.name, json::output_if_not_empty),
+                "number_strains", &a.number_strains,
+                "subtree", json::field(&a.subtree, json::output_if_not_empty)
                                    );
         }
 
