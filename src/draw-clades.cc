@@ -84,15 +84,15 @@ void Clades::draw(Surface& aSurface, const Viewport& aViewport, const Viewport& 
             const auto top = base_y + vertical_step * clade.begin -  aSettings.arrow_extra * vertical_step;
             const auto bottom = base_y + vertical_step * clade.end + aSettings.arrow_extra * vertical_step;
 
-            double label_vpos;
+            double label_vpos = 0; // initialized to avoid gcc-6 complaining about using uninitialized in the line with += below
             switch (clade.label_position) {
-              case CladeLabelPosition::Top:
+              case SettingsClade::LabelPosition::Top:
                   label_vpos = top;
                   break;
-              case CladeLabelPosition::Bottom:
+              case SettingsClade::LabelPosition::Bottom:
                   label_vpos = bottom;
                   break;
-              case CladeLabelPosition::Middle:
+              case SettingsClade::LabelPosition::Middle:
                   label_vpos = (top + bottom) / 2.0;
                   break;
             }

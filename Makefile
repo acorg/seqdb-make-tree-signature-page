@@ -12,7 +12,7 @@ MAKEFLAGS = -w
 SOURCES_DIR = src
 
 # TEST_SOURCES = test.cc seqdb.cc seqdb-json.cc read-file.cc xz.cc
-SEQDB_SOURCES = seqdb.cc seqdb-json.cc seqdb-py.cc amino-acids.cc clades.cc \
+SEQDB_SOURCES = seqdb.cc seqdb-py.cc amino-acids.cc clades.cc \
 		tree.cc tree-import.cc newick.cc settings.cc chart.cc \
 		draw.cc coloring.cc \
 		signature-page.cc draw-tree.cc time-series.cc draw-clades.cc antigenic-maps.cc \
@@ -35,14 +35,14 @@ PYTHON_VERSION = $(shell python3 -c 'import sys; print("{0.major}.{0.minor}".for
 PYTHON_CONFIG = python$(PYTHON_VERSION)-config
 PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 
-# -fvisibility=hidden and -flto make resulting lib smaller (pybind11)
-OPTIMIZATION = -O3 -fvisibility=hidden -flto
+# -fvisibility=hidden and -flto make resulting lib smaller (pybind11) but linking is much slower
+OPTIMIZATION = -O3 #-fvisibility=hidden -flto
 CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
 LDFLAGS =
 TEST_LDLIBS = $$(pkg-config --libs liblzma)
 SEQDB_LDLIBS = $$(pkg-config --libs cairo) $$(pkg-config --libs liblzma) $$($(PYTHON_CONFIG) --ldflags)
 
-MODULES_INCLUDE = -Imodules/json/src -Imodules/axe/include -Imodules/pybind11/include
+MODULES_INCLUDE = -Imodules/json/src -Imodules/axe/include -Imodules/pybind11/include -Imodules/json-struct
 PKG_INCLUDES = $$(pkg-config --cflags cairo) $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
 
 # ----------------------------------------------------------------------
@@ -83,6 +83,7 @@ $(BUILD)/%.o: $(SOURCES_DIR)/%.cc | $(BUILD) $(BUILD)/submodules
 $(BUILD)/submodules:
 	git submodule init
 	git submodule update
+	git submodule update --remote
 	touch $@
 
 # ----------------------------------------------------------------------

@@ -65,7 +65,8 @@ def main(args):
     if args.ladderize:
         tree.ladderize()        # must be before clade_setup()
     tree.clade_setup()
-    tree.make_aa_transitions()
+    if args.aa_transitions:
+        tree.make_aa_transitions()
     if args.hz_line_section_tolerance > 0:
         tree.make_hz_line_sections(args.hz_line_section_tolerance)
     mark_vaccines(tree)
@@ -76,7 +77,7 @@ def main(args):
 with seqdb.timeit(sys.argv[0]):
     try:
         import argparse
-        print(sys.argv)
+        print(" ".join(repr(a) for a in sys.argv))
         parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
 
@@ -84,6 +85,7 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('output', nargs=1, help='output tree.')
 
         parser.add_argument('--no-ladderize', action='store_false', dest='ladderize', default=True, help='No ladderize the tree')
+        parser.add_argument('--no-aa-transitions', action='store_false', dest='aa_transitions', default=True, help='Do not generate aa transition labels')
 
         parser.add_argument('--hz-line-section-tolerance', action='store', type=float, dest='hz_line_section_tolerance', default=0, help='')
 

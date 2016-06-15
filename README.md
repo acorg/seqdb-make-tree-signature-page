@@ -1,6 +1,11 @@
 # seqdb
 Set of tools to build, query sequence database and to generate phylogenetic trees.
 
+## Requirements:
+
+- macOS: clang 7.3
+- Linux: gcc 5.3 or 6.1 (gcc 4.9 is not supported by json-struct module)
+
 ## Processing
 
 - Make database from the source fasta files.

@@ -7,12 +7,9 @@
 #include <string>
 #include <stdexcept>
 #include <cmath>
-// #include <functional>
 
 #include "cairo.hh"
-#include "json-read.hh"
-#include "json-write.hh"
-// #include "date.hh"
+#include "json-struct.hh"
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wweak-vtables"
@@ -44,6 +41,9 @@ class Location
     inline void min(const Location& a) { x = std::min(x, a.x); y = std::min(y, a.y); }
     inline void max(const Location& a) { x = std::max(x, a.x); y = std::max(y, a.y); }
     static inline Location center_of(const Location& a, const Location& b) { return {(a.x + b.x) / 2.0, (a.y + b.y) / 2.0}; }
+
+    inline std::vector<double> to_vector() const { return {x, y}; }
+    inline void from_vector(const std::vector<double>& source) { x = source[0]; y = source[1]; }
 
 }; // class Location
 
@@ -145,6 +145,8 @@ class Viewport
 class Color
 {
  public:
+    static constexpr uint32_t _not_set = 0xFFFFFFFF;
+
     inline Color() : mColor(0xFF00FF) {}
     template <typename Uint, typename std::enable_if<std::is_integral<Uint>::value>::type* = nullptr> constexpr inline Color(Uint aColor) : mColor(static_cast<uint32_t>(aColor)) {}
     inline Color(std::string aColor) { from_string(aColor); }
@@ -188,6 +190,9 @@ class Color
             }
         }
 
+      // to avoid serialing not set colors
+    inline operator bool() const { return mColor != _not_set; }
+
  private:
     uint32_t mColor; // 4 bytes, most->least significant: transparency-red-green-blue, 0x00FF0000 - opaque red, 0xFF000000 - fully transparent
 
@@ -197,21 +202,23 @@ constexpr const Color BLACK = 0;
 constexpr const Color GREY = 0xA0A0A0;
 constexpr const Color LIGHT_GREY = 0xE0E0E0;
 constexpr const Color TRANSPARENT = 0xFF000000;
-constexpr const Color COLOR_NOT_SET = 0xFFFFFFFF;
+constexpr const Color COLOR_NOT_SET = Color::_not_set;
 
 // ----------------------------------------------------------------------
 
 class FontStyle
 {
  public:
-    inline FontStyle() : cairo_family("sans-serif") {}
+    static constexpr const char* default_family = "sans-serif";
+
+    inline FontStyle() : cairo_family(default_family) {}
     inline FontStyle(std::string aFamily) { from_string(aFamily); }
     inline FontStyle& operator=(std::string aFamily) { from_string(aFamily); return *this; }
 
     inline void from_string(std::string aFamily)
         {
             if (aFamily == "default")
-                cairo_family = "sans-serif";
+                cairo_family = default_family;
             else
                 cairo_family = aFamily;
         }
@@ -223,6 +230,9 @@ class FontStyle
 
     inline operator const char*() const { return cairo_family.c_str(); }
 
+      // to avoid saving to json, e.g. for settings.SettingsAATransition.TransitionData
+    inline operator bool() const { return cairo_family != default_family; }
+
  private:
     std::string cairo_family;
 };
@@ -231,25 +241,6 @@ class FontStyle
 
 class TextStyle
 {
- private:
-    class json_parser_t AXE_RULE
-        {
-          public:
-            inline json_parser_t(TextStyle& aTextStyle) : mTextStyle(aTextStyle) {}
-
-            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-            {
-                auto r_font = jsonr::object_string_value("font", mTextStyle.mFontStyle);
-                auto r_slant = jsonr::object_enum_value("slant", mTextStyle.mSlant, &TextStyle::slant_from_string);
-                auto r_weight = jsonr::object_enum_value("weight", mTextStyle.mWeight, &TextStyle::weight_from_string);
-                auto r_comment = jsonr::object_string_ignore_value("?");
-                return jsonr::object(r_font | r_slant | r_weight | r_comment)(i1, i2);
-            }
-
-          private:
-            TextStyle& mTextStyle;
-        };
-
  public:
     inline TextStyle() : mSlant(CAIRO_FONT_SLANT_NORMAL), mWeight(CAIRO_FONT_WEIGHT_NORMAL) {}
     inline TextStyle(std::string aFontFamily) : mFontStyle(aFontFamily), mSlant(CAIRO_FONT_SLANT_NORMAL), mWeight(CAIRO_FONT_WEIGHT_NORMAL) {}
@@ -258,18 +249,28 @@ class TextStyle
     inline cairo_font_slant_t slant() const { return mSlant; }
     inline cairo_font_weight_t weight() const { return mWeight; }
 
-    jsonw::IfPrependComma json(std::string& target, jsonw::IfPrependComma comma, size_t indent, size_t prefix) const;
-    inline auto json_parser() { return json_parser_t(*this); }
+      // to avoid saving to json, e.g. for settings.SettingsAATransition.TransitionData
+    inline operator bool() const { return mSlant != CAIRO_FONT_SLANT_NORMAL || mWeight != CAIRO_FONT_WEIGHT_NORMAL || !mFontStyle; }
 
  private:
     FontStyle mFontStyle;
     cairo_font_slant_t mSlant;
     cairo_font_weight_t mWeight;
 
-    static cairo_font_slant_t slant_from_string(std::string source);
-    static cairo_font_weight_t weight_from_string(std::string source);
+    static std::string slant_to_string(const cairo_font_slant_t* a);
+    static std::string weight_to_string(const cairo_font_weight_t* a);
+    static void slant_from_string(cairo_font_slant_t* a, std::string source);
+    static void weight_from_string(cairo_font_weight_t* a, std::string source);
 
-    friend class json_parser_t;
+    friend inline auto json_fields(TextStyle& a)
+        {
+            return std::make_tuple(
+                "?", json::comment("font: default monospace; slant: normal italic oblique; weight: normal bold"),
+                "font", json::field(&a.mFontStyle, &FontStyle::to_string, &FontStyle::from_string),
+                "slant", json::field(&a.mSlant, &TextStyle::slant_to_string, &TextStyle::slant_from_string),
+                "weight", json::field(&a.mWeight, &TextStyle::weight_to_string, &TextStyle::weight_from_string)
+                                   );
+        }
 
 }; // class TextStyle
 
@@ -338,7 +339,8 @@ class Surface
       // width*ratio.
     double set_clip_region(const Viewport& aViewport, double aWidthScale);
 
-    Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing = nullptr);
+    Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing);
+    inline Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle) { return text_size(aText, aSize, aTextStyle, nullptr); } // for pybind11 to avoid exposing double* to python
 
     class PushContext
     {

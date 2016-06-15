@@ -236,33 +236,37 @@ DrawHzLines& DrawHzLines::prepare(Tree& aTree, HzLineSections& aSections)
 
 // ----------------------------------------------------------------------
 
-void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps& aAntigenicMaps, const HzLineSections& aSections)
+void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections)
 {
-    const auto vertical_step = aDrawTree.vertical_step();
-    for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
-        const auto& section = aSections[section_no];
-        double first_y;
-        if (section_no != 0) {
-            first_y = aTimeSeries.origin.y + vertical_step * section.first_line - vertical_step * 0.5;
-              // draw hz line in the time series area
-            aSurface.line({aTimeSeries.origin.x, first_y}, {aTimeSeries.right(), first_y}, aSections.hz_line_color, aSections.hz_line_width);
-        }
-        else {
-            first_y = aTimeSeries.origin.y;
+    if (!aSections.empty()) {
+        const auto vertical_step = aDrawTree.vertical_step();
+        for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
+            const auto& section = aSections[section_no];
+            double first_y;
+            if (section_no != 0) {
+                first_y = aTimeSeries.origin.y + vertical_step * section.first_line - vertical_step * 0.5;
+                  // draw hz line in the time series area
+                aSurface.line({aTimeSeries.origin.x, first_y}, {aTimeSeries.right(), first_y}, aSections.hz_line_color, aSections.hz_line_width);
+            }
+            else {
+                first_y = aTimeSeries.origin.y;
+            }
+
+            if (aAntigenicMaps != nullptr) {
+                  // draw section vertical colored bar
+                double last_y = section_no == (aSections.size() - 1) ? aTimeSeries.bottom() : aTimeSeries.origin.y + vertical_step * aSections[section_no+1].first_line + vertical_step * 0.5;
+                aSurface.line({aAntigenicMapsViewport.origin.x, first_y}, {aAntigenicMapsViewport.origin.x, last_y}, section.color, section.line_width);
+            }
         }
 
-          // draw section vertical colored bar
-        double last_y = section_no == (aSections.size() - 1) ? aTimeSeries.bottom() : aTimeSeries.origin.y + vertical_step * aSections[section_no+1].first_line + vertical_step * 0.5;
-        aSurface.line({aAntigenicMapsViewport.origin.x, first_y}, {aAntigenicMapsViewport.origin.x, last_y}, section.color, section.line_width);
-    }
-
-    if (aSections.sequenced_antigen_line_show) {
-          // draw sequenced antigen marks
-        const double mark_x1 = aAntigenicMapsViewport.origin.x - aSections[0].line_width;
-        const double mark_x2 = mark_x1 - aSections.sequenced_antigen_line_length;
-        for (auto line_no: aAntigenicMaps.lines_of_sequenced_antigens_in_chart()) {
-            const double y = aTimeSeries.origin.y + vertical_step * line_no;
-            aSurface.line({mark_x1, y}, {mark_x2, y}, aSections.sequenced_antigen_line_color, aSections.sequenced_antigen_line_width);
+        if (aAntigenicMaps != nullptr && aSections.sequenced_antigen_line_show) {
+              // draw sequenced antigen marks
+            const double mark_x1 = aAntigenicMapsViewport.origin.x - aSections[0].line_width;
+            const double mark_x2 = mark_x1 - aSections.sequenced_antigen_line_length;
+            for (auto line_no: aAntigenicMaps->lines_of_sequenced_antigens_in_chart()) {
+                const double y = aTimeSeries.origin.y + vertical_step * line_no;
+                aSurface.line({mark_x1, y}, {mark_x2, y}, aSections.sequenced_antigen_line_color, aSections.sequenced_antigen_line_width);
+            }
         }
     }
 

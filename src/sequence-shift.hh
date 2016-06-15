@@ -4,7 +4,7 @@
 #include <string>
 #include <limits>
 
-#include "json-read.hh"
+#include "json-struct.hh"
 
 // ----------------------------------------------------------------------
 
@@ -16,21 +16,6 @@ class InvalidShift : public std::runtime_error
 
 class Shift
 {
- private:
-    class json_parser_t AXE_RULE
-        {
-          public:
-            inline json_parser_t(Shift& aShift) : mShift(aShift) {}
-
-            template<class Iterator> inline axe::result<Iterator> operator()(Iterator i1, Iterator i2) const
-            {
-                return (axe::r_decimal() >> axe::e_ref([&](auto b, auto e) { mShift = std::stoi(std::string(b, e)); }))(i1, i2);
-            }
-
-          private:
-            Shift& mShift;
-        };
-
  public:
     typedef int ShiftT;
 
@@ -76,7 +61,20 @@ class Shift
 
     inline void reset() { mShift = NotAligned; }
 
-    inline auto json_parser() { return json_parser_t(*this); }
+    inline ShiftT to_json() const
+        {
+            try {
+                return *this;
+            }
+            catch (InvalidShift&) {
+                throw json::no_value();
+            }
+        }
+
+    inline void from_json(ShiftT& source)
+        {
+            mShift = source;
+        }
 
  private:
     ShiftT mShift;

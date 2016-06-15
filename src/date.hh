@@ -16,7 +16,11 @@ class Date
       // inline Date& operator =(const Date&) = default;
     inline Date& operator =(std::string aText) { if (!aText.empty()) parse(aText); return *this; }
 
+    inline bool operator < (const Date& d) const { return year() == d.year() ? (month() == d.month() ? day() < d.day() : month() < d.month()) : year() < d.year(); }
+    inline bool operator == (const Date& d) const { return year() == d.year() && month() == d.month() && day() == d.day(); }
+
     inline bool empty() const { return mTime.tm_year == 0; }
+    inline operator bool() const { return !operator==(Date()); }
     inline int year() const { return mTime.tm_year; }
     inline int month() const { return mTime.tm_mon; }
     inline int day() const { return mTime.tm_mday; }
@@ -30,16 +34,14 @@ class Date
 
     inline void parse(std::string aText)
         {
+            reset();
             if (aText.size() == 10) {
                 strptime(aText.c_str(), "%Y-%m-%d", &mTime);
             }
             else if (aText.size() == 7) {
                 strptime(aText.c_str(), "%Y-%m", &mTime);
             }
-            else if (aText.size() == 0) {
-                reset();
-            }
-            else {
+            else if (!aText.empty()) {
                 throw std::runtime_error(std::string("cannot parse date from ") + aText);
             }
         }
@@ -59,6 +61,8 @@ class Date
     //         std::strftime(buf, sizeof(buf), "%b %y", &mTime);
     //         return buf;
     //     }
+
+    // if this different from a date that was reset
 
     inline std::string month_3() const
         {
@@ -120,17 +124,6 @@ class Date
                 mTime.tm_mon = 11;
                 --mTime.tm_year;
             }
-        }
-
-    inline bool operator < (const Date& d) const
-        {
-              // return std::mktime(const_cast<std::tm*>(&mTime)) < std::mktime(const_cast<std::tm*>(&d.mTime));
-            return year() == d.year() ? (month() == d.month() ? day() < d.day() : month() < d.month()) : year() < d.year();
-        }
-
-    inline bool operator == (const Date& d) const
-        {
-            return year() == d.year() && month() == d.month() && day() == d.day();
         }
 
  private:
