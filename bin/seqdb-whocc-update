@@ -85,7 +85,7 @@ with timeit(sys.argv[0]):
         parser.add_argument('-n', '--no-save', action='store_false', dest='save', default=True, help='Do not save resulting database.')
         # parser.add_argument('--gene', action='store', dest='default_gene', default="HA", help='default gene.')
         parser.add_argument('--acmacs', action='store', dest='acmacs_url', default='https://localhost:1168', help='AcmacsWeb server host and port, e.g. https://localhost:1168.')
-        parser.add_argument('--db', action='store', dest='path_to_db', default='', help='Path to sequence database (empty for default location).')
+        parser.add_argument('--db', action='store', dest='path_to_db', required=True, help='Path to sequence database.')
         parser.add_argument('--hidb', action='store', dest='path_to_hidb', default="~/WHO", help='Path to directory with the HiDb files.')
         parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
         args = parser.parse_args()
