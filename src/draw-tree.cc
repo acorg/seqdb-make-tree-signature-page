@@ -261,7 +261,8 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
             if (section_no != 0) {
                 first_y = aTimeSeries.origin.y + vertical_step * (section.first_line - 0.5);
                   // draw hz line in the time series area
-                aSurface.line({aTimeSeries.origin.x, first_y}, {aTimeSeries.right(), first_y}, aSections.hz_line_color, aSections.hz_line_width);
+                const double y = aTimeSeries.origin.y + vertical_step * (section.first_line - (1 + aSections.vertical_gap) * 0.5);
+                aSurface.line({aTimeSeries.origin.x, y}, {aTimeSeries.right(), y}, aSections.hz_line_color, aSections.hz_line_width);
             }
             else {
                 first_y = aTimeSeries.origin.y;
