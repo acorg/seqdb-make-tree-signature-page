@@ -9,8 +9,7 @@ DrawTree& DrawTree::prepare(Tree& aTree, const SettingsDrawTree& aSettings)
 {
     add_hz_line_sections_gap(aTree, aSettings.hz_line_sections);
     aTree.prepare_for_drawing();
-    const auto tre_wh = aTree.width_height();
-    mNumberOfLines = tre_wh.second;
+    mNumberOfLines = aTree.height();
 
     mVaccines.clear();
     for (const auto& vaccine_data: aTree.settings().draw_tree.vaccines) {
@@ -42,9 +41,8 @@ void DrawTree::add_hz_line_sections_gap(Tree& aTree, const HzLineSections& aSect
 void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewport, const SettingsDrawTree& aSettings)
 {
     mViewport = aViewport;
-    const auto tre_wh = aTree.width_height();
-    mHorizontalStep = aViewport.size.width / tre_wh.first * 0.9;
-    mVerticalStep = aViewport.size.height / (tre_wh.second + 2); // +2 to add space at the top and bottom
+    mHorizontalStep = aViewport.size.width / aTree.width() * 0.9;
+    mVerticalStep = aViewport.size.height / (aTree.height() + 2); // +2 to add space at the top and bottom
     mLineWidth = std::min(aSettings.line_width, mVerticalStep * 0.5);
     set_label_scale(aSurface, aTree, aViewport, aSettings);
     set_horizontal_step(aSurface, aTree, aViewport, aSettings);
@@ -261,7 +259,7 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
             const auto& section = aSections[section_no];
             double first_y;
             if (section_no != 0) {
-                first_y = aTimeSeries.origin.y + vertical_step * section.first_line - vertical_step * 0.5;
+                first_y = aTimeSeries.origin.y + vertical_step * (section.first_line - 0.5);
                   // draw hz line in the time series area
                 aSurface.line({aTimeSeries.origin.x, first_y}, {aTimeSeries.right(), first_y}, aSections.hz_line_color, aSections.hz_line_width);
             }
@@ -271,7 +269,9 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
 
             if (aAntigenicMaps != nullptr) {
                   // draw section vertical colored bar
-                double last_y = section_no == (aSections.size() - 1) ? aTimeSeries.bottom() : aTimeSeries.origin.y + vertical_step * aSections[section_no+1].first_line + vertical_step * 0.5;
+                double last_y = section_no == (aSections.size() - 1)
+                        ? aTimeSeries.bottom()
+                        : aTimeSeries.origin.y + vertical_step * (aSections[section_no+1].first_line - aSections.vertical_gap - 0.5);
                 aSurface.line({aAntigenicMapsViewport.origin.x, first_y}, {aAntigenicMapsViewport.origin.x, last_y}, section.color, section.line_width);
             }
         }

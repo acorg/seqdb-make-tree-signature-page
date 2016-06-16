@@ -125,7 +125,6 @@ class Node
 
     inline bool is_leaf() const { return subtree.empty() && !name.empty(); }
     inline double middle() const { return is_leaf() ? static_cast<double>(line_no) : ((top + bottom) / 2.0); }
-    std::pair<double, size_t> width_height() const;
     int months_from(const Date& aStart) const; // returns negative if date of the node is earlier than aStart
 
     std::string display_name() const;
@@ -249,6 +248,11 @@ class Tree : public Node
 
 
     void add_vaccine(std::string aId, std::string aLabel);
+
+      // number of lines in the tree
+    size_t height() const;
+      // biggest cumulative_edge_length
+    inline double width() const { compute_cumulative_edge_length(); return mMaxCumulativeEdgeLength; }
 
  private:
     Settings mSettings;

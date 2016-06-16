@@ -21,27 +21,6 @@
 
 // ----------------------------------------------------------------------
 
-std::pair<double, size_t> Node::width_height() const
-{
-    size_t height = 0;
-    double width = 0;
-    if (is_leaf()) {
-        ++height;
-    }
-    else {
-        for (auto node = subtree.begin(); node != subtree.end(); ++node) {
-            auto const wh = node->width_height();
-            if (wh.first > width)
-                width = wh.first;
-            height += wh.second;
-        }
-    }
-    return std::make_pair(width + edge_length, height);
-
-} // Node::width_height
-
-// ----------------------------------------------------------------------
-
 int Node::months_from(const Date& aStart) const
 {
     return date.empty() ? -1 : months_between_dates(aStart, date);
@@ -123,8 +102,6 @@ void Tree::ladderize()
 {
     Node::ladderize();
     set_branch_id();
-      //set_line_no();
-      //set_top_bottom();
     init_hz_line_sections(true);
 
 } // Tree::ladderize
@@ -142,8 +119,6 @@ void Tree::preprocess_upon_importing_from_external_format()
     iterate_post(*this, set_number_strains);
 
     set_branch_id();
-      // set_line_no();
-      // set_top_bottom();
     init_hz_line_sections();
 
 } // Tree::preprocess_upon_importing_from_external_format
@@ -192,6 +167,18 @@ void Tree::set_line_no()
     iterate_leaf(*this, set_line_no);
 
 } // Tree::set_line_no
+
+// ----------------------------------------------------------------------
+
+size_t Tree::height() const
+{
+    size_t height = find_last_leaf(*this).line_no;
+    if (height == 0) {
+        height = number_strains; // lines were not numbered, use number of leaves
+    }
+    return height;
+
+} // Tree::height
 
 // ----------------------------------------------------------------------
 
