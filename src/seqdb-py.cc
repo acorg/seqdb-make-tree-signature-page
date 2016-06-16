@@ -311,7 +311,7 @@ PYBIND11_PLUGIN(seqdb_backend)
 
     py::class_<DrawTree>(m, "DrawTree")
             .def(py::init<>())
-            .def("prepare", &DrawTree::prepare, py::arg("tree"), py::return_value_policy::take_ownership)
+              // .def("prepare", &DrawTree::prepare, py::arg("tree"), py::arg("HzLineSections"), py::return_value_policy::take_ownership)
             .def("color_by_continent", &DrawTree::color_by_continent, py::arg("color_by_continent"), py::return_value_policy::take_ownership)
             .def("color_by_pos", &DrawTree::color_by_pos, py::arg("pos"), py::return_value_policy::take_ownership)
             .def("draw", &DrawTree::draw, py::arg("tree"), py::arg("surface"), py::arg("viewport"), py::arg("settings"))

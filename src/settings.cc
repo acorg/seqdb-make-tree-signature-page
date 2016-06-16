@@ -14,10 +14,14 @@ HzLineSection::HzLineSection(const Node& aNode, Color aColor)
 void SettingsClade::update(const SettingsClade& source)
 {
     show = source.show;
-    if (source.begin >= 0)
+    if (!source.begin.empty()) {
         begin = source.begin;
-    if (source.end >= 0)
+        begin_line = source.begin_line;
+    }
+    if (!source.end.empty()) {
         end = source.end;
+        end_line = source.end_line;
+    }
     label = source.label;
     if (source.slot >= 0)
         slot = source.slot;

@@ -137,8 +137,6 @@ class SettingsVaccineOnTree
 
 // ----------------------------------------------------------------------
 
-// typedef std::vector<SettingsVaccineOnTree> SettingsVaccinesOnTree;
-
 class SettingsVaccinesOnTree : public std::vector<SettingsVaccineOnTree>
 {
  public:
@@ -156,8 +154,10 @@ class HzLineSection
 
  public:
     inline HzLineSection() : first_line(LINE_NOT_SET), color(COLOR_NOT_SET), line_width(2) {}
-    inline HzLineSection(std::string aFirstName, size_t aFirstLine, Color aColor = COLOR_NOT_SET)
-        : first_name(aFirstName), first_line(aFirstLine), color(aColor), line_width(2) {}
+    // inline HzLineSection(std::string aFirstName, size_t aFirstLine, Color aColor = COLOR_NOT_SET)
+    //     : first_name(aFirstName), first_line(aFirstLine), color(aColor), line_width(2) {}
+    inline HzLineSection(std::string aFirstName, Color aColor = COLOR_NOT_SET)
+        : first_name(aFirstName), first_line(LINE_NOT_SET), color(aColor), line_width(2) {}
     HzLineSection(const Node& aNode, Color aColor = COLOR_NOT_SET);
 
     std::string first_name;
@@ -180,7 +180,9 @@ class HzLineSection
 class HzLineSections : public std::vector<HzLineSection>
 {
  public:
-    inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY), sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY) {}
+    inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY),
+                              sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
+                              vertical_gap(1) {}
 
     inline void sort()
         {
@@ -192,6 +194,7 @@ class HzLineSections : public std::vector<HzLineSection>
     bool sequenced_antigen_line_show;
     double sequenced_antigen_line_width, sequenced_antigen_line_length;
     Color sequenced_antigen_line_color;
+    size_t vertical_gap;
 
     friend inline auto json_fields(HzLineSections& a)
         {
@@ -202,6 +205,7 @@ class HzLineSections : public std::vector<HzLineSection>
                 "sequenced_antigen_line_width", &a.sequenced_antigen_line_width,
                 "sequenced_antigen_line_length", &a.sequenced_antigen_line_length,
                 "sequenced_antigen_line_color", json::field(&a.sequenced_antigen_line_color, &Color::to_string, &Color::from_string),
+                "vertical_gap", &a.vertical_gap,
                 "hz_line_sections", static_cast<std::vector<HzLineSection>*>(&a)
                                    );
         }
@@ -344,17 +348,19 @@ class SettingsClade
     enum class LabelPosition { Middle, Top, Bottom };
 
     inline SettingsClade()
-        : show(false), begin(-1), end(-1), slot(-1), label_position(LabelPosition::Middle),
+        : show(false), slot(-1), label_position(LabelPosition::Middle),
           label_position_offset(0.0), label_rotation(0.0), label_offset(3.0) {}
-    inline SettingsClade(int aBegin, int aEnd, std::string aLabel, std::string aId)
-        : show(true), begin(aBegin), end(aEnd), label(aLabel), id(aId), slot(-1), label_position(LabelPosition::Middle),
+    inline SettingsClade(std::string aBegin, std::string aEnd, size_t aBeginLine, size_t aEndLine, std::string aLabel, std::string aId)
+        : show(true), begin(aBegin), end(aEnd), begin_line(aBeginLine), end_line(aEndLine),
+          label(aLabel), id(aId), slot(-1), label_position(LabelPosition::Middle),
           label_position_offset(0.0), label_rotation(0.0), label_offset(3.0) {}
 
     void update(const SettingsClade& source);
 
     bool show;
-    int begin;
-    int end;
+    std::string begin;          // name of the node
+    std::string end;            // name of the node
+    size_t begin_line, end_line; // for drawing only, not saved/loaded
     std::string label;
     std::string id;
     int slot;

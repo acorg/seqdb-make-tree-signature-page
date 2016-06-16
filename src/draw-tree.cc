@@ -5,8 +5,9 @@
 
 // ----------------------------------------------------------------------
 
-DrawTree& DrawTree::prepare(Tree& aTree)
+DrawTree& DrawTree::prepare(Tree& aTree, const SettingsDrawTree& aSettings)
 {
+    add_hz_line_sections_gap(aTree, aSettings.hz_line_sections);
     aTree.prepare_for_drawing();
     const auto tre_wh = aTree.width_height();
     mNumberOfLines = tre_wh.second;
@@ -19,6 +20,22 @@ DrawTree& DrawTree::prepare(Tree& aTree)
     return *this;
 
 } // DrawTree::prepare
+
+// ----------------------------------------------------------------------
+
+void DrawTree::add_hz_line_sections_gap(Tree& aTree, const HzLineSections& aSections)
+{
+    if (aSections.vertical_gap > 0) {
+        for (size_t section_no = 1; section_no < aSections.size(); ++section_no) {
+            auto& section = aSections[section_no];
+            const auto node = aTree.find_node_by_name(section.first_name);
+            if (node == nullptr)
+                throw std::runtime_error("Cannot process hz-line-section: \"" + section.first_name + "\" not found in the tree");
+            node->vertical_gap_before = aSections.vertical_gap;
+        }
+    }
+
+} // DrawTree::add_hz_line_sections_gap
 
 // ----------------------------------------------------------------------
 
@@ -220,10 +237,10 @@ DrawHzLines& DrawHzLines::prepare(Tree& aTree, HzLineSections& aSections)
       // find line_no for each section first and last
     for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
         auto& section = aSections[section_no];
-        const auto first = aTree.find_name(section.first_name);
-        if (first.empty())
+        const auto node = aTree.find_node_by_name(section.first_name);
+        if (node == nullptr)
             throw std::runtime_error("Cannot process hz-line-section: \"" + section.first_name + "\" not found in the tree");
-        section.first_line = first.back()->line_no;
+        section.first_line = node->line_no;
         if (section_no == 0 && section.first_line != 0)
             throw std::runtime_error("Cannot process hz-line-section: line_no for the first section is not 0");
     }

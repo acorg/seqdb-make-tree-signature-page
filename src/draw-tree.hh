@@ -19,7 +19,7 @@ class DrawTree
 //            , mRootEdge(0), mLineColor(0), mLineWidth(1), mNameOffset(0.2) {}
     inline ~DrawTree() { delete mColoring; }
 
-    DrawTree& prepare(Tree& aTree);
+    DrawTree& prepare(Tree& aTree, const SettingsDrawTree& aSettings);
     inline DrawTree& color_by_continent(bool aColorByContinent) { if (aColorByContinent) { delete mColoring; mColoring = new ColoringByContinent(); } return *this; }
     inline DrawTree& color_by_pos(int aPos) { if (aPos >= 0) { delete mColoring; mColoring = new ColoringByPos(static_cast<size_t>(aPos)); } return *this; }
 
@@ -42,6 +42,7 @@ class DrawTree
 
     Viewport mViewport;         // to avoid passing via draw_node recusrsive calls
 
+    void add_hz_line_sections_gap(Tree& aTree, const HzLineSections& aSections);
     void set_label_scale(Surface& surface, const Tree& aTree, const Viewport& aViewport, const SettingsDrawTree& aSettings);
     void set_horizontal_step(Surface& surface, const Tree& aTree, const Viewport& aViewport, const SettingsDrawTree& aSettings);
     double tree_width(Surface& surface, const Node& aNode, const SettingsDrawTree& aSettings, double aEdgeLength = -1.0) const;

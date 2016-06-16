@@ -79,7 +79,7 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
         const double padding = aSurface.canvas_size().width * aTree.settings().signature_page.outer_padding;
         mPageArea.set(Location(padding, padding), aSurface.canvas_size() - Size(padding + padding, padding + padding));
 
-        mDrawTree->prepare(aTree);
+        mDrawTree->prepare(aTree, aTree.settings().draw_tree);
         if (mParts & ShowLegend) {
             mLegend = mDrawTree->coloring().legend();
         }
@@ -163,7 +163,7 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
             mTimeSeries->draw(aSurface, time_series_viewport, aTree, *mDrawTree, aTree.settings().time_series);
         }
         if (mClades) {
-            mClades->draw(aSurface, clades_viewport, time_series_viewport, *mDrawTree, aTree.settings().clades);
+            mClades->draw(aSurface, aTree, clades_viewport, time_series_viewport, *mDrawTree, aTree.settings().clades);
         }
         if (mDrawHzLines) {
             mDrawHzLines->draw(aSurface, time_series_viewport, antigenic_maps_viewport, *mDrawTree, mAntigenicMaps, aTree.settings().draw_tree.hz_line_sections);

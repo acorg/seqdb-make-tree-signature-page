@@ -123,8 +123,8 @@ void Tree::ladderize()
 {
     Node::ladderize();
     set_branch_id();
-    set_line_no();
-    set_top_bottom();
+      //set_line_no();
+      //set_top_bottom();
     init_hz_line_sections(true);
 
 } // Tree::ladderize
@@ -142,8 +142,8 @@ void Tree::preprocess_upon_importing_from_external_format()
     iterate_post(*this, set_number_strains);
 
     set_branch_id();
-    set_line_no();
-    set_top_bottom();
+      // set_line_no();
+      // set_top_bottom();
     init_hz_line_sections();
 
 } // Tree::preprocess_upon_importing_from_external_format
@@ -174,7 +174,7 @@ void Tree::init_hz_line_sections(bool reset)
     if (hz_line_sections.empty()) {
         const auto first = find_first_leaf(*this);
           // const auto last = find_last_leaf(*this);
-        hz_line_sections.emplace_back(first.name, first.line_no);
+        hz_line_sections.emplace_back(first.name);
     }
 
 } // Tree::init_hz_line_sections
@@ -185,6 +185,7 @@ void Tree::set_line_no()
 {
     size_t current_line = 0;
     auto set_line_no = [&current_line](Node& aNode) {
+        current_line += aNode.vertical_gap_before;
         aNode.line_no = current_line;
         ++current_line;
     };
@@ -339,18 +340,8 @@ void Tree::fix_labels()
 
 void Tree::prepare_for_drawing()
 {
-      // set line_no for each name node
-    size_t current_line = 0;
-    auto set_line_no = [&](Node& aNode) {
-        aNode.line_no = current_line;
-        ++current_line;
-    };
-      // set top and bottom for each subtree node
-    auto set_top_bottom = [](Node& aNode) {
-        aNode.top = aNode.subtree.begin()->middle();
-        aNode.bottom = aNode.subtree.rbegin()->middle();
-    };
-    iterate_leaf_post(*this, set_line_no, set_top_bottom);
+    set_line_no();
+    set_top_bottom();
 
 } // Tree::prepare_for_drawing
 
@@ -655,6 +646,14 @@ bool Node::find_name_r(std::string aName, std::vector<const Node*>& aPath) const
 
 // ----------------------------------------------------------------------
 
+const Node* Tree::find_node_by_name(std::string aName) const
+{
+    return find_node(*this, [&](const Node& aNode) -> bool { return aNode.name == aName; });
+
+} // Tree::find_node_by_name
+
+// ----------------------------------------------------------------------
+
 void Tree::re_root(std::string aName)
 {
     std::vector<const Node*> path = find_name(aName);
@@ -712,7 +711,7 @@ std::pair<Node*,Node*> Tree::find_path_to_next_leaf(std::vector<std::pair<size_t
 void Tree::make_hz_line_sections(double tolerance)
 {
     compute_cumulative_edge_length();
-    std::cout << "max_cumulative_edge_length " << mMaxCumulativeEdgeLength << std::endl;
+      // std::cout << "max_cumulative_edge_length " << mMaxCumulativeEdgeLength << std::endl;
 
       // compute edge_length_to_next
     for (auto node_path = find_path_to_first_leaf(); node_path.first != nullptr; ) {

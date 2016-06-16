@@ -98,8 +98,8 @@ class Node
  public:
     typedef std::vector<Node> Subtree;
 
-    inline Node() : edge_length(0), line_no(0), number_strains(1) {}
-    inline Node(std::string aName, double aEdgeLength, const Date& aDate = Date()) : edge_length(aEdgeLength), name(aName), date(aDate), line_no(0), number_strains(1) {}
+    inline Node() : edge_length(0), line_no(0), number_strains(1), vertical_gap_before(0) {}
+    inline Node(std::string aName, double aEdgeLength, const Date& aDate = Date()) : edge_length(aEdgeLength), name(aName), date(aDate), line_no(0), number_strains(1), vertical_gap_before(0) {}
     // inline Node(Node&&) = default;
     // inline Node(const Node&) = default;
     // inline Node& operator=(Node&&) = default; // needed for swap needed for sort
@@ -143,6 +143,7 @@ class Node
 
       // for hz line sections
     double edge_length_to_next;
+    mutable size_t vertical_gap_before; // if this node is the beginning of the hz line section, we may need to add gap when enumerating lines
 
     inline Node* find_path_to_first_leaf(std::vector<std::pair<size_t, Node*>>& path)
         {
@@ -224,6 +225,7 @@ class Tree : public Node
 
       // finds leaf node with the passed name and returns path to that node, the first pointer in the path is &Tree, the last pointer in the path is the found node.
     std::vector<const Node*> find_name(std::string aName) const;
+    const Node* find_node_by_name(std::string aName) const;
     void re_root(const std::vector<const Node*>& aNewRoot);
       // re-roots tree making the parent of the leaf node with the passed name root
     void re_root(std::string aName);
@@ -273,7 +275,9 @@ class Tree : public Node
 
     std::vector<const Node*> leaf_nodes_sorted_by(const std::function<bool(const Node*,const Node*)>& cmp) const;
 
-    static constexpr const char* TREE_JSON_DUMP_VERSION = "phylogenetic-tree-v1";
+      // changes between "phylogenetic-tree-v1" and "phylogenetic-tree-v2"
+      // - settings.clades.per_clade[]: begin and end are names (of nodes) instead of line numbers, lines recomputed right before drawing
+    static constexpr const char* TREE_JSON_DUMP_VERSION = "phylogenetic-tree-v2"; // program cannot read phylogenetic-tree-v1
     std::string mJsonDumpVersion = TREE_JSON_DUMP_VERSION;
 
     friend inline auto json_fields(Tree& a)
