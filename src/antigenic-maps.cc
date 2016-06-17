@@ -4,7 +4,7 @@
 
 // ----------------------------------------------------------------------
 
-AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
+AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& /*aPageArea*/, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& /*aSettings*/)
 {
     if (!aSections.empty()) {
         for (size_t section_no = 0; section_no < (aSections.size() - 1); ++section_no) {
@@ -17,11 +17,6 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageAr
     }
 
     mLinesOfSequencedAntigensInChart = aChart->sequenced_antigens(aTree.leaves());
-
-    mGap = aSettings.gap_between_maps * aPageArea.size.width;
-    std::tie(mGridWidth, mGridHeight) = grid();
-    const double size = (aPageArea.size.height - mGap * (mGridHeight - 1)) / mGridHeight;
-    mCellSize.set(size, size);
     mLeftOffset = aSections.empty() ? 0.0 : aSections[0].line_width * 2.0;
 
     return *this;
@@ -54,20 +49,35 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
 
 // ----------------------------------------------------------------------
 
-Viewport AntigenicMaps::viewport_of(const Viewport& aViewport, size_t map_no) const
+AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
 {
-    const size_t cell_x = map_no % mGridWidth;
-    const size_t cell_y = map_no / mGridWidth;
-    return Viewport(Location(aViewport.origin.x + mLeftOffset + (mCellSize.width + mGap) * cell_x, aViewport.origin.y + (mCellSize.height + mGap) * cell_y), mCellSize);
+    AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
 
-} // AntigenicMaps::viewport_of
+    mGap = aSettings.gap_between_maps * aPageArea.size.width;
+    std::tie(mGridWidth, mGridHeight) = grid();
+    const double size = (aPageArea.size.height - mGap * (mGridHeight - 1)) / mGridHeight;
+    mCellSize.set(size, size);
+
+    return *this;
+
+} // AntigenicMapsGrid::prepare
 
 // ----------------------------------------------------------------------
 
-std::pair<size_t, size_t> AntigenicMaps::grid() const
+Viewport AntigenicMapsGrid::viewport_of(const Viewport& aViewport, size_t map_no) const
+{
+    const size_t cell_x = map_no % mGridWidth;
+    const size_t cell_y = map_no / mGridWidth;
+    return Viewport(Location(aViewport.origin.x + left_offset() + (mCellSize.width + mGap) * cell_x, aViewport.origin.y + (mCellSize.height + mGap) * cell_y), mCellSize);
+
+} // AntigenicMapsGrid::viewport_of
+
+// ----------------------------------------------------------------------
+
+std::pair<size_t, size_t> AntigenicMapsGrid::grid() const
 {
     size_t grid_w, grid_h;
-    switch (mNamesPerMap.size()) {
+    switch (names_per_map().size()) {
       case 1: grid_w = grid_h = 1; break;
       case 2: grid_w = 1; grid_h = 2; break;
       case 3: grid_w = 2; grid_h = 2; break;
@@ -77,12 +87,12 @@ std::pair<size_t, size_t> AntigenicMaps::grid() const
       case 7: grid_w = 3; grid_h = 3; break;
       case 8: grid_w = 3; grid_h = 3; break;
       case 9: grid_w = 3; grid_h = 3; break;
-      default: throw std::runtime_error("AntigenicMaps: unsupported number of maps: " + std::to_string(mNamesPerMap.size()));
+      default: throw std::runtime_error("AntigenicMaps: unsupported number of maps: " + std::to_string(names_per_map().size()));
     }
 
     return std::make_pair(grid_w, grid_h);
 
-} // AntigenicMaps::grid
+} // AntigenicMapsGrid::grid
 
 // ----------------------------------------------------------------------
 /// Local Variables:

@@ -36,7 +36,7 @@ SignaturePage& SignaturePage::select_parts(int aParts)
     if (aParts & ShowClades)
         mClades = new Clades();
     if (aParts & ShowAntigenicMaps)
-        mAntigenicMaps = new AntigenicMaps();
+        mAntigenicMaps = new AntigenicMapsGrid();
     return *this;
 
 } // SignaturePage::select_parts
