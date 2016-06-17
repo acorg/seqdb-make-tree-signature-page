@@ -9,6 +9,7 @@ class Surface;
 class Viewport;
 class Tree;
 class Chart;
+class DrawTree;
 
 // ----------------------------------------------------------------------
 
@@ -27,13 +28,12 @@ class AntigenicMaps
  protected:
     double left_offset() const { return mLeftOffset; }
     const auto& names_per_map() const { return mNamesPerMap; }
+    virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const = 0;
 
  private:
     std::vector<std::vector<std::string>> mNamesPerMap;
     double mLeftOffset;
     std::vector<size_t> mLinesOfSequencedAntigensInChart;
-
-    virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const = 0;
 
 }; // class AntigenicMaps
 
@@ -51,15 +51,37 @@ class AntigenicMapsGrid : public AntigenicMaps
 
     virtual AntigenicMapsGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
 
+ protected:
+    virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
+
  private:
     size_t mGridWidth, mGridHeight;
     Size mCellSize;
     double mGap;
 
-    virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
     std::pair<size_t, size_t> grid() const;
 
 }; // class AntigenicMapsGrid
+
+// ----------------------------------------------------------------------
+
+class AntigenicMapsVpos : public AntigenicMaps
+{
+ public:
+    inline AntigenicMapsVpos() : mGap(0) {}
+
+    virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const;
+    virtual AntigenicMapsVpos& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+
+ protected:
+    virtual inline Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
+
+ private:
+    std::vector<Viewport> mViewports;
+    double mCellHeight;
+    double mGap;
+
+}; // class AntigenicMapsVpos
 
 // ----------------------------------------------------------------------
 /// Local Variables:

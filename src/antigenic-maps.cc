@@ -1,5 +1,6 @@
 #include "antigenic-maps.hh"
 #include "tree.hh"
+#include "draw-tree.hh"
 #include "chart.hh"
 
 // ----------------------------------------------------------------------
@@ -93,6 +94,76 @@ std::pair<size_t, size_t> AntigenicMapsGrid::grid() const
     return std::make_pair(grid_w, grid_h);
 
 } // AntigenicMapsGrid::grid
+
+// ----------------------------------------------------------------------
+
+inline Size AntigenicMapsVpos::size(const Viewport& /*aPageArea*/, const SettingsAntigenicMaps& /*aSettings*/) const
+{
+    Location bottom_right;
+    for (const Viewport& viewport: mViewports) {
+        bottom_right.max(viewport.bottom_right());
+    }
+    return {bottom_right.x, bottom_right.y};
+
+} // AntigenicMapsVpos::size
+
+// ----------------------------------------------------------------------
+
+AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
+{
+      // settings!!
+    const double map_height_fraction_of_page = 0.2;
+
+    AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
+    const auto vertical_step = aPageArea.size.height / aTree.height();
+
+    mCellHeight = aPageArea.size.height * map_height_fraction_of_page;
+    std::vector<double> slot_bottom;
+
+    for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
+        const auto& section = aSections[section_no];
+        const auto first_line = section.first_line;
+        const auto last_line = section_no < (aSections.size() - 1) ? aSections[section_no + 1].first_line - aSections.vertical_gap - 1 : aTree.height() - 1;
+        const double middle = (first_line + last_line) / 2.0 * vertical_step;
+        double top = middle - mCellHeight / 2.0;
+        if (top < 0.0)
+            top = 0.0;
+        else if ((top + mCellHeight) > aPageArea.size.height)
+            top = aPageArea.size.height - mCellHeight;
+
+        int slot_no = -1;
+        for (size_t slo = 0; slo < slot_bottom.size(); ++slo) {
+            if ((slot_bottom[slo] + mGap) < top) {
+                slot_no = static_cast<int>(slo);
+                break;
+            }
+        }
+        if (slot_no < 0) {
+            slot_bottom.push_back(0.0);
+            slot_no = slot_bottom.size() - 1;
+        }
+        const double left = left_offset() + slot_no * (mCellHeight + mGap);
+        std::cerr << slot_no << " " << slot_bottom[slot_no] << " top: " << top << " " << ((slot_bottom[slot_no] + mGap) < top) << std::endl;
+        slot_bottom[slot_no] = top + mCellHeight;
+
+        mViewports.emplace_back(Location(left, top), Size(mCellHeight, mCellHeight));
+    }
+
+    return *this;
+
+} // AntigenicMapsVpos::prepare
+
+// ----------------------------------------------------------------------
+
+inline Viewport AntigenicMapsVpos::viewport_of(const Viewport& aViewport, size_t map_no) const
+{
+    const Viewport& viewport = mViewports[map_no];
+    return Viewport(aViewport.origin + viewport.origin, viewport.size);
+
+} // AntigenicMapsVpos::viewport_of
+
+// ----------------------------------------------------------------------
+
 
 // ----------------------------------------------------------------------
 /// Local Variables:
