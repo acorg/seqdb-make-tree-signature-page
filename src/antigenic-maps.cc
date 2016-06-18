@@ -5,7 +5,7 @@
 
 // ----------------------------------------------------------------------
 
-AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& /*aPageArea*/, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& /*aSettings*/)
+AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
 {
     if (!aSections.empty()) {
         for (size_t section_no = 0; section_no < (aSections.size() - 1); ++section_no) {
@@ -19,6 +19,7 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& /*aPage
 
     mLinesOfSequencedAntigensInChart = aChart->sequenced_antigens(aTree.leaves());
     mLeftOffset = aSections.empty() ? 0.0 : aSections[0].line_width * 2.0;
+    mGap = aSettings.gap_between_maps * aPageArea.size.width;
 
     return *this;
 
@@ -54,9 +55,8 @@ AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport&
 {
     AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
 
-    mGap = aSettings.gap_between_maps * aPageArea.size.width;
     std::tie(mGridWidth, mGridHeight) = grid();
-    const double size = (aPageArea.size.height - mGap * (mGridHeight - 1)) / mGridHeight;
+    const double size = (aPageArea.size.height - gap_between_maps() * (mGridHeight - 1)) / mGridHeight;
     mCellSize.set(size, size);
 
     return *this;
@@ -69,7 +69,7 @@ Viewport AntigenicMapsGrid::viewport_of(const Viewport& aViewport, size_t map_no
 {
     const size_t cell_x = map_no % mGridWidth;
     const size_t cell_y = map_no / mGridWidth;
-    return Viewport(Location(aViewport.origin.x + left_offset() + (mCellSize.width + mGap) * cell_x, aViewport.origin.y + (mCellSize.height + mGap) * cell_y), mCellSize);
+    return Viewport(Location(aViewport.origin.x + left_offset() + (mCellSize.width + gap_between_maps()) * cell_x, aViewport.origin.y + (mCellSize.height + gap_between_maps()) * cell_y), mCellSize);
 
 } // AntigenicMapsGrid::viewport_of
 
@@ -131,19 +131,20 @@ AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport&
         else if ((top + mCellHeight) > aPageArea.size.height)
             top = aPageArea.size.height - mCellHeight;
 
-        int slot_no = -1;
+        constexpr const size_t SLOT_NOT_CHOSEN = std::numeric_limits<size_t>::max();
+        size_t slot_no = SLOT_NOT_CHOSEN;
         for (size_t slo = 0; slo < slot_bottom.size(); ++slo) {
-            if ((slot_bottom[slo] + mGap) < top) {
-                slot_no = static_cast<int>(slo);
+            if ((slot_bottom[slo] + gap_between_maps()) < top) {
+                slot_no = slo;
                 break;
             }
         }
-        if (slot_no < 0) {
+        if (slot_no == SLOT_NOT_CHOSEN) {
             slot_bottom.push_back(0.0);
             slot_no = slot_bottom.size() - 1;
         }
-        const double left = left_offset() + slot_no * (mCellHeight + mGap);
-        std::cerr << slot_no << " " << slot_bottom[slot_no] << " top: " << top << " " << ((slot_bottom[slot_no] + mGap) < top) << std::endl;
+        const double left = left_offset() + slot_no * (mCellHeight + gap_between_maps());
+        std::cerr << slot_no << " " << slot_bottom[slot_no] << " top: " << top << " " << ((slot_bottom[slot_no] + gap_between_maps()) < top) << std::endl;
         slot_bottom[slot_no] = top + mCellHeight;
 
         mViewports.emplace_back(Location(left, top), Size(mCellHeight, mCellHeight));

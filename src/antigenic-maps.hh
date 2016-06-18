@@ -16,6 +16,7 @@ class DrawTree;
 class AntigenicMaps
 {
  public:
+    inline AntigenicMaps() : mGap(0) {}
     virtual inline ~AntigenicMaps() {}
 
     virtual AntigenicMaps& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
@@ -29,11 +30,13 @@ class AntigenicMaps
     double left_offset() const { return mLeftOffset; }
     const auto& names_per_map() const { return mNamesPerMap; }
     virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const = 0;
+    double gap_between_maps() const { return mGap; }
 
  private:
     std::vector<std::vector<std::string>> mNamesPerMap;
     double mLeftOffset;
     std::vector<size_t> mLinesOfSequencedAntigensInChart;
+    double mGap;
 
 }; // class AntigenicMaps
 
@@ -42,11 +45,9 @@ class AntigenicMaps
 class AntigenicMapsGrid : public AntigenicMaps
 {
  public:
-    inline AntigenicMapsGrid() : mGap(0) {}
-
     virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const
         {
-            return Size(mCellSize.width * mGridWidth + mGap * (mGridWidth - 1) + left_offset(), aPageArea.size.height);
+            return Size(mCellSize.width * mGridWidth + gap_between_maps() * (mGridWidth - 1) + left_offset(), aPageArea.size.height);
         }
 
     virtual AntigenicMapsGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
@@ -57,7 +58,6 @@ class AntigenicMapsGrid : public AntigenicMaps
  private:
     size_t mGridWidth, mGridHeight;
     Size mCellSize;
-    double mGap;
 
     std::pair<size_t, size_t> grid() const;
 
@@ -68,8 +68,6 @@ class AntigenicMapsGrid : public AntigenicMaps
 class AntigenicMapsVpos : public AntigenicMaps
 {
  public:
-    inline AntigenicMapsVpos() : mGap(0) {}
-
     virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const;
     virtual AntigenicMapsVpos& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
 
@@ -79,7 +77,6 @@ class AntigenicMapsVpos : public AntigenicMaps
  private:
     std::vector<Viewport> mViewports;
     double mCellHeight;
-    double mGap;
 
 }; // class AntigenicMapsVpos
 
