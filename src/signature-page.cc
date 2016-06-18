@@ -99,28 +99,23 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
             }
         }
     }
+    calculate_viewports(aTree, aSurface);
     return *this;
 
 } // SignaturePage::prepare
 
 // ----------------------------------------------------------------------
 
-void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aChart)
+void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface)
 {
     const double canvas_width = aSurface.canvas_size().width;
     const double padding = canvas_width * aTree.settings().signature_page.outer_padding;
 
-    Viewport tree_viewport;
-    Viewport legend_viewport;
-    Viewport time_series_viewport;
-    Viewport clades_viewport;
-    Viewport antigenic_maps_viewport;
-
     double tree_top = padding;
+
     if (mTitle) {
-        const Viewport title_viewport(mPageArea.origin, Size(1, 1));
-        mTitle->draw(aSurface, title_viewport);
-        tree_top += mTitle->right_bottom(aSurface, title_viewport).y + padding * 0.5;
+        mTitleViewport.set(mPageArea.origin, Size(1, 1));
+        tree_top += mTitle->right_bottom(aSurface, mTitleViewport).y + padding * 0.5;
     }
 
     if (mDrawTree) {
@@ -132,47 +127,71 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
 
         double left = mPageArea.right();
         if (mAntigenicMaps) {
+            mAntigenicMaps->calculate_viewports(aTree, aSurface, mPageArea, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
             const Size size = mAntigenicMaps->size(mPageArea, aTree.settings().antigenic_maps);
-            antigenic_maps_viewport.set(mPageArea.top_right() - Size(size.width, 0), size);
-            left = antigenic_maps_viewport.origin.x;
+            mAntigenicMapsViewport.set(mPageArea.top_right() - Size(size.width, 0), size);
+            left = mAntigenicMapsViewport.origin.x;
         }
 
         if (mClades) {
-            clades_viewport.size = Size(mClades->size(aSurface, aTree.settings().clades).width, tree_height);
-            clades_viewport.origin = Location(left - aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width - clades_viewport.size.width, tree_top);
-            left = clades_viewport.origin.x;
+            mCladesViewport.size = Size(mClades->size(aSurface, aTree.settings().clades).width, tree_height);
+            mCladesViewport.origin = Location(left - aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width - mCladesViewport.size.width, tree_top);
+            left = mCladesViewport.origin.x;
         }
         else {
             left -= aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width;
         }
 
         if (mTimeSeries) {
-            time_series_viewport.size = Size(mTimeSeries->size(aSurface, aTree.settings().time_series).width, tree_height);
-            time_series_viewport.origin = Location(left - aTree.settings().signature_page.time_series_clades_space * canvas_width - time_series_viewport.size.width, tree_top);
-            left = time_series_viewport.origin.x;
+            mTimeSeriesViewport.size = Size(mTimeSeries->size(aSurface, aTree.settings().time_series).width, tree_height);
+            mTimeSeriesViewport.origin = Location(left - aTree.settings().signature_page.time_series_clades_space * canvas_width - mTimeSeriesViewport.size.width, tree_top);
+            left = mTimeSeriesViewport.origin.x;
         }
 
-        tree_viewport.set(Location(mPageArea.origin.x, tree_top), Size(left - mPageArea.origin.x - aTree.settings().signature_page.tree_time_series_space * canvas_width, tree_height));
-        mDrawTree->draw(aTree, aSurface, tree_viewport, aTree.settings().draw_tree);
+        mTreeViewport.set(Location(mPageArea.origin.x, tree_top), Size(left - mPageArea.origin.x - aTree.settings().signature_page.tree_time_series_space * canvas_width, tree_height));
 
           // Note legend must be drawn after tree, because ColoringByPos needs to collect data to be drawn in the legend
         if (mLegend) {
             const auto legend_size = mLegend->size(aSurface, aTree.settings().legend);
-            legend_viewport.set({mPageArea.origin.x, mPageArea.bottom() - legend_size.height}, legend_size);
-            mLegend->draw(aSurface, legend_viewport, aTree.settings().legend);
+            mLegendViewport.set({mPageArea.origin.x, mPageArea.bottom() - legend_size.height}, legend_size);
+        }
+
+        mDrawTree->calculate_viewports(aTree, mTreeViewport);
+          // Calculate individual map viewports again after mDrawTree->calculate_viewports
+        if (mAntigenicMaps) {
+            mAntigenicMaps->calculate_viewports(aTree, aSurface, mAntigenicMapsViewport, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
+        }
+    }
+
+} // SignaturePage::calculate_viewports
+
+// ----------------------------------------------------------------------
+
+void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aChart)
+{
+    if (mTitle) {
+        mTitle->draw(aSurface, mTitleViewport);
+    }
+
+    if (mDrawTree) {
+        mDrawTree->draw(aTree, aSurface, mTreeViewport, aTree.settings().draw_tree);
+
+          // Note legend must be drawn after tree, because ColoringByPos needs to collect data to be drawn in the legend
+        if (mLegend) {
+            mLegend->draw(aSurface, mLegendViewport, aTree.settings().legend);
         }
 
         if (mTimeSeries) {
-            mTimeSeries->draw(aSurface, time_series_viewport, aTree, *mDrawTree, aTree.settings().time_series);
+            mTimeSeries->draw(aSurface, mTimeSeriesViewport, aTree, *mDrawTree, aTree.settings().time_series);
         }
         if (mClades) {
-            mClades->draw(aSurface, aTree, clades_viewport, time_series_viewport, *mDrawTree, aTree.settings().clades);
+            mClades->draw(aSurface, aTree, mCladesViewport, mTimeSeriesViewport, *mDrawTree, aTree.settings().clades);
         }
         if (mDrawHzLines) {
-            mDrawHzLines->draw(aSurface, time_series_viewport, antigenic_maps_viewport, *mDrawTree, mAntigenicMaps, aTree.settings().draw_tree.hz_line_sections);
+            mDrawHzLines->draw(aSurface, mTimeSeriesViewport, mAntigenicMapsViewport, *mDrawTree, mAntigenicMaps, aTree.settings().draw_tree.hz_line_sections);
         }
         if (mAntigenicMaps) {
-            mAntigenicMaps->draw(aSurface, antigenic_maps_viewport, aChart, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
+            mAntigenicMaps->draw(aSurface, mAntigenicMapsViewport, aChart, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
         }
     }
 

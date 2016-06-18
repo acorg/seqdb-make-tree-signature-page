@@ -20,6 +20,7 @@ class AntigenicMaps
     virtual inline ~AntigenicMaps() {}
 
     virtual AntigenicMaps& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+    virtual void calculate_viewports(Tree& aTree, Surface& aSurface, const Viewport& aViewport, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) = 0;
     virtual void draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const;
 
     virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& aSettings) const = 0;
@@ -51,6 +52,7 @@ class AntigenicMapsGrid : public AntigenicMaps
         }
 
     virtual AntigenicMapsGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+    virtual void calculate_viewports(Tree& aTree, Surface& aSurface, const Viewport& aViewport, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
 
  protected:
     virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
@@ -70,6 +72,7 @@ class AntigenicMapsVpos : public AntigenicMaps
  public:
     virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const;
     virtual AntigenicMapsVpos& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+    virtual void calculate_viewports(Tree& aTree, Surface& aSurface, const Viewport& aViewport, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
 
  protected:
     virtual inline Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;

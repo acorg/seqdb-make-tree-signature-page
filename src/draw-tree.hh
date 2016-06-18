@@ -15,11 +15,11 @@ class AntigenicMaps;
 class DrawTree
 {
  public:
-    inline DrawTree() : mColoring(new ColoringBlack()) {}
-//            , mRootEdge(0), mLineColor(0), mLineWidth(1), mNameOffset(0.2) {}
+    inline DrawTree() : mColoring(new ColoringBlack()), mVerticalStep(0) {}
     inline ~DrawTree() { delete mColoring; }
 
     DrawTree& prepare(Tree& aTree, const SettingsDrawTree& aSettings);
+    void calculate_viewports(const Tree& aTree, const Viewport& aViewport);
     inline DrawTree& color_by_continent(bool aColorByContinent) { if (aColorByContinent) { delete mColoring; mColoring = new ColoringByContinent(); } return *this; }
     inline DrawTree& color_by_pos(int aPos) { if (aPos >= 0) { delete mColoring; mColoring = new ColoringByPos(static_cast<size_t>(aPos)); } return *this; }
 

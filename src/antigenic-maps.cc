@@ -65,6 +65,13 @@ AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport&
 
 // ----------------------------------------------------------------------
 
+void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, Surface& /*aSurface*/, const Viewport& /*aViewport*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
+{
+
+} // AntigenicMapsGrid::calculate_viewports
+
+// ----------------------------------------------------------------------
+
 Viewport AntigenicMapsGrid::viewport_of(const Viewport& aViewport, size_t map_no) const
 {
     const size_t cell_x = map_no % mGridWidth;
@@ -114,10 +121,24 @@ AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport&
       // settings!!
     const double map_height_fraction_of_page = 0.2;
 
-    AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
-    const auto vertical_step = aPageArea.size.height / aTree.height();
-
     mCellHeight = aPageArea.size.height * map_height_fraction_of_page;
+    AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
+
+    return *this;
+
+} // AntigenicMapsVpos::prepare
+
+// ----------------------------------------------------------------------
+
+void AntigenicMapsVpos::calculate_viewports(Tree& aTree, Surface& aSurface, const Viewport& aViewport, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
+{
+    double vertical_step = aDrawTree.vertical_step();
+
+    if (vertical_step > 0)
+        mViewports.clear();         // re-calculate final viewports
+    else
+        vertical_step = aViewport.size.height / (aTree.height() + 2) * 0.9; // preliminary step to get preliminary maps layout
+
     std::vector<double> slot_bottom;
 
     for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
@@ -126,10 +147,11 @@ AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport&
         const auto last_line = section_no < (aSections.size() - 1) ? aSections[section_no + 1].first_line - aSections.vertical_gap - 1 : aTree.height() - 1;
         const double middle = (first_line + last_line) / 2.0 * vertical_step;
         double top = middle - mCellHeight / 2.0;
+        std::cerr << "section_no:" << section_no << " top:" << top << " first_line:" << first_line << " last_line:" << last_line << " middle:" << middle << std::endl;
         if (top < 0.0)
             top = 0.0;
-        else if ((top + mCellHeight) > aPageArea.size.height)
-            top = aPageArea.size.height - mCellHeight;
+        else if ((top + mCellHeight) > aViewport.size.height)
+            top = aViewport.size.height - mCellHeight;
 
         constexpr const size_t SLOT_NOT_CHOSEN = std::numeric_limits<size_t>::max();
         size_t slot_no = SLOT_NOT_CHOSEN;
@@ -144,19 +166,19 @@ AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport&
             slot_no = slot_bottom.size() - 1;
         }
         const double left = left_offset() + slot_no * (mCellHeight + gap_between_maps());
-        std::cerr << slot_no << " " << slot_bottom[slot_no] << " top: " << top << " " << ((slot_bottom[slot_no] + gap_between_maps()) < top) << std::endl;
+        std::cerr << "slot:" << slot_no << " slot_bottom:" << slot_bottom[slot_no] << " top:" << top << " " << ((slot_bottom[slot_no] + gap_between_maps()) < top) << std::endl;
         slot_bottom[slot_no] = top + mCellHeight;
 
         mViewports.emplace_back(Location(left, top), Size(mCellHeight, mCellHeight));
     }
 
-    return *this;
+    std::cerr << "-------------------------------\n\n" << std::endl;
 
-} // AntigenicMapsVpos::prepare
+} // AntigenicMapsVpos::calculate_viewports
 
 // ----------------------------------------------------------------------
 
-inline Viewport AntigenicMapsVpos::viewport_of(const Viewport& aViewport, size_t map_no) const
+Viewport AntigenicMapsVpos::viewport_of(const Viewport& aViewport, size_t map_no) const
 {
     const Viewport& viewport = mViewports[map_no];
     return Viewport(aViewport.origin + viewport.origin, viewport.size);

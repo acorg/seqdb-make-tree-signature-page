@@ -38,11 +38,18 @@ void DrawTree::add_hz_line_sections_gap(Tree& aTree, const HzLineSections& aSect
 
 // ----------------------------------------------------------------------
 
-void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewport, const SettingsDrawTree& aSettings)
+void DrawTree::calculate_viewports(const Tree& aTree, const Viewport& aViewport)
 {
     mViewport = aViewport;
     mHorizontalStep = aViewport.size.width / aTree.width() * 0.9;
     mVerticalStep = aViewport.size.height / (aTree.height() + 2); // +2 to add space at the top and bottom
+
+} // DrawTree::calculate_viewports
+
+// ----------------------------------------------------------------------
+
+void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewport, const SettingsDrawTree& aSettings)
+{
     mLineWidth = std::min(aSettings.line_width, mVerticalStep * 0.5);
     set_label_scale(aSurface, aTree, aViewport, aSettings);
     set_horizontal_step(aSurface, aTree, aViewport, aSettings);

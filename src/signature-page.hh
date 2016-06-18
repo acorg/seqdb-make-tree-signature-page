@@ -47,9 +47,16 @@ class SignaturePage
     DrawHzLines* mDrawHzLines;
 
     Viewport mPageArea;
+    Viewport mTitleViewport;
+    Viewport mTreeViewport;
+    Viewport mLegendViewport;
+    Viewport mTimeSeriesViewport;
+    Viewport mCladesViewport;
+    Viewport mAntigenicMapsViewport;
 
       // to implement clone all m pointers
     SignaturePage(const SignaturePage&) = default;
+    void calculate_viewports(Tree& aTree, Surface& aSurface);
 
 }; // class DrawTree
 
