@@ -33,8 +33,7 @@ SignaturePage& SignaturePage::select_parts(int aParts)
         mTimeSeries = new TimeSeries();
         mDrawHzLines = new DrawHzLines();
         if (aParts & ShowAntigenicMaps) {
-              // mAntigenicMaps = new AntigenicMapsGrid();
-            mAntigenicMaps = new AntigenicMapsVpos();
+            mShowAntigenicMaps = true;
         }
     }
     if (aParts & ShowClades)
@@ -91,7 +90,15 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
             mClades->prepare(aTree, aTree.settings().clades);
         if (mDrawHzLines) {
             mDrawHzLines->prepare(aTree, aTree.settings().draw_tree.hz_line_sections);
-            if (mAntigenicMaps) {
+            if (mShowAntigenicMaps) {
+                switch (aTree.settings().draw_tree.hz_line_sections.mode) {
+                  case HzLineSections::ColoredGrid:
+                      mAntigenicMaps = new AntigenicMapsGrid();
+                      break;
+                  case HzLineSections::BWVpos:
+                      mAntigenicMaps = new AntigenicMapsVpos();
+                      break;
+                }
                 if (aChart == nullptr)
                     throw std::runtime_error("Antigenic maps part requested but no chart provided to SignaturePage.prepare");
                 aChart->preprocess(aTree.settings().antigenic_maps);

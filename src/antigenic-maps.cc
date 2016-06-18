@@ -2,6 +2,7 @@
 #include "tree.hh"
 #include "draw-tree.hh"
 #include "chart.hh"
+#include "float.hh"
 
 // ----------------------------------------------------------------------
 
@@ -56,8 +57,6 @@ AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport&
     AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
 
     std::tie(mGridWidth, mGridHeight) = grid();
-    const double size = (aPageArea.size.height - gap_between_maps() * (mGridHeight - 1)) / mGridHeight;
-    mCellSize.set(size, size);
 
     return *this;
 
@@ -65,8 +64,12 @@ AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport&
 
 // ----------------------------------------------------------------------
 
-void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, const Viewport& /*aViewport*/, const Viewport& /*aPageArea*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
+void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, const Viewport& aViewport, const Viewport& /*aPageArea*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
 {
+    if (float_equal(mCellSize.width, 0.0)) {
+        const double size = (aViewport.size.height - gap_between_maps() * (mGridHeight - 1)) / mGridHeight;
+        mCellSize.set(size, size);
+    }
 
 } // AntigenicMapsGrid::calculate_viewports
 
@@ -118,10 +121,7 @@ inline Size AntigenicMapsVpos::size(const Viewport& /*aPageArea*/, const Setting
 
 AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
 {
-      // settings!!
-    const double map_height_fraction_of_page = 0.2;
-
-    mCellHeight = aPageArea.size.height * map_height_fraction_of_page;
+    mCellHeight = aPageArea.size.height * aSections.map_height_fraction_of_page;
     AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
 
     return *this;
@@ -148,7 +148,6 @@ void AntigenicMapsVpos::calculate_viewports(Tree& aTree, const Viewport& aViewpo
         const auto last_line = section_no < (aSections.size() - 1) ? aSections[section_no + 1].first_line - aSections.vertical_gap - 1 : aTree.height() - 1;
         const double middle = (first_line + last_line) / 2.0 * vertical_step;
         double top = middle - mCellHeight / 2.0;
-        std::cerr << "section_no:" << section_no << " top:" << top << " first_line:" << first_line << " last_line:" << last_line << " middle:" << middle << std::endl;
         if (top < - top_gap)
             top = - top_gap;
         else if ((top + mCellHeight) > (aPageArea.size.height - top_gap))
@@ -167,13 +166,10 @@ void AntigenicMapsVpos::calculate_viewports(Tree& aTree, const Viewport& aViewpo
             slot_no = slot_bottom.size() - 1;
         }
         const double left = left_offset() + slot_no * (mCellHeight + gap_between_maps());
-        std::cerr << "slot:" << slot_no << " slot_bottom:" << slot_bottom[slot_no] << " top:" << top << " " << ((slot_bottom[slot_no] + gap_between_maps()) < top) << std::endl;
         slot_bottom[slot_no] = top + mCellHeight;
 
         mViewports.emplace_back(Location(left, top), Size(mCellHeight, mCellHeight));
     }
-
-    std::cerr << "-------------------------------\n\n" << std::endl;
 
 } // AntigenicMapsVpos::calculate_viewports
 
@@ -185,9 +181,6 @@ Viewport AntigenicMapsVpos::viewport_of(const Viewport& aViewport, size_t map_no
     return Viewport(aViewport.origin + viewport.origin, viewport.size);
 
 } // AntigenicMapsVpos::viewport_of
-
-// ----------------------------------------------------------------------
-
 
 // ----------------------------------------------------------------------
 /// Local Variables:

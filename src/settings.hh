@@ -177,10 +177,14 @@ class HzLineSection
 
 }; // class HzLineSection
 
+// ----------------------------------------------------------------------
+
 class HzLineSections : public std::vector<HzLineSection>
 {
  public:
-    inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY),
+    enum Mode { ColoredGrid, BWVpos };
+
+    inline HzLineSections() : mode(ColoredGrid), map_height_fraction_of_page(0.25), hz_line_width(0.5), hz_line_color(GREY),
                               sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
                               vertical_gap(1) {}
 
@@ -189,6 +193,8 @@ class HzLineSections : public std::vector<HzLineSection>
             std::sort(begin(), end(), [](const auto& a, const auto& b) { return a.first_line < b.first_line; });
         }
 
+    Mode mode;
+    double map_height_fraction_of_page;
     double hz_line_width;
     Color hz_line_color;
     bool sequenced_antigen_line_show;
@@ -196,9 +202,27 @@ class HzLineSections : public std::vector<HzLineSection>
     Color sequenced_antigen_line_color;
     size_t vertical_gap;
 
+ private:
+    inline static std::string mode_to_string(const Mode* a)
+        {
+            switch (*a) {
+              case ColoredGrid: return "colored_grid";
+              case BWVpos: return "bw_vpos";
+            }
+            return "colored_grid";            // to shut compiler up
+        }
+
+    inline static void mode_from_string(Mode* target, std::string source)
+        {
+            if (source == "colored_grid" || source == "colored-grid") *target = ColoredGrid;
+            else if (source == "bw_vpos" || source == "bw-vpos" || source == "bwvpos") *target = BWVpos;
+            else throw std::invalid_argument("cannot parse hz line section mode from \"" + source + "\", supported values: \"colored_grid\", \"bw_vpos\"");
+        }
+
     friend inline auto json_fields(HzLineSections& a)
         {
             return std::make_tuple(
+                "map_height_fraction_of_page", &a.map_height_fraction_of_page,
                 "hz_line_width", &a.hz_line_width,
                 "hz_line_color", json::field(&a.hz_line_color, &Color::to_string, &Color::from_string),
                 "sequenced_antigen_line_show", &a.sequenced_antigen_line_show,
@@ -206,7 +230,8 @@ class HzLineSections : public std::vector<HzLineSection>
                 "sequenced_antigen_line_length", &a.sequenced_antigen_line_length,
                 "sequenced_antigen_line_color", json::field(&a.sequenced_antigen_line_color, &Color::to_string, &Color::from_string),
                 "vertical_gap", &a.vertical_gap,
-                "hz_line_sections", static_cast<std::vector<HzLineSection>*>(&a)
+                "hz_line_sections", static_cast<std::vector<HzLineSection>*>(&a),
+                "mode", json::field(&a.mode, &HzLineSections::mode_to_string, &HzLineSections::mode_from_string)
                                    );
         }
 

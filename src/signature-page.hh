@@ -26,7 +26,7 @@ class SignaturePage
     enum Parts : int { ShowTitle = 1, ShowTree = 2, ShowLegend = 4, ShowTimeSeries = 8, ShowClades = 16, ShowAntigenicMaps = 32 };
 
     inline SignaturePage() : mParts(ShowTree), mTitle(nullptr), mDrawTree(nullptr), mLegend(nullptr), mTimeSeries(nullptr), mClades(nullptr),
-                             mAntigenicMaps(nullptr), mDrawHzLines(nullptr) {}
+                             mAntigenicMaps(nullptr), mShowAntigenicMaps(false), mDrawHzLines(nullptr) {}
     ~SignaturePage();
 
     SignaturePage& select_parts(int aParts); // use ORed enum Parts above
@@ -44,6 +44,7 @@ class SignaturePage
     TimeSeries* mTimeSeries;
     Clades* mClades;
     AntigenicMaps* mAntigenicMaps;
+    bool mShowAntigenicMaps;
     DrawHzLines* mDrawHzLines;
 
     Viewport mPageArea;
