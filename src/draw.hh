@@ -199,6 +199,7 @@ class Color
 }; // class Color
 
 constexpr const Color BLACK = 0;
+constexpr const Color WHITE = 0xFFFFFF;
 constexpr const Color GREY = 0xA0A0A0;
 constexpr const Color LIGHT_GREY = 0xE0E0E0;
 constexpr const Color TRANSPARENT = 0xFF000000;
@@ -322,6 +323,7 @@ class Surface
     void rectangle(const Location& a, const Size& s, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
     inline void rectangle(const Viewport& v, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT) { rectangle(v.origin, v.size, aColor, aWidth, aLineCap); }
     void rectangle_filled(const Location& a, const Size& s, Color aOutlineColor, double aWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    inline void rectangle_filled(const Viewport& v, Color aOutlineColor, double aWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT) { rectangle_filled(v.origin, v.size, aOutlineColor, aWidth, aFillColor, aLineCap); }
     void square_filled(const Location& aCenter, double aSide, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
     void triangle_filled(const Location& aCenter, double aSide, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
     void circle_filled(const Location& aCenter, double aDiameter, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor);

@@ -30,11 +30,11 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageAr
 
 void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const
 {
-    for (size_t section_no = 0; section_no < mNamesPerMap.size(); ++section_no) {
+    for (size_t section_no = 0; section_no < names_per_map().size(); ++section_no) {
         const Viewport map_viewport = viewport_of(aViewport, section_no);
 
         Surface::PushContext pc(aSurface);
-        aSurface.rectangle(map_viewport, aSettings.border_color, aSettings.border_width);
+        aSurface.rectangle_filled(map_viewport, aSettings.border_color, aSettings.border_width, WHITE);
 
         const auto chart_viewport = aChart->viewport();
 
@@ -43,9 +43,9 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
         aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
 
         aChart->draw_points_reset(aSettings);
-        const auto num_antigens = aChart->tracked_antigens(mNamesPerMap[section_no], aSections[section_no].color, aSettings);
+        const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], aSections[section_no].color, aSettings);
         aChart->draw(aSurface, scale, aSettings);
-        std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << aSections[section_no].color << " names: " << mNamesPerMap[section_no].size() << " antigens: " << num_antigens << std::endl;
+        std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << aSections[section_no].color << " names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
     }
 
 } // AntigenicMaps::draw
@@ -181,6 +181,23 @@ Viewport AntigenicMapsVpos::viewport_of(const Viewport& aViewport, size_t map_no
     return Viewport(aViewport.origin + viewport.origin, viewport.size);
 
 } // AntigenicMapsVpos::viewport_of
+
+// ----------------------------------------------------------------------
+
+void AntigenicMapsVpos::draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const
+{
+    for (size_t section_no = 0; section_no < names_per_map().size(); ++section_no) {
+        const Viewport map_viewport = viewport_of(aViewport, section_no);
+        const double gap = aViewport.size.height * 0.01;
+        const double top_y = map_viewport.center().y - gap;
+        const double bottom_y = top_y + gap * 2.0;
+        aSurface.line({aViewport.origin.x, top_y},    {map_viewport.origin.x, top_y},    aSections.hz_line_color, aSections.hz_line_width);
+        aSurface.line({aViewport.origin.x, bottom_y}, {map_viewport.origin.x, bottom_y}, aSections.hz_line_color, aSections.hz_line_width);
+    }
+
+    AntigenicMaps::draw(aSurface, aViewport, aChart, aSections, aSettings);
+
+} // AntigenicMapsVpos::draw
 
 // ----------------------------------------------------------------------
 /// Local Variables:

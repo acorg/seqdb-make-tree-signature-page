@@ -264,23 +264,33 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
         const auto vertical_step = aDrawTree.vertical_step();
         for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
             const auto& section = aSections[section_no];
-            double first_y;
+            double first_y = aTimeSeries.origin.y;
             if (section_no != 0) {
-                first_y = aTimeSeries.origin.y + vertical_step * (section.first_line - 0.5);
+                first_y += vertical_step * (section.first_line - 0.5);
                   // draw hz line in the time series area
-                const double y = aTimeSeries.origin.y + vertical_step * (section.first_line - (1 + aSections.vertical_gap) * 0.5);
-                aSurface.line({aTimeSeries.origin.x, y}, {aTimeSeries.right(), y}, aSections.hz_line_color, aSections.hz_line_width);
-            }
-            else {
-                first_y = aTimeSeries.origin.y;
+                const double line_y = aTimeSeries.origin.y + vertical_step * (section.first_line - (1 + aSections.vertical_gap) * 0.5);
+                aSurface.line({aTimeSeries.origin.x, line_y}, {aTimeSeries.right(), line_y}, aSections.hz_line_color, aSections.hz_line_width);
             }
 
             if (aAntigenicMaps != nullptr) {
-                  // draw section vertical colored bar
-                double last_y = section_no == (aSections.size() - 1)
+                const double last_y = section_no == (aSections.size() - 1)
                         ? aTimeSeries.bottom()
                         : aTimeSeries.origin.y + vertical_step * (aSections[section_no+1].first_line - aSections.vertical_gap - 0.5);
-                aSurface.line({aAntigenicMapsViewport.origin.x, first_y}, {aAntigenicMapsViewport.origin.x, last_y}, section.color, section.line_width);
+                switch (aSections.mode) {
+                  case HzLineSections::ColoredGrid:
+                        // draw section vertical colored bar
+                      aSurface.line({aAntigenicMapsViewport.origin.x, first_y}, {aAntigenicMapsViewport.origin.x, last_y}, section.color, section.line_width);
+                      break;
+                  case HzLineSections::BWVpos:
+                        // draw section direction lines
+                      const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, section_no);
+                      const double gap = aAntigenicMapsViewport.size.height * 0.01;
+                      const double top_y = map_viewport.center().y - gap;
+                      const double bottom_y = top_y + gap * 2.0;
+                      aSurface.line({aTimeSeries.right(), first_y}, {aAntigenicMapsViewport.origin.x, top_y}, aSections.hz_line_color, aSections.hz_line_width);
+                      aSurface.line({aTimeSeries.right(), last_y}, {aAntigenicMapsViewport.origin.x, bottom_y}, aSections.hz_line_color, aSections.hz_line_width);
+                      break;
+                }
             }
         }
 
