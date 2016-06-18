@@ -65,7 +65,7 @@ AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport&
 
 // ----------------------------------------------------------------------
 
-void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, Surface& /*aSurface*/, const Viewport& /*aViewport*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
+void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, const Viewport& /*aViewport*/, const Viewport& /*aPageArea*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
 {
 
 } // AntigenicMapsGrid::calculate_viewports
@@ -130,14 +130,15 @@ AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport&
 
 // ----------------------------------------------------------------------
 
-void AntigenicMapsVpos::calculate_viewports(Tree& aTree, Surface& aSurface, const Viewport& aViewport, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
+void AntigenicMapsVpos::calculate_viewports(Tree& aTree, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& /*aSettings*/)
 {
     double vertical_step = aDrawTree.vertical_step();
+    const double top_gap = aViewport.origin.y - aPageArea.origin.y;
 
     if (vertical_step > 0)
         mViewports.clear();         // re-calculate final viewports
     else
-        vertical_step = aViewport.size.height / (aTree.height() + 2) * 0.9; // preliminary step to get preliminary maps layout
+        vertical_step = aViewport.size.height / (aTree.height() + 2); // preliminary step to get preliminary maps layout
 
     std::vector<double> slot_bottom;
 
@@ -148,10 +149,10 @@ void AntigenicMapsVpos::calculate_viewports(Tree& aTree, Surface& aSurface, cons
         const double middle = (first_line + last_line) / 2.0 * vertical_step;
         double top = middle - mCellHeight / 2.0;
         std::cerr << "section_no:" << section_no << " top:" << top << " first_line:" << first_line << " last_line:" << last_line << " middle:" << middle << std::endl;
-        if (top < 0.0)
-            top = 0.0;
-        else if ((top + mCellHeight) > aViewport.size.height)
-            top = aViewport.size.height - mCellHeight;
+        if (top < - top_gap)
+            top = - top_gap;
+        else if ((top + mCellHeight) > (aPageArea.size.height - top_gap))
+            top = aPageArea.size.height - top_gap - mCellHeight;
 
         constexpr const size_t SLOT_NOT_CHOSEN = std::numeric_limits<size_t>::max();
         size_t slot_no = SLOT_NOT_CHOSEN;

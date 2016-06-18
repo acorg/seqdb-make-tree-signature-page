@@ -122,12 +122,13 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface)
         const auto time_series_label_height = mTimeSeries ? mTimeSeries->label_height(aSurface, aTree.settings().time_series) : 0;
         if (tree_top < time_series_label_height)
             tree_top = time_series_label_height;
+        const Location tree_origin {mPageArea.origin.x, tree_top};
 
         const auto tree_height = std::min(mPageArea.size.height - tree_top, aSurface.canvas_size().height - tree_top - time_series_label_height - padding * 0.2);
 
         double left = mPageArea.right();
         if (mAntigenicMaps) {
-            mAntigenicMaps->calculate_viewports(aTree, aSurface, mPageArea, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
+            mAntigenicMaps->calculate_viewports(aTree, Viewport(tree_origin, Size(mPageArea.size.width, tree_height)), mPageArea, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
             const Size size = mAntigenicMaps->size(mPageArea, aTree.settings().antigenic_maps);
             mAntigenicMapsViewport.set(mPageArea.top_right() - Size(size.width, 0), size);
             left = mAntigenicMapsViewport.origin.x;
@@ -148,7 +149,7 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface)
             left = mTimeSeriesViewport.origin.x;
         }
 
-        mTreeViewport.set(Location(mPageArea.origin.x, tree_top), Size(left - mPageArea.origin.x - aTree.settings().signature_page.tree_time_series_space * canvas_width, tree_height));
+        mTreeViewport.set(tree_origin, Size(left - mPageArea.origin.x - aTree.settings().signature_page.tree_time_series_space * canvas_width, tree_height));
 
           // Note legend must be drawn after tree, because ColoringByPos needs to collect data to be drawn in the legend
         if (mLegend) {
@@ -158,8 +159,9 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface)
 
         mDrawTree->calculate_viewports(aTree, mTreeViewport);
           // Calculate individual map viewports again after mDrawTree->calculate_viewports
+        mAntigenicMapsViewport.origin.y = mTreeViewport.origin.y;
         if (mAntigenicMaps) {
-            mAntigenicMaps->calculate_viewports(aTree, aSurface, mAntigenicMapsViewport, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
+            mAntigenicMaps->calculate_viewports(aTree, mAntigenicMapsViewport, mPageArea, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
         }
     }
 
