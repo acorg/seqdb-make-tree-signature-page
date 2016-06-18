@@ -32,6 +32,7 @@ class AntigenicMaps
     double left_offset() const { return mLeftOffset; }
     const auto& names_per_map() const { return mNamesPerMap; }
     double gap_between_maps() const { return mGap; }
+    virtual Color section_color(const HzLineSections& aSections, size_t section_no) const = 0;
 
  private:
     std::vector<std::vector<std::string>> mNamesPerMap;
@@ -55,6 +56,9 @@ class AntigenicMapsGrid : public AntigenicMaps
     virtual void calculate_viewports(Tree& aTree, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
     virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
 
+ protected:
+    virtual Color section_color(const HzLineSections& aSections, size_t section_no) const;
+
  private:
     size_t mGridWidth, mGridHeight;
     Size mCellSize;
@@ -74,6 +78,9 @@ class AntigenicMapsVpos : public AntigenicMaps
     virtual void draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const;
 
     virtual inline Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
+
+ protected:
+    virtual Color section_color(const HzLineSections& aSections, size_t section_no) const;
 
  private:
     std::vector<Viewport> mViewports;

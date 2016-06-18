@@ -43,9 +43,9 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
         aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
 
         aChart->draw_points_reset(aSettings);
-        const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], aSections[section_no].color, aSettings);
+        const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], section_color(aSections, section_no), aSettings);
         aChart->draw(aSurface, scale, aSettings);
-        std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << aSections[section_no].color << " names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
+        std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << " names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
     }
 
 } // AntigenicMaps::draw
@@ -107,7 +107,15 @@ std::pair<size_t, size_t> AntigenicMapsGrid::grid() const
 
 // ----------------------------------------------------------------------
 
-inline Size AntigenicMapsVpos::size(const Viewport& /*aPageArea*/, const SettingsAntigenicMaps& /*aSettings*/) const
+Color AntigenicMapsGrid::section_color(const HzLineSections& aSections, size_t section_no) const
+{
+    return aSections[section_no].color;
+
+} // AntigenicMapsGrid::section_color
+
+// ----------------------------------------------------------------------
+
+Size AntigenicMapsVpos::size(const Viewport& /*aPageArea*/, const SettingsAntigenicMaps& /*aSettings*/) const
 {
     Location bottom_right;
     for (const Viewport& viewport: mViewports) {
@@ -198,6 +206,14 @@ void AntigenicMapsVpos::draw(Surface& aSurface, const Viewport& aViewport, const
     AntigenicMaps::draw(aSurface, aViewport, aChart, aSections, aSettings);
 
 } // AntigenicMapsVpos::draw
+
+// ----------------------------------------------------------------------
+
+Color AntigenicMapsVpos::section_color(const HzLineSections& aSections, size_t /*section_no*/) const
+{
+    return aSections.this_section_antigen_color;
+
+} // AntigenicMapsVpos::section_color
 
 // ----------------------------------------------------------------------
 /// Local Variables:

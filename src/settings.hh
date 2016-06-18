@@ -186,7 +186,7 @@ class HzLineSections : public std::vector<HzLineSection>
 
     inline HzLineSections() : mode(ColoredGrid), map_height_fraction_of_page(0.25), hz_line_width(0.5), hz_line_color(GREY),
                               sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
-                              vertical_gap(1) {}
+                              this_section_antigen_color(GREY), vertical_gap(1) {}
 
     inline void sort()
         {
@@ -200,6 +200,7 @@ class HzLineSections : public std::vector<HzLineSection>
     bool sequenced_antigen_line_show;
     double sequenced_antigen_line_width, sequenced_antigen_line_length;
     Color sequenced_antigen_line_color;
+    Color this_section_antigen_color; // BWVpos mode only
     size_t vertical_gap;
 
  private:
@@ -223,6 +224,7 @@ class HzLineSections : public std::vector<HzLineSection>
         {
             return std::make_tuple(
                 "map_height_fraction_of_page", &a.map_height_fraction_of_page,
+                "this_section_antigen_color", json::field(&a.this_section_antigen_color, &Color::to_string, &Color::from_string),
                 "hz_line_width", &a.hz_line_width,
                 "hz_line_color", json::field(&a.hz_line_color, &Color::to_string, &Color::from_string),
                 "sequenced_antigen_line_show", &a.sequenced_antigen_line_show,
