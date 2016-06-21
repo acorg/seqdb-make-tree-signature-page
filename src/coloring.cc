@@ -112,29 +112,25 @@ class ColoringByContinentMapLegend : public Legend
 {
 
  public:
-    inline ColoringByContinentMapLegend(const ColoringByContinent& aColoring) : Legend(), mColoring(aColoring) {}
+    inline ColoringByContinentMapLegend(const ColoringByContinent& aColoring) : Legend(), mColoring(aColoring), mOutline(nullptr) {}
     virtual ~ColoringByContinentMapLegend() { if (mOutline) { cairo_path_destroy(mOutline); } }
 
     virtual void draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& aSettings) const
         {
-            auto const label_size = aSurface.text_size("W", aSettings.font_size, aSettings.style);
-            auto y = aViewport.origin.y + label_size.height;
-            for (auto& label: ColoringByContinentLegendLabels) {
-                aSurface.text({aViewport.origin.x, y}, label, mColoring.color(label), aSettings.font_size, aSettings.style);
-                y += label_size.height * aSettings.interline;
-            }
+            aSurface.draw_path(outline(aSurface), aViewport, GREY, 1);
         }
 
-    virtual Size size(Surface& /*aSurface*/, const SettingsLegend& /*aSettings*/) const
+    virtual Size size(Surface& aSurface, const SettingsLegend& /*aSettings*/) const
         {
-            return Size(geographic_map_size[0], geographic_map_size[1]);
+            const double map_height = aSurface.canvas_size().height * 0.2; // settings!
+            return Size(geographic_map_size[0] / geographic_map_size[1] * map_height, map_height);
         }
 
  private:
     const ColoringByContinent& mColoring;
-    cairo_path_t* mOutline;
+    mutable cairo_path_t* mOutline;
 
-    cairo_path_t* outline(Surface& aSurface)
+    cairo_path_t* outline(Surface& aSurface) const
         {
             if (!mOutline) {
                 aSurface.new_path();
@@ -160,8 +156,8 @@ class ColoringByContinentMapLegend : public Legend
 
 Legend* ColoringByContinent::legend() const
 {
-    return new ColoringByContinentLegend(*this);
-      //return new ColoringByContinentMapLegend(*this);
+      //return new ColoringByContinentLegend(*this);
+    return new ColoringByContinentMapLegend(*this);
 
 } // ColoringByContinent::legend
 

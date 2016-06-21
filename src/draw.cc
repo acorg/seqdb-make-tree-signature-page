@@ -236,6 +236,29 @@ double Surface::set_clip_region(const Viewport& aViewport, double aWidthScale)
 
 // ----------------------------------------------------------------------
 
+void Surface::draw_path(cairo_path_t* aPath, const Viewport& aViewport, Color aColor, double aWidth, cairo_line_cap_t aLineCap)
+{
+    PushContext pc(*this);
+
+      // compute scale to fit path into the viewport
+    cairo_append_path(mContext, aPath);
+    double x1, y1, x2, y2;
+    cairo_path_extents(mContext, &x1, &y1, &x2, &y2);
+    cairo_new_path(mContext);
+    const double scale = aViewport.size.width / (x2 - x1);
+
+    cairo_translate(mContext, aViewport.origin.x, aViewport.origin.y);
+    cairo_scale(mContext, scale, scale);
+    cairo_set_line_width(mContext, aWidth);
+    set_source_rgba(aColor);
+    cairo_set_line_cap(mContext, aLineCap);
+    cairo_append_path(mContext, aPath);
+    cairo_stroke(mContext);
+
+} // Surface::draw_path
+
+// ----------------------------------------------------------------------
+
 std::string TextStyle::slant_to_string(const cairo_font_slant_t* a)
 {
     switch (*a) {

@@ -202,6 +202,9 @@ constexpr const Color BLACK = 0;
 constexpr const Color WHITE = 0xFFFFFF;
 constexpr const Color GREY = 0xA0A0A0;
 constexpr const Color LIGHT_GREY = 0xE0E0E0;
+constexpr const Color RED = 0xFF0000;
+constexpr const Color GREEN = 0x00FF00;
+constexpr const Color BLUE = 0x0000FF;
 constexpr const Color TRANSPARENT = 0xFF000000;
 constexpr const Color COLOR_NOT_SET = Color::_not_set;
 
@@ -362,8 +365,10 @@ class Surface
     inline void move_to(double x, double y) { cairo_move_to(mContext, x, y); }
     inline void line_to(double x, double y) { cairo_line_to(mContext, x, y); }
     inline cairo_path_t* copy_path() { return cairo_copy_path(mContext); }
+      // inline void append_path(cairo_path_t* aPath) { return cairo_append_path(mContext, aPath); }
+    void draw_path(cairo_path_t* aPath, const Viewport& aViewport, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
 
-    inline cairo_t* context() { return mContext; }
+      // inline cairo_t* context() { return mContext; }
 
  private:
     cairo_t* mContext;
