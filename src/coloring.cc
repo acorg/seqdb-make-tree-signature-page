@@ -2,6 +2,7 @@
 #include "legend.hh"
 #include "tree.hh"
 #include "settings.hh"
+#include "geographic-path.inc"
 
 // ----------------------------------------------------------------------
 
@@ -105,9 +106,62 @@ class ColoringByContinentLegend : public Legend
 
 }; // class ColoringByContinentLegend
 
+// ----------------------------------------------------------------------
+
+class ColoringByContinentMapLegend : public Legend
+{
+
+ public:
+    inline ColoringByContinentMapLegend(const ColoringByContinent& aColoring) : Legend(), mColoring(aColoring) {}
+    virtual ~ColoringByContinentMapLegend() { if (mOutline) { cairo_path_destroy(mOutline); } }
+
+    virtual void draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& aSettings) const
+        {
+            auto const label_size = aSurface.text_size("W", aSettings.font_size, aSettings.style);
+            auto y = aViewport.origin.y + label_size.height;
+            for (auto& label: ColoringByContinentLegendLabels) {
+                aSurface.text({aViewport.origin.x, y}, label, mColoring.color(label), aSettings.font_size, aSettings.style);
+                y += label_size.height * aSettings.interline;
+            }
+        }
+
+    virtual Size size(Surface& /*aSurface*/, const SettingsLegend& /*aSettings*/) const
+        {
+            return Size(geographic_map_size[0], geographic_map_size[1]);
+        }
+
+ private:
+    const ColoringByContinent& mColoring;
+    cairo_path_t* mOutline;
+
+    cairo_path_t* outline(Surface& aSurface)
+        {
+            if (!mOutline) {
+                aSurface.new_path();
+                for (unsigned element_no = 0; element_no < (sizeof(geographic_map_path) / sizeof(geographic_map_path[0])); ++element_no) {
+                    if (geographic_map_path[element_no].x < 0) {
+                        aSurface.close_path();
+                        aSurface.move_to(- geographic_map_path[element_no].x, geographic_map_path[element_no].y);
+                    }
+                    else {
+                        aSurface.line_to(geographic_map_path[element_no].x, geographic_map_path[element_no].y);
+                    }
+                }
+                mOutline = aSurface.copy_path();
+                aSurface.new_path();
+            }
+            return mOutline;
+
+        } // GeographicMapSource::outline
+
+}; // class ColoringByContinentMapLegend
+
+// ----------------------------------------------------------------------
+
 Legend* ColoringByContinent::legend() const
 {
     return new ColoringByContinentLegend(*this);
+      //return new ColoringByContinentMapLegend(*this);
 
 } // ColoringByContinent::legend
 

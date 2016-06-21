@@ -356,6 +356,15 @@ class Surface
 
     // void test();
 
+    inline void new_path() { cairo_new_path(mContext); }
+    inline void destroy_path(cairo_path_t* aPath) { cairo_path_destroy(aPath); }
+    inline void close_path() { cairo_close_path(mContext); }
+    inline void move_to(double x, double y) { cairo_move_to(mContext, x, y); }
+    inline void line_to(double x, double y) { cairo_line_to(mContext, x, y); }
+    inline cairo_path_t* copy_path() { return cairo_copy_path(mContext); }
+
+    inline cairo_t* context() { return mContext; }
+
  private:
     cairo_t* mContext;
     Size mCanvasSize;
