@@ -117,12 +117,12 @@ class ColoringByContinentMapLegend : public Legend
 
     virtual void draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& aSettings) const
         {
-            aSurface.draw_path(outline(aSurface), aViewport, GREY, 1);
+            aSurface.draw_path(outline(aSurface), aViewport, aSettings.geographic_map_outline_color, aSettings.geographic_map_outline_width);
         }
 
-    virtual Size size(Surface& aSurface, const SettingsLegend& /*aSettings*/) const
+    virtual Size size(Surface& aSurface, const SettingsLegend& aSettings) const
         {
-            const double map_height = aSurface.canvas_size().height * 0.2; // settings!
+            const double map_height = aSurface.canvas_size().height * aSettings.geographic_map_fraction;
             return Size(geographic_map_size[0] / geographic_map_size[1] * map_height, map_height);
         }
 

@@ -286,15 +286,24 @@ class SettingsLegend
 {
  public:
     inline SettingsLegend()
-        : font_size(14), interline(1.2), style("monospace") {}
+        : font_size(14), interline(1.2), style("monospace"), geographic_map(true),
+          geographic_map_fraction(0.15), geographic_map_outline_color(GREY), geographic_map_outline_width(1.0) {}
 
     double font_size;
     double interline;
     TextStyle style;
+    bool geographic_map;        // show geographic_map as a coloring by continents legend
+    double geographic_map_fraction; // height of geographic map relative to the canvas height
+    Color geographic_map_outline_color;
+    double geographic_map_outline_width;
 
     friend inline auto json_fields(SettingsLegend& a)
         {
             return std::make_tuple(
+                "geographic_map_outline_color", json::field(&a.geographic_map_outline_color, &Color::to_string, &Color::from_string),
+                "geographic_map_outline_width", &a.geographic_map_outline_width,
+                "geographic_map_fraction", &a.geographic_map_fraction,
+                "geographic_map", &a.geographic_map,
                 "font_size", &a.font_size, // object_double_non_negative_value
                 "interline", &a.interline, // object_double_non_negative_value
                 "style", &a.style
