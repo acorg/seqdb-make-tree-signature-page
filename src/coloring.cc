@@ -112,12 +112,18 @@ class ColoringByContinentMapLegend : public Legend
 {
 
  public:
-    inline ColoringByContinentMapLegend(const ColoringByContinent& aColoring) : Legend(), mColoring(aColoring), mOutline(nullptr) {}
-    virtual ~ColoringByContinentMapLegend() { if (mOutline) { cairo_path_destroy(mOutline); } }
+    inline ColoringByContinentMapLegend(const ColoringByContinent& aColoring) : Legend(), mColoring(aColoring) {}
 
     virtual void draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& aSettings) const
         {
-            aSurface.draw_path(outline(aSurface), aViewport, aSettings.geographic_map_outline_color, aSettings.geographic_map_outline_width);
+            cairo_path_t* map_outline = outline(aSurface, geographic_map_path);
+            aSurface.draw_path(map_outline, aViewport, aSettings.geographic_map_outline_color, aSettings.geographic_map_outline_width);
+            aSurface.destroy_path(map_outline);
+            for (auto& label: ColoringByContinentLegendLabels) {
+                cairo_path_t* map_outline = outline(aSurface, geographic_map_path);
+                aSurface.draw_path(map_outline, aViewport, aSettings.geographic_map_outline_color, aSettings.geographic_map_outline_width);
+                aSurface.destroy_path(map_outline);
+            }
         }
 
     virtual Size size(Surface& aSurface, const SettingsLegend& aSettings) const
@@ -128,27 +134,40 @@ class ColoringByContinentMapLegend : public Legend
 
  private:
     const ColoringByContinent& mColoring;
-    mutable cairo_path_t* mOutline;
 
-    cairo_path_t* outline(Surface& aSurface) const
+    // cairo_path_t* outline(Surface& aSurface) const
+    //     {
+    //         aSurface.new_path();
+    //         for (unsigned element_no = 0; element_no < (sizeof(geographic_map_path) / sizeof(geographic_map_path[0])); ++element_no) {
+    //             if (geographic_map_path[element_no].x < 0) {
+    //                 aSurface.close_path();
+    //                 aSurface.move_to(- geographic_map_path[element_no].x, geographic_map_path[element_no].y);
+    //             }
+    //             else {
+    //                 aSurface.line_to(geographic_map_path[element_no].x, geographic_map_path[element_no].y);
+    //             }
+    //         }
+    //         auto path = aSurface.copy_path();
+    //         aSurface.new_path();
+    //         return path;
+    //     }
+
+    cairo_path_t* outline(Surface& aSurface, const std::vector<GeographicMapPathElement>& aPath) const
         {
-            if (!mOutline) {
-                aSurface.new_path();
-                for (unsigned element_no = 0; element_no < (sizeof(geographic_map_path) / sizeof(geographic_map_path[0])); ++element_no) {
-                    if (geographic_map_path[element_no].x < 0) {
-                        aSurface.close_path();
-                        aSurface.move_to(- geographic_map_path[element_no].x, geographic_map_path[element_no].y);
-                    }
-                    else {
-                        aSurface.line_to(geographic_map_path[element_no].x, geographic_map_path[element_no].y);
-                    }
+            aSurface.new_path();
+            for (const auto& element: aPath) {
+                if (element.x < 0) {
+                    aSurface.close_path();
+                    aSurface.move_to(- element.x, element.y);
                 }
-                mOutline = aSurface.copy_path();
-                aSurface.new_path();
+                else {
+                    aSurface.line_to(element.x, element.y);
+                }
             }
-            return mOutline;
-
-        } // GeographicMapSource::outline
+            auto path = aSurface.copy_path();
+            aSurface.new_path();
+            return path;
+        }
 
 }; // class ColoringByContinentMapLegend
 
