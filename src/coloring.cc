@@ -141,7 +141,7 @@ class ColoringByContinentMapLegend : public Legend
             aSurface.new_path();
             for (const auto& element: aPath) {
                 if (element.x < 0) {
-                    aSurface.close_path();
+                      //aSurface.close_path();
                     aSurface.move_to(- element.x, element.y);
                 }
                 else {

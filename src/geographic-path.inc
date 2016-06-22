@@ -2592,18 +2592,18 @@ static std::vector<GeographicMapPathElement> geographic_map_path {
 // ----------------------------------------------------------------------
 
 static std::map<std::string, std::vector<GeographicMapPathElement>> continent_corners {
-    {"EUROPE", {{500, 20}, {700, 190}}},
+    {"EUROPE", {{500, 20}, {680, 190}}},
     {"CENTRAL-AMERICA", {{200, 233}, {385, 280}}},
     {"MIDDLE-EAST", {{680, 170}, {850, 250}}},
     {"NORTH-AMERICA", {{1, 20}, {400, 233}}}, //{{-1, 20}, {400, 10}, {400, 233}, {0, 233}}},
-    {"AFRICA", {{500, 190}, {750, 450}}},
-    {"ASIA", {{850, 160}, {1100, 350}}},
-    {"RUSSIA", {{700, 20}, {1261, 160}}},
+    {"AFRICA", {{500, 190}, {800, 450}}},
+    {"ASIA", {{840, 160}, {1100, 350}}},
+    {"RUSSIA", {{680, 20}, {1261, 170}}},
     {"AUSTRALIA-OCEANIA", {{900, 350}, {1261, 520}}},
     {"SOUTH-AMERICA", {{300, 280}, {470, 520}}}
 };
 
-static std::vector<GeographicMapPathElement> continent_path(std::string aContinent)
+static std::vector<GeographicMapPathElement> continent_path_sq(std::string aContinent)
 {
     std::vector<GeographicMapPathElement> path;
     const std::vector<GeographicMapPathElement>& corners = continent_corners[aContinent];
@@ -2612,6 +2612,27 @@ static std::vector<GeographicMapPathElement> continent_path(std::string aContine
     path.push_back(corners[1]);
     path.push_back({corners[0].x, corners[1].y});
     path.push_back(corners[0]);
+    return path;
+}
+
+static std::vector<GeographicMapPathElement> continent_path(std::string aContinent)
+{
+    const std::vector<GeographicMapPathElement>& corners = continent_corners[aContinent];
+    std::vector<GeographicMapPathElement> path;
+    bool reset = false;
+    for (const auto& element: geographic_map_path) {
+        const auto x = std::abs(element.x), y = std::abs(element.y);
+        if (x >= corners[0].x && x <= corners[1].x && y >= corners[0].y && y <= corners[1].y) {
+            GeographicMapPathElement e = element;
+            if (reset && e.x > 0)
+                e.x = - e.x;
+            path.push_back(e);
+            reset = false;
+        }
+        else {
+            reset = true;
+        }
+    }
     return path;
 }
 
