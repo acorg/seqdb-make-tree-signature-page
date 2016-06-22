@@ -366,7 +366,8 @@ class Surface
     inline void line_to(double x, double y) { cairo_line_to(mContext, x, y); }
     inline cairo_path_t* copy_path() { return cairo_copy_path(mContext); }
       // inline void append_path(cairo_path_t* aPath) { return cairo_append_path(mContext, aPath); }
-    void draw_path(cairo_path_t* aPath, const Viewport& aViewport, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    double draw_path_scale(cairo_path_t* aPath, const Viewport& aViewport);
+    void draw_path(cairo_path_t* aPath, const Viewport& aViewport, double aScale, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
 
       // inline cairo_t* context() { return mContext; }
 

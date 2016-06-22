@@ -117,12 +117,13 @@ class ColoringByContinentMapLegend : public Legend
     virtual void draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& aSettings) const
         {
             cairo_path_t* map_outline = outline(aSurface, geographic_map_path);
-            aSurface.draw_path(map_outline, aViewport, aSettings.geographic_map_outline_color, aSettings.geographic_map_outline_width);
+            const double scale = aSurface.draw_path_scale(map_outline, aViewport);
+            aSurface.draw_path(map_outline, aViewport, scale, aSettings.geographic_map_outline_color, aSettings.geographic_map_outline_width);
             aSurface.destroy_path(map_outline);
             for (auto& label: ColoringByContinentLegendLabels) {
-                cairo_path_t* map_outline = outline(aSurface, geographic_map_path);
-                aSurface.draw_path(map_outline, aViewport, aSettings.geographic_map_outline_color, aSettings.geographic_map_outline_width);
-                aSurface.destroy_path(map_outline);
+                cairo_path_t* continent_outline = outline(aSurface, continent_path(label));
+                aSurface.draw_path(continent_outline, aViewport, scale, mColoring.color(label), aSettings.geographic_map_outline_width);
+                aSurface.destroy_path(continent_outline);
             }
         }
 
@@ -134,23 +135,6 @@ class ColoringByContinentMapLegend : public Legend
 
  private:
     const ColoringByContinent& mColoring;
-
-    // cairo_path_t* outline(Surface& aSurface) const
-    //     {
-    //         aSurface.new_path();
-    //         for (unsigned element_no = 0; element_no < (sizeof(geographic_map_path) / sizeof(geographic_map_path[0])); ++element_no) {
-    //             if (geographic_map_path[element_no].x < 0) {
-    //                 aSurface.close_path();
-    //                 aSurface.move_to(- geographic_map_path[element_no].x, geographic_map_path[element_no].y);
-    //             }
-    //             else {
-    //                 aSurface.line_to(geographic_map_path[element_no].x, geographic_map_path[element_no].y);
-    //             }
-    //         }
-    //         auto path = aSurface.copy_path();
-    //         aSurface.new_path();
-    //         return path;
-    //     }
 
     cairo_path_t* outline(Surface& aSurface, const std::vector<GeographicMapPathElement>& aPath) const
         {
