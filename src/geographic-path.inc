@@ -2603,17 +2603,17 @@ static std::map<std::string, std::vector<GeographicMapPathElement>> continent_co
     {"SOUTH-AMERICA", {{300, 280}, {470, 520}}}
 };
 
-static std::vector<GeographicMapPathElement> continent_path_sq(std::string aContinent)
-{
-    std::vector<GeographicMapPathElement> path;
-    const std::vector<GeographicMapPathElement>& corners = continent_corners[aContinent];
-    path.push_back({- corners[0].x, corners[0].y});
-    path.push_back({corners[1].x, corners[0].y});
-    path.push_back(corners[1]);
-    path.push_back({corners[0].x, corners[1].y});
-    path.push_back(corners[0]);
-    return path;
-}
+// static std::vector<GeographicMapPathElement> continent_path_sq(std::string aContinent)
+// {
+//     std::vector<GeographicMapPathElement> path;
+//     const std::vector<GeographicMapPathElement>& corners = continent_corners[aContinent];
+//     path.push_back({- corners[0].x, corners[0].y});
+//     path.push_back({corners[1].x, corners[0].y});
+//     path.push_back(corners[1]);
+//     path.push_back({corners[0].x, corners[1].y});
+//     path.push_back(corners[0]);
+//     return path;
+// }
 
 static std::vector<GeographicMapPathElement> continent_path(std::string aContinent)
 {

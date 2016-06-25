@@ -82,7 +82,7 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
 
         mDrawTree->prepare(aTree, aTree.settings().draw_tree);
         if (mParts & ShowLegend) {
-            mLegend = mDrawTree->coloring().legend();
+            mLegend = mDrawTree->coloring().legend(aTree.settings().legend);
         }
         if (mTimeSeries)
             mTimeSeries->prepare(aTree, aTree.settings().time_series);

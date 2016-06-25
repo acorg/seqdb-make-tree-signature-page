@@ -157,10 +157,14 @@ class ColoringByContinentMapLegend : public Legend
 
 // ----------------------------------------------------------------------
 
-Legend* ColoringByContinent::legend() const
+Legend* ColoringByContinent::legend(const SettingsLegend& aSettings) const
 {
-      //return new ColoringByContinentLegend(*this);
-    return new ColoringByContinentMapLegend(*this);
+    Legend* legend;
+    if (aSettings.geographic_map)
+        legend = new ColoringByContinentMapLegend(*this);
+    else
+        legend = new ColoringByContinentLegend(*this);
+    return legend;
 
 } // ColoringByContinent::legend
 
@@ -217,7 +221,7 @@ class ColoringByPosLegend : public Legend
 
 }; // class ColoringByContinentLegend
 
-Legend* ColoringByPos::legend() const
+Legend* ColoringByPos::legend(const SettingsLegend& /*aSettings*/) const
 {
     return new ColoringByPosLegend(*this);
 
