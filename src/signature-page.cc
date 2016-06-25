@@ -141,19 +141,41 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface)
             left = mAntigenicMapsViewport.origin.x;
         }
 
-        if (mClades) {
-            mCladesViewport.size = Size(mClades->size(aSurface, aTree.settings().clades).width, tree_height);
-            mCladesViewport.origin = Location(left - aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width - mCladesViewport.size.width, tree_top);
-            left = mCladesViewport.origin.x;
-        }
-        else {
-            left -= aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width;
+        if (mTimeSeries) {
+            if (mClades) {
+                mCladesViewport.size = Size(mClades->size(aSurface, aTree.settings().clades).width, tree_height);
+            }
+
+            mTimeSeriesViewport.size = Size(mTimeSeries->size(aSurface, aTree.settings().time_series).width, tree_height);
         }
 
-        if (mTimeSeries) {
-            mTimeSeriesViewport.size = Size(mTimeSeries->size(aSurface, aTree.settings().time_series).width, tree_height);
-            mTimeSeriesViewport.origin = Location(left - aTree.settings().signature_page.time_series_clades_space * canvas_width - mTimeSeriesViewport.size.width, tree_top);
-            left = mTimeSeriesViewport.origin.x;
+        switch (aTree.settings().signature_page.layout) {
+          case SettingsSignaturePage::TreeTimeseriesCladesMaps:
+              if (mTimeSeries) {
+                  if (mClades) {
+                      mCladesViewport.origin = Location(left - aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width - mCladesViewport.size.width, tree_top);
+                      left = mCladesViewport.origin.x;
+                  }
+                  else {
+                      left -= aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width;
+                  }
+                  mTimeSeriesViewport.origin = Location(left - aTree.settings().signature_page.time_series_clades_space * canvas_width - mTimeSeriesViewport.size.width, tree_top);
+                  left = mTimeSeriesViewport.origin.x;
+              }
+              break;
+          case SettingsSignaturePage::TreeCladesTimeseriesMaps:
+              if (mTimeSeries) {
+                  mTimeSeriesViewport.origin = Location(left - aTree.settings().signature_page.clades_antigenic_maps_space * canvas_width - mTimeSeriesViewport.size.width, tree_top);
+                  left = mTimeSeriesViewport.origin.x;
+                  if (mClades) {
+                      mCladesViewport.origin = Location(left - aTree.settings().signature_page.time_series_clades_space * canvas_width - mCladesViewport.size.width, tree_top);
+                      left = mCladesViewport.origin.x;
+                  }
+                  else {
+                      left -= aTree.settings().signature_page.time_series_clades_space * canvas_width;
+                  }
+              }
+              break;
         }
 
         mTreeViewport.set(tree_origin, Size(left - mPageArea.origin.x - aTree.settings().signature_page.tree_time_series_space * canvas_width, tree_height));
