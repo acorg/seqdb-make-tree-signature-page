@@ -317,21 +317,43 @@ class SettingsLegend
 class SettingsSignaturePage
 {
  public:
-    inline SettingsSignaturePage()
-        : outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
+    enum Layout { TreeTimeseriesCladesMaps, TreeCladesTimeseriesMaps };
 
+    inline SettingsSignaturePage()
+        : layout(TreeCladesTimeseriesMaps), outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
+
+
+    Layout layout;
     double outer_padding;             // relative to the canvas width
     double tree_time_series_space;    // relative to the canvas width
     double time_series_clades_space;  // relative to the canvas width
     double clades_antigenic_maps_space; // relative to the canvas width
 
+ private:
+    inline static std::string layout_to_string(const Layout* a)
+        {
+            switch (*a) {
+              case TreeTimeseriesCladesMaps: return "tree-timeseries-clades-maps";
+              case TreeCladesTimeseriesMaps: return "tree-clades-timeseries-maps";
+            }
+            return "colored_grid";            // to shut compiler up
+        }
+
+    inline static void layout_from_string(Layout* target, std::string source)
+        {
+            if (source == "tree-timeseries-clades-maps" || source == "tree_timeseries_clades_maps") *target = TreeTimeseriesCladesMaps;
+            else if (source == "tree-clades-timeseries-maps" || source == "tree_clades_timeseries_maps") *target = TreeCladesTimeseriesMaps;
+            else throw std::invalid_argument("cannot parse signature page layout from \"" + source + "\", supported values: \"tree-timeseries-clades-maps\", \"tree-clades-timeseries-maps\"");
+        }
+
     friend inline auto json_fields(SettingsSignaturePage& a)
         {
             return std::make_tuple(
-                "outer_padding", &a.outer_padding, // object_double_non_negative_value
-                "tree_time_series_space", &a.tree_time_series_space, // object_double_non_negative_value
-                "time_series_clades_space", &a.time_series_clades_space, // object_double_non_negative_value
                 "clades_antigenic_maps_space", &a.clades_antigenic_maps_space, // object_double_non_negative_value
+                "time_series_clades_space", &a.time_series_clades_space, // object_double_non_negative_value
+                "tree_time_series_space", &a.tree_time_series_space, // object_double_non_negative_value
+                "outer_padding", &a.outer_padding, // object_double_non_negative_value
+                "layout", json::field(&a.layout, &layout_to_string, &layout_from_string),
                 "?", json::comment("outer_padding: size of space around the image, fraction of canvas width, default: 0.01; tree_time_series_space: fraction of canvas width")
                                    );
         }
