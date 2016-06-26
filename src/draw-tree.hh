@@ -78,11 +78,13 @@ class DrawHzLines
     inline DrawHzLines() {}
 
     DrawHzLines& prepare(Tree& aTree, HzLineSections& aSections);
-    void draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, SettingsSignaturePage::Layout aLayout) const;
+    void draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const SettingsAntigenicMaps& aAntigenicMapsSettings, const HzLineSections& aSections, SettingsSignaturePage::Layout aLayout) const;
 
  private:
-    void draw_sequenced_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const;
-    void draw_sequenced_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const;
+    void draw_section_lines_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double top_y, double bottom_y, const HzLineSections& aSections) const;
+    void draw_section_lines_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double top_y, double bottom_y, const HzLineSections& aSections) const;
+    void draw_sequenced_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const AntigenicMaps& aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const;
+    void draw_sequenced_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const AntigenicMaps& aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const;
 
 }; // class DrawHzLines
 

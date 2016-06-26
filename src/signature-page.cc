@@ -219,7 +219,7 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
             mClades->draw(aSurface, aTree, mCladesViewport, mTimeSeriesViewport, *mDrawTree, aTree.settings().clades, aTree.settings().signature_page.layout);
         }
         if (mDrawHzLines) {
-            mDrawHzLines->draw(aSurface, mTimeSeriesViewport, mAntigenicMapsViewport, *mDrawTree, mAntigenicMaps, aTree.settings().draw_tree.hz_line_sections, aTree.settings().signature_page.layout);
+            mDrawHzLines->draw(aSurface, mTimeSeriesViewport, mAntigenicMapsViewport, *mDrawTree, mAntigenicMaps, aTree.settings().antigenic_maps, aTree.settings().draw_tree.hz_line_sections, aTree.settings().signature_page.layout);
         }
         if (mAntigenicMaps) {
             mAntigenicMaps->draw(aSurface, mAntigenicMapsViewport, aChart, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
