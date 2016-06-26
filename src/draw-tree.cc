@@ -258,10 +258,20 @@ DrawHzLines& DrawHzLines::prepare(Tree& aTree, HzLineSections& aSections)
 
 // ----------------------------------------------------------------------
 
-void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections)
+void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, SettingsSignaturePage::Layout aLayout) const
 {
     if (!aSections.empty()) {
-        const auto vertical_step = aDrawTree.vertical_step();
+        auto draw_sequenced = &DrawHzLines::draw_sequenced_right;
+        switch (aLayout) {
+          case SettingsSignaturePage::TreeTimeseriesCladesMaps:
+              draw_sequenced = &DrawHzLines::draw_sequenced_right;
+              break;
+          case SettingsSignaturePage::TreeCladesTimeseriesMaps:
+              draw_sequenced = &DrawHzLines::draw_sequenced_left;
+              break;
+        }
+
+        const double vertical_step = aDrawTree.vertical_step();
         for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
             const auto& section = aSections[section_no];
             double first_y = aTimeSeries.origin.y;
@@ -296,16 +306,38 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
 
         if (aAntigenicMaps != nullptr && aSections.sequenced_antigen_line_show) {
               // draw sequenced antigen marks
-            const double mark_x1 = aAntigenicMapsViewport.origin.x - aSections[0].line_width;
-            const double mark_x2 = mark_x1 - aSections.sequenced_antigen_line_length;
-            for (auto line_no: aAntigenicMaps->lines_of_sequenced_antigens_in_chart()) {
-                const double y = aTimeSeries.origin.y + vertical_step * line_no;
-                aSurface.line({mark_x1, y}, {mark_x2, y}, aSections.sequenced_antigen_line_color, aSections.sequenced_antigen_line_width);
-            }
+            (this->*draw_sequenced)(aSurface, aTimeSeries, aAntigenicMapsViewport, aAntigenicMaps, aSections, vertical_step);
         }
     }
 
 } // DrawHzLines::draw
+
+// ----------------------------------------------------------------------
+
+void DrawHzLines::draw_sequenced_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const
+{
+    const double mark_x1 = aAntigenicMapsViewport.origin.x - aSections[0].line_width;
+    const double mark_x2 = mark_x1 - aSections.sequenced_antigen_line_length;
+    for (auto line_no: aAntigenicMaps->lines_of_sequenced_antigens_in_chart()) {
+        const double y = aTimeSeriesViewport.origin.y + vertical_step * line_no;
+        aSurface.line({mark_x1, y}, {mark_x2, y}, aSections.sequenced_antigen_line_color, aSections.sequenced_antigen_line_width);
+    }
+
+} // DrawHzLines::draw_right
+
+// ----------------------------------------------------------------------
+
+void DrawHzLines::draw_sequenced_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& /*aAntigenicMapsViewport*/, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const
+{
+    const double canvas_width = aSurface.canvas_size().width;
+    const double mark_x1 = aTimeSeriesViewport.right() + aSections.sequenced_antigen_line_length;
+    const double mark_x2 = mark_x1 + aSections.sequenced_antigen_line_length;
+    for (auto line_no: aAntigenicMaps->lines_of_sequenced_antigens_in_chart()) {
+        const double y = aTimeSeriesViewport.origin.y + vertical_step * line_no;
+        aSurface.line({mark_x1, y}, {mark_x2, y}, aSections.sequenced_antigen_line_color, aSections.sequenced_antigen_line_width);
+    }
+
+} // DrawHzLines::draw_left
 
 // ----------------------------------------------------------------------
 /// Local Variables:

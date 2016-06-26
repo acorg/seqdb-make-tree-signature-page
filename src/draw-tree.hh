@@ -78,7 +78,11 @@ class DrawHzLines
     inline DrawHzLines() {}
 
     DrawHzLines& prepare(Tree& aTree, HzLineSections& aSections);
-    void draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections);
+    void draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, SettingsSignaturePage::Layout aLayout) const;
+
+ private:
+    void draw_sequenced_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const;
+    void draw_sequenced_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const AntigenicMaps* aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const;
 
 }; // class DrawHzLines
 

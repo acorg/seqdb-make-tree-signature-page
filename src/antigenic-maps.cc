@@ -199,8 +199,8 @@ void AntigenicMapsVpos::draw(Surface& aSurface, const Viewport& aViewport, const
         const double gap = aViewport.size.height * 0.01;
         const double top_y = map_viewport.center().y - gap;
         const double bottom_y = top_y + gap * 2.0;
-        aSurface.line({aViewport.origin.x, top_y},    {map_viewport.origin.x, top_y},    aSections.hz_line_color, aSections.hz_line_width);
-        aSurface.line({aViewport.origin.x, bottom_y}, {map_viewport.origin.x, bottom_y}, aSections.hz_line_color, aSections.hz_line_width);
+        aSurface.line({aViewport.origin.x, top_y},    {map_viewport.origin.x, top_y},    aSettings.border_color, aSettings.border_width); // aSections.hz_line_color, aSections.hz_line_width);
+        aSurface.line({aViewport.origin.x, bottom_y}, {map_viewport.origin.x, bottom_y}, aSettings.border_color, aSettings.border_width); // aSections.hz_line_color, aSections.hz_line_width);
     }
 
     AntigenicMaps::draw(aSurface, aViewport, aChart, aSections, aSettings);
