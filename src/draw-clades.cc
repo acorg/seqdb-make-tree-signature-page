@@ -75,8 +75,18 @@ void Clades::assign_slots(const SettingsClades& /*aSettings*/)
 
 // ----------------------------------------------------------------------
 
-void Clades::draw(Surface& aSurface, const Tree& aTree, const Viewport& aViewport, const Viewport& aTimeSeriesViewport, const DrawTree& aDrawTree, const SettingsClades& aSettings) const
+void Clades::draw(Surface& aSurface, const Tree& aTree, const Viewport& aViewport, const Viewport& aTimeSeriesViewport, const DrawTree& aDrawTree, const SettingsClades& aSettings, SettingsSignaturePage::Layout aLayout) const
 {
+    auto draw_lines = &Clades::draw_right;
+    switch (aLayout) {
+      case SettingsSignaturePage::TreeTimeseriesCladesMaps:
+          draw_lines = &Clades::draw_right;
+          break;
+      case SettingsSignaturePage::TreeCladesTimeseriesMaps:
+          draw_lines = &Clades::draw_left;
+          break;
+    }
+
     for (const auto& clade: mClades) {
         if (clade.show) {
             const auto clade_begin = aTree.find_node_by_name(clade.begin);
@@ -85,7 +95,6 @@ void Clades::draw(Surface& aSurface, const Tree& aTree, const Viewport& aViewpor
             const auto clade_end = aTree.find_node_by_name(clade.end);
             if (clade_end == nullptr)
                 throw std::runtime_error("cannot find clade last node by name: " + clade.end);
-            const auto x = aViewport.origin.x + clade.slot * aSettings.slot_width;
             const auto base_y = aViewport.origin.y;
             const auto vertical_step = aDrawTree.vertical_step();
             const auto top = base_y + vertical_step * clade_begin->line_no -  aSettings.arrow_extra * vertical_step;
@@ -106,16 +115,41 @@ void Clades::draw(Surface& aSurface, const Tree& aTree, const Viewport& aViewpor
             auto const label_size = aSurface.text_size(clade.label, aSettings.label_size, aSettings.label_style);
             label_vpos += label_size.height / 2.0 + clade.label_position_offset;
 
-            aSurface.double_arrow({x, top}, {x, bottom}, aSettings.arrow_color, aSettings.line_width, aSettings.arrow_width);
-            aSurface.text({x + clade.label_offset, label_vpos}, clade.label, aSettings.label_color, aSettings.label_size, aSettings.label_style, clade.label_rotation);
-            if (clade_begin->line_no > 0)
-                aSurface.line({x, top}, {aTimeSeriesViewport.origin.x, top}, aSettings.separator_color, aSettings.separator_width);
-            if (clade_end->line_no < (aDrawTree.number_of_lines() - 1))
-                aSurface.line({x, bottom}, {aTimeSeriesViewport.origin.x, bottom}, aSettings.separator_color, aSettings.separator_width);
+            (this->*draw_lines)(aSurface, aViewport, clade, top, bottom, label_vpos, label_size, clade_begin->line_no > 0, clade_end->line_no < (aDrawTree.number_of_lines() - 1), aTimeSeriesViewport, aSettings);
         }
     }
 
 } // Clades::draw
+
+// ----------------------------------------------------------------------
+
+                                // SettingsSignaturePage::TreeTimeseriesCladesMaps
+void Clades::draw_right(Surface& aSurface, const Viewport& aViewport, const SettingsClade& clade, double top, double bottom, double label_vpos, const Size& /*label_size*/, bool draw_top_line, bool draw_bottom_line, const Viewport& aTimeSeriesViewport, const SettingsClades& aSettings) const
+{
+    const auto x = aViewport.origin.x + clade.slot * aSettings.slot_width;
+    aSurface.double_arrow({x, top}, {x, bottom}, aSettings.arrow_color, aSettings.line_width, aSettings.arrow_width);
+    aSurface.text({x + clade.label_offset, label_vpos}, clade.label, aSettings.label_color, aSettings.label_size, aSettings.label_style, clade.label_rotation);
+    if (draw_top_line)
+        aSurface.line({x, top}, {aTimeSeriesViewport.origin.x, top}, aSettings.separator_color, aSettings.separator_width);
+    if (draw_bottom_line)
+        aSurface.line({x, bottom}, {aTimeSeriesViewport.origin.x, bottom}, aSettings.separator_color, aSettings.separator_width);
+
+} // Clades::draw_right
+
+// ----------------------------------------------------------------------
+
+                                // SettingsSignaturePage::TreeCladesTimeseriesMaps
+void Clades::draw_left(Surface& aSurface, const Viewport& aViewport, const SettingsClade& clade, double top, double bottom, double label_vpos, const Size& label_size, bool draw_top_line, bool draw_bottom_line, const Viewport& aTimeSeriesViewport, const SettingsClades& aSettings) const
+{
+    const auto x = aViewport.right() - clade.slot * aSettings.slot_width;
+    aSurface.double_arrow({x, top}, {x, bottom}, aSettings.arrow_color, aSettings.line_width, aSettings.arrow_width);
+    aSurface.text({x - label_size.width - clade.label_offset, label_vpos}, clade.label, aSettings.label_color, aSettings.label_size, aSettings.label_style, clade.label_rotation);
+    if (draw_top_line)
+        aSurface.line({x, top}, {aTimeSeriesViewport.right(), top}, aSettings.separator_color, aSettings.separator_width);
+    if (draw_bottom_line)
+        aSurface.line({x, bottom}, {aTimeSeriesViewport.right(), bottom}, aSettings.separator_color, aSettings.separator_width);
+
+} // Clades::draw_left
 
 // ----------------------------------------------------------------------
 
