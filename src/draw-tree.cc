@@ -300,7 +300,7 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
                       const double gap = aAntigenicMapsViewport.size.height * 0.01;
                       const double top_y = map_viewport.center().y - gap;
                       const double bottom_y = top_y + gap * 2.0;
-                      (this->*draw_section_lines)(aSurface, aTimeSeries, aAntigenicMapsViewport, aAntigenicMapsSettings, first_y, last_y, top_y, bottom_y, aSections);
+                      (this->*draw_section_lines)(aSurface, aTimeSeries, aAntigenicMapsViewport, aAntigenicMapsSettings, first_y, last_y, top_y, bottom_y, vertical_step, aSections);
                       break;
                 }
             }
@@ -316,7 +316,7 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeries, const Vie
 
 // ----------------------------------------------------------------------
 
-void DrawHzLines::draw_section_lines_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const SettingsAntigenicMaps& /*aAntigenicMapsSettings*/, double first_y, double last_y, double top_y, double bottom_y, const HzLineSections& aSections) const
+void DrawHzLines::draw_section_lines_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const SettingsAntigenicMaps& /*aAntigenicMapsSettings*/, double first_y, double last_y, double top_y, double bottom_y, double /*vertical_step*/, const HzLineSections& aSections) const
 {
     aSurface.line({aTimeSeriesViewport.right(), first_y}, {aAntigenicMapsViewport.origin.x, top_y}, aSections.hz_line_color, aSections.hz_line_width);
     aSurface.line({aTimeSeriesViewport.right(), last_y}, {aAntigenicMapsViewport.origin.x, bottom_y}, aSections.hz_line_color, aSections.hz_line_width);
@@ -325,9 +325,12 @@ void DrawHzLines::draw_section_lines_right(Surface& aSurface, const Viewport& aT
 
 // ----------------------------------------------------------------------
 
-void DrawHzLines::draw_section_lines_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double top_y, double bottom_y, const HzLineSections& aSections) const
+void DrawHzLines::draw_section_lines_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double top_y, double bottom_y, double vertical_step, const HzLineSections& aSections) const
 {
     const double brace_middle = aTimeSeriesViewport.right() + aSections.sequenced_antigen_line_length * 3;
+    first_y -= vertical_step * 10;
+    last_y += vertical_step * 10;
+
     aSurface.line({brace_middle, top_y}, {aAntigenicMapsViewport.origin.x, top_y}, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
     aSurface.line({brace_middle, top_y}, {brace_middle, first_y}, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
     aSurface.line({aTimeSeriesViewport.right(), first_y}, {brace_middle, first_y}, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
@@ -335,9 +338,6 @@ void DrawHzLines::draw_section_lines_left(Surface& aSurface, const Viewport& aTi
     aSurface.line({brace_middle, bottom_y}, {aAntigenicMapsViewport.origin.x, bottom_y}, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
     aSurface.line({brace_middle, bottom_y}, {brace_middle, last_y}, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
     aSurface.line({aTimeSeriesViewport.right(), last_y}, {brace_middle, last_y}, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
-
-      // aSurface.line({aTimeSeriesViewport.right(), first_y}, {aAntigenicMapsViewport.origin.x, top_y}, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
-    // aSurface.line({aTimeSeriesViewport.right(), last_y}, {aAntigenicMapsViewport.origin.x, bottom_y}, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
 
 } // DrawHzLines::draw_section_lines_left
 
