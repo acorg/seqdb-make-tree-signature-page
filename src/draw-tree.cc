@@ -358,7 +358,6 @@ void DrawHzLines::draw_sequenced_right(Surface& aSurface, const Viewport& aTimeS
 
 void DrawHzLines::draw_sequenced_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& /*aAntigenicMapsViewport*/, const AntigenicMaps& aAntigenicMaps, const HzLineSections& aSections, double vertical_step) const
 {
-    const double canvas_width = aSurface.canvas_size().width;
     const double mark_x1 = aTimeSeriesViewport.right() + aSections.sequenced_antigen_line_length;
     const double mark_x2 = mark_x1 + aSections.sequenced_antigen_line_length;
     for (auto line_no: aAntigenicMaps.lines_of_sequenced_antigens_in_chart()) {

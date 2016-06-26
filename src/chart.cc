@@ -33,12 +33,16 @@ void Chart::preprocess(const SettingsAntigenicMaps& aSettings)
       // Calculate viewport for all points
     Location tl(1e10, 1e10), br(-1e10, -1e10);
     for (const auto& p: mPoints) {
-        tl.min(p.coordinates);
-        br.max(p.coordinates);
+        if (!p.coordinates.isnan()) {
+            tl.min(p.coordinates);
+            br.max(p.coordinates);
+        }
     }
     const Location center = Location::center_of(tl, br);
     for (auto& p: mPoints) {
-        p.coordinates -= center;
+        if (!p.coordinates.isnan()) {
+            p.coordinates -= center;
+        }
     }
     tl -= center;
     br -= center;
@@ -161,8 +165,10 @@ inline double DrawPoint::rotation(const Point& aPoint, const SettingsAntigenicMa
 void DrawSerum::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     const double size = aSettings.serum_scale * aObjectScale;
-    aSurface.rectangle_filled(aPoint.coordinates, {size * aspect(aPoint, aSettings), size}, aSettings.serum_outline_color,
-                              aSettings.serum_outline_width * aObjectScale, TRANSPARENT);
+    if (!aPoint.coordinates.isnan()) {
+        aSurface.rectangle_filled(aPoint.coordinates, {size * aspect(aPoint, aSettings), size}, aSettings.serum_outline_color,
+                                  aSettings.serum_outline_width * aObjectScale, TRANSPARENT);
+    }
 
 } // DrawSerum::draw
 
@@ -178,9 +184,11 @@ double DrawAntigen::aspect(const Point& aPoint, const SettingsAntigenicMaps& aSe
 
 void DrawReferenceAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
-    aSurface.circle_filled(aPoint.coordinates, aSettings.reference_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
-                           aSettings.reference_antigen_outline_color,
-                           aSettings.reference_antigen_outline_width * aObjectScale, TRANSPARENT);
+    if (!aPoint.coordinates.isnan()) {
+        aSurface.circle_filled(aPoint.coordinates, aSettings.reference_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+                               aSettings.reference_antigen_outline_color,
+                               aSettings.reference_antigen_outline_width * aObjectScale, TRANSPARENT);
+    }
 
 } // DrawReferenceAntigen::draw
 
@@ -188,9 +196,11 @@ void DrawReferenceAntigen::draw(Surface& aSurface, const Point& aPoint, double a
 
 void DrawTestAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
-    aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
-                           aSettings.test_antigen_outline_color,
-                           aSettings.test_antigen_outline_width * aObjectScale, aSettings.test_antigen_fill_color);
+    if (!aPoint.coordinates.isnan()) {
+        aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+                               aSettings.test_antigen_outline_color,
+                               aSettings.test_antigen_outline_width * aObjectScale, aSettings.test_antigen_fill_color);
+    }
 
 } // DrawTestAntigen::draw
 
@@ -198,9 +208,11 @@ void DrawTestAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjec
 
 void DrawSequencedAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
-    aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
-                           aSettings.sequenced_antigen_outline_color,
-                           aSettings.sequenced_antigen_outline_width * aObjectScale, aSettings.sequenced_antigen_fill_color);
+    if (!aPoint.coordinates.isnan()) {
+        aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+                               aSettings.sequenced_antigen_outline_color,
+                               aSettings.sequenced_antigen_outline_width * aObjectScale, aSettings.sequenced_antigen_fill_color);
+    }
 
 } // DrawSequencedAntigen::draw
 
@@ -208,9 +220,11 @@ void DrawSequencedAntigen::draw(Surface& aSurface, const Point& aPoint, double a
 
 void DrawTrackedAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
-    aSurface.circle_filled(aPoint.coordinates, aSettings.tracked_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
-                           aSettings.tracked_antigen_outline_color,
-                           aSettings.tracked_antigen_outline_width * aObjectScale, mColor);
+    if (!aPoint.coordinates.isnan()) {
+        aSurface.circle_filled(aPoint.coordinates, aSettings.tracked_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+                               aSettings.tracked_antigen_outline_color,
+                               aSettings.tracked_antigen_outline_width * aObjectScale, mColor);
+    }
 
 } // DrawTrackedAntigen::draw
 
@@ -218,9 +232,11 @@ void DrawTrackedAntigen::draw(Surface& aSurface, const Point& aPoint, double aOb
 
 void DrawVaccineAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
-    aSurface.circle_filled(aPoint.coordinates, aSettings.vaccine_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
-                           aSettings.vaccine_antigen_outline_color, // aPoint.attributes.vaccine.outline_color,
-                           aSettings.vaccine_antigen_outline_width * aObjectScale, aPoint.attributes.vaccine.fill_color);
+    if (!aPoint.coordinates.isnan()) {
+        aSurface.circle_filled(aPoint.coordinates, aSettings.vaccine_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+                               aSettings.vaccine_antigen_outline_color, // aPoint.attributes.vaccine.outline_color,
+                               aSettings.vaccine_antigen_outline_width * aObjectScale, aPoint.attributes.vaccine.fill_color);
+    }
 
 } // DrawVaccineAntigen::draw
 

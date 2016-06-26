@@ -42,6 +42,7 @@ class Location
     inline void max(const Location& a) { x = std::max(x, a.x); y = std::max(y, a.y); }
     static inline Location center_of(const Location& a, const Location& b) { return {(a.x + b.x) / 2.0, (a.y + b.y) / 2.0}; }
 
+    inline bool isnan() const { return std::isnan(x) || std::isnan(y); }
     inline std::vector<double> to_vector() const { return {x, y}; }
     inline void from_vector(const std::vector<double>& source) { x = source[0]; y = source[1]; }
 
