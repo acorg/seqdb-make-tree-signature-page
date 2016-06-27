@@ -41,6 +41,43 @@ void Surface::line(const Location& a, const Location& b, Color aColor, double aW
 
 // ----------------------------------------------------------------------
 
+void Surface::path_outline(std::vector<Location>::const_iterator first, std::vector<Location>::const_iterator last, Color aOutlineColor, double aOutlineWidth, bool aClose, cairo_line_cap_t aLineCap)
+{
+    PushContext pc(*this);
+    cairo_new_path(mContext);
+    cairo_set_line_cap(mContext, aLineCap);
+    cairo_set_line_join(mContext, CAIRO_LINE_JOIN_MITER);
+    cairo_set_line_width(mContext, aOutlineWidth);
+    set_source_rgba(aOutlineColor);
+    cairo_move_to(mContext, first->x, first->y);
+    while (++first != last) {
+        cairo_line_to(mContext, first->x, first->y);
+    }
+    if (aClose) {
+        cairo_close_path(mContext);
+    }
+    cairo_stroke(mContext);
+
+} // Surface::path_outline
+
+// ----------------------------------------------------------------------
+
+void Surface::path_fill(std::vector<Location>::const_iterator first, std::vector<Location>::const_iterator last, Color aFillColor)
+{
+    PushContext pc(*this);
+    cairo_new_path(mContext);
+    set_source_rgba(aFillColor);
+    cairo_move_to(mContext, first->x, first->y);
+    while (++first != last) {
+        cairo_line_to(mContext, first->x, first->y);
+    }
+    cairo_close_path(mContext);
+    cairo_fill(mContext);
+
+} // Surface::path_fill
+
+// ----------------------------------------------------------------------
+
 void Surface::grid(const Viewport& aViewport, double aStep, Color aLineColor, double aLineWidth)
 {
     PushContext pc(*this);

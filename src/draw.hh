@@ -324,6 +324,8 @@ class Surface
     const Size& canvas_size() const { return mCanvasSize; }
 
     void line(const Location& a, const Location& b, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    void path_outline(std::vector<Location>::const_iterator first, std::vector<Location>::const_iterator last, Color aOutlineColor, double aOutlineWidth, bool aClose = false, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    void path_fill(std::vector<Location>::const_iterator first, std::vector<Location>::const_iterator last, Color aFillColor);
     void rectangle(const Location& a, const Size& s, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
     inline void rectangle(const Viewport& v, Color aColor, double aWidth, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT) { rectangle(v.origin, v.size, aColor, aWidth, aLineCap); }
     void rectangle_filled(const Location& a, const Size& s, Color aOutlineColor, double aWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);

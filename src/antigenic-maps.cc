@@ -194,15 +194,6 @@ Viewport AntigenicMapsVpos::viewport_of(const Viewport& aViewport, size_t map_no
 
 void AntigenicMapsVpos::draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const
 {
-    for (size_t section_no = 0; section_no < names_per_map().size(); ++section_no) {
-        const Viewport map_viewport = viewport_of(aViewport, section_no);
-        const double gap = aViewport.size.height * 0.01;
-        const double top_y = map_viewport.center().y - gap;
-        const double bottom_y = top_y + gap * 2.0;
-        aSurface.line({aViewport.origin.x, top_y},    {map_viewport.origin.x, top_y},    aSettings.border_color, aSettings.border_width); // aSections.hz_line_color, aSections.hz_line_width);
-        aSurface.line({aViewport.origin.x, bottom_y}, {map_viewport.origin.x, bottom_y}, aSettings.border_color, aSettings.border_width); // aSections.hz_line_color, aSections.hz_line_width);
-    }
-
     AntigenicMaps::draw(aSurface, aViewport, aChart, aSections, aSettings);
 
       // breaking the antigenic map box outline where section connecting lines meet the box
