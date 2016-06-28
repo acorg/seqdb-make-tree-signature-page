@@ -274,10 +274,10 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeriesViewport, c
               break;
         }
 
-        if (aSections.mode == HzLineSections::BWVpos) {
-              // make grey background for the antigenic map area
-            aSurface.rectangle_filled(Location(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, 0), aSurface.canvas_size(), TRANSPARENT, 0, 0xF0F0F0);
-        }
+        // if (aSections.mode == HzLineSections::BWVpos) {
+        //       // make grey background for the antigenic map area
+        //     aSurface.rectangle_filled(Location(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, 0), aSurface.canvas_size(), TRANSPARENT, 0, 0xF0F0F0);
+        // }
 
         const double vertical_step = aDrawTree.vertical_step();
         for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
@@ -355,7 +355,7 @@ void DrawHzLines::draw_section_lines_left(Surface& aSurface, const Viewport& aTi
 
     aSurface.path_outline(vertices.begin(), vertices.begin() + 4, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
     aSurface.path_outline(vertices.begin() + 4, vertices.end(), aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
-    aSurface.path_fill(vertices.begin(), vertices.end(), WHITE);
+    aSurface.path_fill(vertices.begin(), vertices.end(), 0xFBFBFB);
 
 } // DrawHzLines::draw_section_lines_left
 
