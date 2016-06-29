@@ -120,7 +120,13 @@ void Clades::draw(Surface& aSurface, const Tree& aTree, const Viewport& aViewpor
             auto const label_size = aSurface.text_size(clade.label, aSettings.label_size, aSettings.label_style);
             label_vpos += label_size.height / 2.0 + clade.label_position_offset;
 
-            (this->*draw_lines)(aSurface, aViewport, clade, top, bottom, label_vpos, label_size, clade_begin->line_no > 0, clade_end->line_no < (aDrawTree.number_of_lines() - 1), aTimeSeriesViewport, aSettings);
+            const bool draw_top_tree_and_bottom_tree_lines = true;
+            if (draw_top_tree_and_bottom_tree_lines) {
+                (this->*draw_lines)(aSurface, aViewport, clade, top, bottom, label_vpos, label_size, true, true, aTimeSeriesViewport, aSettings);
+            }
+            else {
+                (this->*draw_lines)(aSurface, aViewport, clade, top, bottom, label_vpos, label_size, clade_begin->line_no > 0, clade_end->line_no < (aDrawTree.number_of_lines() - 1), aTimeSeriesViewport, aSettings);
+            }
         }
     }
 
