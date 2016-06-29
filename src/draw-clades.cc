@@ -92,13 +92,18 @@ void Clades::draw(Surface& aSurface, const Tree& aTree, const Viewport& aViewpor
             const auto clade_begin = aTree.find_node_by_name(clade.begin);
             if (clade_begin == nullptr)
                 throw std::runtime_error("cannot find clade first node by name: " + clade.begin);
+            const auto node_before_clade_begin = aTree.find_previous_leaf_node(*clade_begin);
             const auto clade_end = aTree.find_node_by_name(clade.end);
             if (clade_end == nullptr)
                 throw std::runtime_error("cannot find clade last node by name: " + clade.end);
+            const auto node_after_clade_end = aTree.find_next_leaf_node(*clade_end);
             const auto base_y = aViewport.origin.y;
             const auto vertical_step = aDrawTree.vertical_step();
-            const auto top = base_y + vertical_step * clade_begin->line_no -  aSettings.arrow_extra * vertical_step;
-            const auto bottom = base_y + vertical_step * clade_end->line_no + aSettings.arrow_extra * vertical_step;
+              // There might be gap (hz line section gap) between clade_begin and node_before_clade_begin, draw clade line in the middle
+            const double top_pos = node_before_clade_begin == nullptr ? clade_begin->line_no : (node_before_clade_begin->line_no + clade_begin->line_no) / 2.0;
+            const auto top = base_y + vertical_step * top_pos -  aSettings.arrow_extra * vertical_step;
+            const double bottom_pos = node_after_clade_end == nullptr ? clade_end->line_no : (node_after_clade_end->line_no + clade_end->line_no) / 2.0;
+            const auto bottom = base_y + vertical_step * bottom_pos + aSettings.arrow_extra * vertical_step;
 
             double label_vpos = 0; // initialized to avoid gcc-6 complaining about using uninitialized in the line with += below
             switch (clade.label_position) {

@@ -225,6 +225,8 @@ class Tree : public Node
       // finds leaf node with the passed name and returns path to that node, the first pointer in the path is &Tree, the last pointer in the path is the found node.
     std::vector<const Node*> find_name(std::string aName) const;
     const Node* find_node_by_name(std::string aName) const;
+    const Node* find_next_leaf_node(const Node& aNode) const;
+    const Node* find_previous_leaf_node(const Node& aNode) const;
     void re_root(const std::vector<const Node*>& aNewRoot);
       // re-roots tree making the parent of the leaf node with the passed name root
     void re_root(std::string aName);

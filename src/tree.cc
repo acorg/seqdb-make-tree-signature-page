@@ -695,6 +695,38 @@ std::pair<Node*,Node*> Tree::find_path_to_next_leaf(std::vector<std::pair<size_t
 
 // ----------------------------------------------------------------------
 
+const Node* Tree::find_next_leaf_node(const Node& aNode) const
+{
+    std::vector<const Node*> nodes = leaf_nodes_sorted_by([](const Node* a,const Node* b) -> bool { return a->line_no < b->line_no; });
+    const Node* result = nullptr;
+    for (size_t i = 0; i < (nodes.size() - 1); ++i) {
+        if (nodes[i] == &aNode) {
+            result = nodes[i + 1];
+            break;
+        }
+    }
+    return result;
+
+} // Tree::find_next_leaf_node
+
+// ----------------------------------------------------------------------
+
+const Node* Tree::find_previous_leaf_node(const Node& aNode) const
+{
+    std::vector<const Node*> nodes = leaf_nodes_sorted_by([](const Node* a,const Node* b) -> bool { return a->line_no < b->line_no; });
+    const Node* result = nullptr;
+    for (size_t i = 1; i < nodes.size(); ++i) {
+        if (nodes[i] == &aNode) {
+            result = nodes[i - 1];
+            break;
+        }
+    }
+    return result;
+
+} // Tree::find_previous_leaf_node
+
+// ----------------------------------------------------------------------
+
 void Tree::make_hz_line_sections(double tolerance)
 {
     compute_cumulative_edge_length();
