@@ -353,9 +353,9 @@ void DrawHzLines::draw_section_lines_left(Surface& aSurface, const Viewport& aTi
     vertices.emplace_back(brace_vertical_x, brace_gap_bottom_y);
     vertices.emplace_back(aMapViewport.origin.x, map_bottom_y);
 
-    aSurface.path_outline(vertices.begin(), vertices.begin() + 4, aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
-    aSurface.path_outline(vertices.begin() + 4, vertices.end(), aAntigenicMapsSettings.border_color, aAntigenicMapsSettings.border_width);
-    aSurface.path_fill(vertices.begin(), vertices.end(), 0xFBFBFB);
+    aSurface.path_outline(vertices.begin(), vertices.begin() + 4, aSections.connecting_pipe_border_color, aSections.connecting_pipe_border_width);
+    aSurface.path_outline(vertices.begin() + 4, vertices.end(), aSections.connecting_pipe_border_color, aSections.connecting_pipe_border_width);
+    aSurface.path_fill(vertices.begin(), vertices.end(), aSections.connecting_pipe_background_color);
 
 } // DrawHzLines::draw_section_lines_left
 

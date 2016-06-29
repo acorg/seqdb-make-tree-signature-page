@@ -186,7 +186,9 @@ class HzLineSections : public std::vector<HzLineSection>
 
     inline HzLineSections() : mode(ColoredGrid), map_height_fraction_of_page(0.25), hz_line_width(0.5), hz_line_color(GREY),
                               sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
-                              this_section_antigen_color(GREY), vertical_gap(1) {}
+                              this_section_antigen_color(0x75DB51),
+                              connecting_pipe_border_color(BLACK), connecting_pipe_background_color(0xFFFFF8), connecting_pipe_border_width(1),
+                              vertical_gap(1) {}
 
     inline void sort()
         {
@@ -201,6 +203,8 @@ class HzLineSections : public std::vector<HzLineSection>
     double sequenced_antigen_line_width, sequenced_antigen_line_length;
     Color sequenced_antigen_line_color;
     Color this_section_antigen_color; // BWVpos mode only
+    Color connecting_pipe_border_color, connecting_pipe_background_color; // BWVpos mode only
+    double connecting_pipe_border_width; // BWVpos mode only
     size_t vertical_gap;
 
  private:
@@ -225,6 +229,9 @@ class HzLineSections : public std::vector<HzLineSection>
             return std::make_tuple(
                 "map_height_fraction_of_page", &a.map_height_fraction_of_page,
                 "this_section_antigen_color", json::field(&a.this_section_antigen_color, &Color::to_string, &Color::from_string),
+                "connecting_pipe_border_color", json::field(&a.connecting_pipe_border_color, &Color::to_string, &Color::from_string),
+                "connecting_pipe_background_color", json::field(&a.connecting_pipe_background_color, &Color::to_string, &Color::from_string),
+                "connecting_pipe_border_width", &a.connecting_pipe_border_width,
                 "hz_line_width", &a.hz_line_width,
                 "hz_line_color", json::field(&a.hz_line_color, &Color::to_string, &Color::from_string),
                 "sequenced_antigen_line_show", &a.sequenced_antigen_line_show,
@@ -513,7 +520,7 @@ class SettingsAntigenicMaps
 {
  public:
     inline SettingsAntigenicMaps()
-        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), gap_between_maps(0.005), map_zoom(1.1),
+        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(WHITE), gap_between_maps(0.005), map_zoom(1.1),
           serum_scale(5), reference_antigen_scale(8), test_antigen_scale(5), vaccine_antigen_scale(15), tracked_antigen_scale(8),
           serum_outline_width(0.5), reference_antigen_outline_width(0.5), test_antigen_outline_width(0.5), vaccine_antigen_outline_width(0.5),
           sequenced_antigen_outline_width(0.5), tracked_antigen_outline_width(0.5),
@@ -524,7 +531,7 @@ class SettingsAntigenicMaps
         {}
 
     double border_width, grid_line_width;
-    Color border_color, grid_color;
+    Color border_color, grid_color, background_color;
     double gap_between_maps;    // relative to canvas width
     double map_zoom;
     double serum_scale, reference_antigen_scale, test_antigen_scale, vaccine_antigen_scale, tracked_antigen_scale;
@@ -539,6 +546,7 @@ class SettingsAntigenicMaps
                 "border_color", json::field(&a.border_color, &Color::to_string, &Color::from_string),
                 "grid_line_width", &a.grid_line_width, // object_double_non_negative_value
                 "grid_color", json::field(&a.grid_color, &Color::to_string, &Color::from_string),
+                "background_color", json::field(&a.background_color, &Color::to_string, &Color::from_string),
                 "gap_between_maps", &a.gap_between_maps,
                 "map_zoom", &a.map_zoom,
                 "egg_antigen_aspect", &a.egg_antigen_aspect,

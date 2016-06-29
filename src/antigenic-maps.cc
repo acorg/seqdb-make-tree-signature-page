@@ -34,7 +34,7 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
         const Viewport map_viewport = viewport_of(aViewport, section_no);
 
         Surface::PushContext pc(aSurface);
-        aSurface.rectangle_filled(map_viewport, aSettings.border_color, aSettings.border_width, WHITE);
+        aSurface.rectangle_filled(map_viewport, aSettings.border_color, aSettings.border_width, aSettings.background_color);
 
         const auto chart_viewport = aChart->viewport();
 
@@ -202,7 +202,7 @@ void AntigenicMapsVpos::draw(Surface& aSurface, const Viewport& aViewport, const
         const double gap = aViewport.size.height * 0.01;
         const double top_y = map_viewport.center().y - gap;
         const double bottom_y = top_y + gap * 2.0;
-        aSurface.line({map_viewport.origin.x, top_y}, {map_viewport.origin.x, bottom_y}, WHITE, aSettings.border_width * 2);
+        aSurface.line({map_viewport.origin.x, top_y}, {map_viewport.origin.x, bottom_y}, aSections.connecting_pipe_background_color, aSettings.border_width * 1.05);
     }
 
 } // AntigenicMapsVpos::draw
