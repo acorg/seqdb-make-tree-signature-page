@@ -302,7 +302,9 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeriesViewport, c
                   case HzLineSections::BWVpos:
                         // draw section direction lines
                       const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, section_no);
-                      (this->*draw_section_lines)(aSurface, aTimeSeriesViewport, aAntigenicMapsViewport, map_viewport, aAntigenicMapsSettings, first_y, last_y, vertical_step, aSections);
+                      if (map_viewport.size.width > 0) { // map viewport with zero size means that map has no tracked antigens and must not be shown according to settings (maps_for_sections_without_antigens)
+                          (this->*draw_section_lines)(aSurface, aTimeSeriesViewport, aAntigenicMapsViewport, map_viewport, aAntigenicMapsSettings, first_y, last_y, vertical_step, aSections);
+                      }
                       break;
                 }
             }

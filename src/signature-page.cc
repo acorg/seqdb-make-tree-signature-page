@@ -106,14 +106,14 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
             }
         }
     }
-    calculate_viewports(aTree, aSurface);
+    calculate_viewports(aTree, aSurface, aChart);
     return *this;
 
 } // SignaturePage::prepare
 
 // ----------------------------------------------------------------------
 
-void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface)
+void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface, Chart* aChart)
 {
     const double canvas_width = aSurface.canvas_size().width;
     const double padding = canvas_width * aTree.settings().signature_page.outer_padding;
@@ -135,7 +135,7 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface)
 
         double left = mPageArea.right();
         if (mAntigenicMaps) {
-            mAntigenicMaps->calculate_viewports(aTree, Viewport(tree_origin, Size(mPageArea.size.width, tree_height)), mPageArea, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
+            mAntigenicMaps->calculate_viewports(aTree, aChart, Viewport(tree_origin, Size(mPageArea.size.width, tree_height)), mPageArea, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
             const Size size = mAntigenicMaps->size(mPageArea, aTree.settings().antigenic_maps);
             mAntigenicMapsViewport.set(mPageArea.top_right() - Size(size.width, 0), size);
             left = mAntigenicMapsViewport.origin.x;
@@ -190,7 +190,7 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface)
           // Calculate individual map viewports again after mDrawTree->calculate_viewports
         mAntigenicMapsViewport.origin.y = mTreeViewport.origin.y;
         if (mAntigenicMaps) {
-            mAntigenicMaps->calculate_viewports(aTree, mAntigenicMapsViewport, mPageArea, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
+            mAntigenicMaps->calculate_viewports(aTree, aChart, mAntigenicMapsViewport, mPageArea, *mDrawTree, aTree.settings().draw_tree.hz_line_sections, aTree.settings().antigenic_maps);
         }
     }
 

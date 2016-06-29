@@ -527,7 +527,7 @@ class SettingsAntigenicMaps
           serum_outline_color(LIGHT_GREY), reference_antigen_outline_color(LIGHT_GREY), test_antigen_outline_color(LIGHT_GREY),
           test_antigen_fill_color(LIGHT_GREY), vaccine_antigen_outline_color(BLACK), sequenced_antigen_outline_color(BLACK), sequenced_antigen_fill_color(LIGHT_GREY),
           tracked_antigen_outline_color(BLACK),
-          egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0)
+          egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0), maps_for_sections_without_antigens(false)
         {}
 
     double border_width, grid_line_width;
@@ -538,10 +538,12 @@ class SettingsAntigenicMaps
     double serum_outline_width, reference_antigen_outline_width, test_antigen_outline_width, vaccine_antigen_outline_width, sequenced_antigen_outline_width, tracked_antigen_outline_width;
     Color serum_outline_color, reference_antigen_outline_color, test_antigen_outline_color, test_antigen_fill_color, vaccine_antigen_outline_color, sequenced_antigen_outline_color, sequenced_antigen_fill_color, tracked_antigen_outline_color;
     double egg_antigen_aspect, reassortant_rotation;
+    bool maps_for_sections_without_antigens; // draw maps for sections having no tracked antigens
 
     friend inline auto json_fields(SettingsAntigenicMaps& a)
         {
             return std::make_tuple(
+                "maps_for_sections_without_antigens", &a.maps_for_sections_without_antigens,
                 "border_width", &a.border_width, // object_double_non_negative_value
                 "border_color", json::field(&a.border_color, &Color::to_string, &Color::from_string),
                 "grid_line_width", &a.grid_line_width, // object_double_non_negative_value

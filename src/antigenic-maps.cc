@@ -32,20 +32,25 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
 {
     for (size_t section_no = 0; section_no < names_per_map().size(); ++section_no) {
         const Viewport map_viewport = viewport_of(aViewport, section_no);
+        if (map_viewport.size.width > 0) {
 
-        Surface::PushContext pc(aSurface);
-        aSurface.rectangle_filled(map_viewport, aSettings.border_color, aSettings.border_width, aSettings.background_color);
+            Surface::PushContext pc(aSurface);
+            aSurface.rectangle_filled(map_viewport, aSettings.border_color, aSettings.border_width, aSettings.background_color);
 
-        const auto chart_viewport = aChart->viewport();
+            const auto chart_viewport = aChart->viewport();
 
-        const double scale = aSurface.set_clip_region(map_viewport, chart_viewport.size.width);
-          // std::cerr << "map scale " << scale << std::endl;
-        aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
+            const double scale = aSurface.set_clip_region(map_viewport, chart_viewport.size.width);
+              // std::cerr << "map scale " << scale << std::endl;
+            aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
 
-        aChart->draw_points_reset(aSettings);
-        const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], section_color(aSections, section_no), aSettings);
-        aChart->draw(aSurface, scale, aSettings);
-        std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << " names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
+            aChart->draw_points_reset(aSettings);
+            const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], section_color(aSections, section_no), aSettings);
+            aChart->draw(aSurface, scale, aSettings);
+            std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << " names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
+        }
+        else {
+            std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << " names: " << names_per_map()[section_no].size() << " no tracked antigens" << std::endl;
+        }
     }
 
 } // AntigenicMaps::draw
@@ -64,7 +69,7 @@ AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport&
 
 // ----------------------------------------------------------------------
 
-void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, const Viewport& aViewport, const Viewport& /*aPageArea*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
+void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, Chart* /*aChart*/, const Viewport& aViewport, const Viewport& /*aPageArea*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
 {
     if (float_equal(mCellSize.width, 0.0)) {
         const double size = (aViewport.size.height - gap_between_maps() * (mGridHeight - 1)) / mGridHeight;
@@ -138,7 +143,7 @@ AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport&
 
 // ----------------------------------------------------------------------
 
-void AntigenicMapsVpos::calculate_viewports(Tree& aTree, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& /*aSettings*/)
+void AntigenicMapsVpos::calculate_viewports(Tree& aTree, Chart* aChart, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
 {
     double vertical_step = aDrawTree.vertical_step();
     const double top_gap = aViewport.origin.y - aPageArea.origin.y;
@@ -151,32 +156,38 @@ void AntigenicMapsVpos::calculate_viewports(Tree& aTree, const Viewport& aViewpo
     std::vector<double> slot_bottom;
 
     for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
-        const auto& section = aSections[section_no];
-        const auto first_line = section.first_line;
-        const auto last_line = section_no < (aSections.size() - 1) ? aSections[section_no + 1].first_line - aSections.vertical_gap - 1 : aTree.height() - 1;
-        const double middle = (first_line + last_line) / 2.0 * vertical_step;
-        double top = middle - mCellHeight / 2.0;
-        if (top < - top_gap)
-            top = - top_gap;
-        else if ((top + mCellHeight) > (aPageArea.size.height - top_gap))
-            top = aPageArea.size.height - top_gap - mCellHeight;
+        const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], WHITE, aSettings);
+        if (num_antigens > 0 || aSettings.maps_for_sections_without_antigens) {
+            const auto& section = aSections[section_no];
+            const auto first_line = section.first_line;
+            const auto last_line = section_no < (aSections.size() - 1) ? aSections[section_no + 1].first_line - aSections.vertical_gap - 1 : aTree.height() - 1;
+            const double middle = (first_line + last_line) / 2.0 * vertical_step;
+            double top = middle - mCellHeight / 2.0;
+            if (top < - top_gap)
+                top = - top_gap;
+            else if ((top + mCellHeight) > (aPageArea.size.height - top_gap))
+                top = aPageArea.size.height - top_gap - mCellHeight;
 
-        constexpr const size_t SLOT_NOT_CHOSEN = std::numeric_limits<size_t>::max();
-        size_t slot_no = SLOT_NOT_CHOSEN;
-        for (size_t slo = 0; slo < slot_bottom.size(); ++slo) {
-            if ((slot_bottom[slo] + gap_between_maps()) < top) {
-                slot_no = slo;
-                break;
+            constexpr const size_t SLOT_NOT_CHOSEN = std::numeric_limits<size_t>::max();
+            size_t slot_no = SLOT_NOT_CHOSEN;
+            for (size_t slo = 0; slo < slot_bottom.size(); ++slo) {
+                if ((slot_bottom[slo] + gap_between_maps()) < top) {
+                    slot_no = slo;
+                    break;
+                }
             }
-        }
-        if (slot_no == SLOT_NOT_CHOSEN) {
-            slot_bottom.push_back(0.0);
-            slot_no = slot_bottom.size() - 1;
-        }
-        const double left = left_offset() + slot_no * (mCellHeight + gap_between_maps());
-        slot_bottom[slot_no] = top + mCellHeight;
+            if (slot_no == SLOT_NOT_CHOSEN) {
+                slot_bottom.push_back(0.0);
+                slot_no = slot_bottom.size() - 1;
+            }
+            const double left = left_offset() + slot_no * (mCellHeight + gap_between_maps());
+            slot_bottom[slot_no] = top + mCellHeight;
 
-        mViewports.emplace_back(Location(left, top), Size(mCellHeight, mCellHeight));
+            mViewports.emplace_back(Location(left, top), Size(mCellHeight, mCellHeight));
+        }
+        else {
+            mViewports.emplace_back();
+        }
     }
 
 } // AntigenicMapsVpos::calculate_viewports
@@ -199,10 +210,12 @@ void AntigenicMapsVpos::draw(Surface& aSurface, const Viewport& aViewport, const
       // breaking the antigenic map box outline where section connecting lines meet the box
     for (size_t section_no = 0; section_no < names_per_map().size(); ++section_no) {
         const Viewport map_viewport = viewport_of(aViewport, section_no);
-        const double gap = aViewport.size.height * 0.01;
-        const double top_y = map_viewport.center().y - gap;
-        const double bottom_y = top_y + gap * 2.0;
-        aSurface.line({map_viewport.origin.x, top_y}, {map_viewport.origin.x, bottom_y}, aSections.connecting_pipe_background_color, aSettings.border_width * 1.05);
+        if (map_viewport.size.width > 0) {
+            const double gap = aViewport.size.height * 0.01;
+            const double top_y = map_viewport.center().y - gap;
+            const double bottom_y = top_y + gap * 2.0;
+            aSurface.line({map_viewport.origin.x, top_y}, {map_viewport.origin.x, bottom_y}, aSections.connecting_pipe_background_color, aSettings.border_width * 1.1);
+        }
     }
 
 } // AntigenicMapsVpos::draw

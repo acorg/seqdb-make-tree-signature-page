@@ -57,7 +57,7 @@ class SignaturePage
 
       // to implement clone all m pointers
     SignaturePage(const SignaturePage&) = default;
-    void calculate_viewports(Tree& aTree, Surface& aSurface);
+    void calculate_viewports(Tree& aTree, Surface& aSurface, Chart* aChart);
 
 }; // class DrawTree
 
