@@ -44,7 +44,8 @@ def main(args):
         tree.settings().draw_tree.aa_transition.number_strains_threshold = args.aa_transition_number_strains_threshold
 
     if args.chart:
-        surface = seqdb.Surface(args.output[0], 1422, 800)
+        # surface = seqdb.Surface(args.output[0], 1422, 800)
+        surface = seqdb.Surface(args.output[0], 1100, 800)
     else:
         pdf_height = 750
         surface = seqdb.Surface(args.output[0], pdf_height * args.pdf_aspect_ratio, pdf_height)
