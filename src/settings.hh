@@ -374,7 +374,7 @@ class SettingsTimeSeries
  public:
     inline SettingsTimeSeries()
         : dash_width(0.5), dash_line_width(1), max_number_of_months(20), month_label_scale(0.9), month_separator_color(0),
-          month_separator_width(0.1), month_width(10) {}
+          month_separator_width(0.1), month_width(10), month_year_to_timeseries_gap(0) {}
 
     Date begin;
     Date end;
@@ -386,10 +386,12 @@ class SettingsTimeSeries
     Color month_separator_color;
     double month_separator_width;
     double month_width;
+    double month_year_to_timeseries_gap;
 
     friend inline auto json_fields(SettingsTimeSeries& a)
         {
             return std::make_tuple(
+                "month_year_to_timeseries_gap", &a.month_year_to_timeseries_gap,
                 "begin", json::field(&a.begin, &Date::display, &Date::parse, json::output_if_true),
                 "end", json::field(&a.end, &Date::display, &Date::parse, json::output_if_true),
                 "dash_width", &a.dash_width, // object_double_non_negative_value

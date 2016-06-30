@@ -44,6 +44,14 @@ TimeSeries& TimeSeries::prepare(const Tree& aTree, const SettingsTimeSeries& aSe
 
 // ----------------------------------------------------------------------
 
+Size TimeSeries::size(Surface& /*aSurface*/, const SettingsTimeSeries& aSettings) const
+{
+    return {mNumberOfMonths * aSettings.month_width, 1};
+
+} // TimeSeries::size
+
+// ----------------------------------------------------------------------
+
 void TimeSeries::draw(Surface& aSurface, const Viewport& aViewport, const Tree& aTree, const DrawTree& aDrawTree, const SettingsTimeSeries& aSettings) const
 {
     if (mNumberOfMonths > 1) {
@@ -74,9 +82,10 @@ void TimeSeries::draw_labels(Surface& aSurface, const Viewport& aViewport, const
     double x_bearing;
     const auto big_label_size = aSurface.text_size("May 99", label_font_size, aSettings.month_label_style, &x_bearing);
     const auto text_up = (aSettings.month_width - big_label_size.height) * 0.5;
+    const double month_year_to_timeseries_gap = aSettings.month_year_to_timeseries_gap * aSurface.canvas_size().height;
 
-    draw_labels_at_side(aSurface, aViewport.origin + Size(text_up, - big_label_size.width - x_bearing), label_font_size, month_max_width, aSettings);
-    draw_labels_at_side(aSurface, aViewport.origin + Size(text_up, aViewport.size.height + x_bearing), label_font_size, month_max_width, aSettings);
+    draw_labels_at_side(aSurface, aViewport.origin + Size(text_up, - big_label_size.width - x_bearing - month_year_to_timeseries_gap), label_font_size, month_max_width, aSettings);
+    draw_labels_at_side(aSurface, aViewport.origin + Size(text_up, aViewport.size.height + x_bearing + month_year_to_timeseries_gap), label_font_size, month_max_width, aSettings);
 
 } // TimeSeries::draw_labels
 
@@ -123,14 +132,6 @@ void TimeSeries::draw_dashes(Surface& aSurface, const Viewport& aViewport, const
     iterate_leaf(aTree, draw_dash);
 
 } // TimeSeries::draw_dashes
-
-// ----------------------------------------------------------------------
-
-Size TimeSeries::size(Surface& /*aSurface*/, const SettingsTimeSeries& aSettings) const
-{
-    return {mNumberOfMonths * aSettings.month_width, 1};
-
-} // TimeSeries::size
 
 // ----------------------------------------------------------------------
 /// Local Variables:
