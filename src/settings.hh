@@ -584,11 +584,42 @@ class SettingsAntigenicMaps
 
 // ----------------------------------------------------------------------
 
+class SettingsTitle
+{
+ public:
+    inline SettingsTitle()
+        : offset_x(0), offset_y(10), size(20), color(BLACK), rotation(0)
+        {}
+
+    double offset_x, offset_y, size;
+    Color color;
+    TextStyle style;
+    std::string text;
+    double rotation;
+
+    friend inline auto json_fields(SettingsTitle& a)
+        {
+            return std::make_tuple(
+                "offset_x", &a.offset_x,
+                "offset_y", &a.offset_y,
+                "rotation", &a.rotation,
+                "size", &a.size,
+                "color", json::field(&a.color, &Color::to_string, &Color::from_string),
+                "style", &a.style,
+                "text", &a.text
+                                   );
+        }
+
+}; // class SettingsTitle
+
+// ----------------------------------------------------------------------
+
 class Settings
 {
  public:
     inline Settings() {}
 
+    SettingsTitle title;
     SettingsSignaturePage signature_page;
     SettingsDrawTree draw_tree;
     SettingsLegend legend;
@@ -599,6 +630,7 @@ class Settings
     friend inline auto json_fields(Settings& a)
         {
             return std::make_tuple(
+                "title", &a.title,
                 "tree", &a.draw_tree,
                 "legend", &a.legend,
                 "signature_page", &a.signature_page,

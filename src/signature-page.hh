@@ -12,6 +12,7 @@ class TimeSeries;
 class Clades;
 class AntigenicMaps;
 class SettingsSignaturePage;
+class SettingsTitle;
 
 class Surface;
 class Tree;
@@ -67,6 +68,7 @@ class Title
 {
  public:
     inline Title(const Text& aTitle) : mTitle(aTitle) {}
+    Title(const SettingsTitle& aSettingsTitle);
 
     void draw(Surface& aSurface, const Viewport& aViewport);
     inline Location right_bottom(Surface& aSurface, const Viewport& aViewport) const { return mTitle.right_bottom(aSurface, aViewport); }

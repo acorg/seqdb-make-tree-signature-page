@@ -77,24 +77,25 @@ def main(args):
     else:
         chart = None
 
-    if args.title is None:
-        virus_type = tree.virus_type()
-        lineage = tree.lineage()
-        if virus_type:
-            title = virus_type
-            if lineage:
-                if lineage in ["VICTORIA", "YAMAGATA"]:
-                    lineage = lineage[:3].capitalize()
-                title += "/" + lineage
-        else:
-            title = ""
-    else:
-        title = args.title
+    # if args.title is None:
+    #     virus_type = tree.virus_type()
+    #     lineage = tree.lineage()
+    #     if virus_type:
+    #         title = virus_type
+    #         if lineage:
+    #             if lineage in ["VICTORIA", "YAMAGATA"]:
+    #                 lineage = lineage[:3].capitalize()
+    #             title += "/" + lineage
+    #     else:
+    #         title = ""
+    # else:
+    #     title = args.title
 
     signature_page = seqdb.SignaturePage()
+    if args.title:
+        signature_page.title(seqdb.Text(seqdb.Location(0, 11), title, 0, 18))   # 20
     (signature_page
      .select_parts(parts)
-     .title(seqdb.Text(seqdb.Location(0, 11), title, 0, 18))   # 20
      .color_by_continent(args.color_by_continent)
      .color_by_pos(args.color_by_pos - 1)
      .prepare(tree, surface, chart)

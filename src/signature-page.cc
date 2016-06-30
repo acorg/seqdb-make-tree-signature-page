@@ -46,8 +46,11 @@ SignaturePage& SignaturePage::select_parts(int aParts)
 
 SignaturePage& SignaturePage::title(const Text& aTitle)
 {
-    if (mParts & ShowTitle)
+    if (mParts & ShowTitle) {
+        if (mTitle)
+            delete mTitle;
         mTitle = new Title(aTitle);
+    }
     return *this;
 
 } // SignaturePage::title
@@ -77,6 +80,9 @@ SignaturePage& SignaturePage::color_by_pos(int aPos)
 SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aChart)
 {
     if (mDrawTree) {
+        if (mParts & ShowTitle && mTitle == nullptr) {
+            mTitle = new Title(aTree.settings().title);
+        }
         const double padding = aSurface.canvas_size().width * aTree.settings().signature_page.outer_padding;
         mPageArea.set(Location(padding, padding), aSurface.canvas_size() - Size(padding + padding, padding + padding));
 
@@ -227,6 +233,14 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
     }
 
 } // SignaturePage::draw
+
+// ----------------------------------------------------------------------
+
+Title::Title(const SettingsTitle& aSettingsTitle)
+    : mTitle(Location(aSettingsTitle.offset_x, aSettingsTitle.offset_y), aSettingsTitle.text, aSettingsTitle.color, aSettingsTitle.size, aSettingsTitle.style, aSettingsTitle.rotation)
+{
+
+} // Title::Title
 
 // ----------------------------------------------------------------------
 
