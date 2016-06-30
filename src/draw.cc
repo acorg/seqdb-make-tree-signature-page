@@ -273,6 +273,26 @@ double Surface::set_clip_region(const Viewport& aViewport, double aWidthScale)
 
 // ----------------------------------------------------------------------
 
+double Surface::set_clip_region(const Viewport& aViewport, const Viewport& aTargetViewport)
+{
+    cairo_reset_clip(mContext);
+    const auto center = aViewport.center();
+    cairo_translate(mContext, center.x, center.y);
+    cairo_new_path(mContext);
+    cairo_rectangle(mContext, - aViewport.size.width / 2, - aViewport.size.height / 2, aViewport.size.width, aViewport.size.height);
+    cairo_clip(mContext);
+
+    const double scale = aViewport.size.width / aTargetViewport.size.width;
+    cairo_scale(mContext, scale, scale);
+    const auto target_center = aTargetViewport.center();
+    cairo_translate(mContext, -target_center.x, -target_center.y);
+
+    return 1.0 / scale;
+
+} // Surface::set_clip_region
+
+// ----------------------------------------------------------------------
+
 double Surface::draw_path_scale(cairo_path_t* aPath, const Viewport& aViewport)
 {
     PushContext pc(*this);

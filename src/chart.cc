@@ -30,24 +30,10 @@ Chart import_chart(std::string buffer)
 
 void Chart::preprocess(const SettingsAntigenicMaps& aSettings)
 {
-      // Calculate viewport for all points
-    Location tl(1e10, 1e10), br(-1e10, -1e10);
-    for (const auto& p: mPoints) {
-        if (!p.coordinates.isnan()) {
-            tl.min(p.coordinates);
-            br.max(p.coordinates);
-        }
-    }
-    const Location center = Location::center_of(tl, br);
-    for (auto& p: mPoints) {
-        if (!p.coordinates.isnan()) {
-            p.coordinates -= center;
-        }
-    }
-    tl -= center;
-    br -= center;
-    mViewport.set(tl, br);
+    mViewport = bounding_rectangle();
     mViewport.square();
+    const Location offset(aSettings.map_x_offset, aSettings.map_y_offset);
+    mViewport.center(mViewport.center() + offset);
     mViewport.zoom(aSettings.map_zoom);
     mViewport.whole_width();
 
@@ -65,6 +51,21 @@ void Chart::preprocess(const SettingsAntigenicMaps& aSettings)
     }
 
 } // Chart::preprocess
+
+// ----------------------------------------------------------------------
+
+Viewport Chart::bounding_rectangle() const
+{
+    Location tl(1e10, 1e10), br(-1e10, -1e10);
+    for (const auto& p: mPoints) {
+        if (!p.coordinates.isnan()) {
+            tl.min(p.coordinates);
+            br.max(p.coordinates);
+        }
+    }
+    return Viewport(tl, br);
+
+} // Chart::bounding_area
 
 // ----------------------------------------------------------------------
 

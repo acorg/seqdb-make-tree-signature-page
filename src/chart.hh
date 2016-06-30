@@ -203,6 +203,8 @@ class Chart
                                    );
         }
 
+    Viewport bounding_rectangle() const;
+
 }; // class Chart
 
 // ----------------------------------------------------------------------

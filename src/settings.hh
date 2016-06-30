@@ -520,7 +520,8 @@ class SettingsAntigenicMaps
 {
  public:
     inline SettingsAntigenicMaps()
-        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(WHITE), gap_between_maps(0.005), map_zoom(1.1),
+        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(WHITE), gap_between_maps(0.005),
+          map_zoom(1.1), map_x_offset(0), map_y_offset(0),
           serum_scale(5), reference_antigen_scale(8), test_antigen_scale(5), vaccine_antigen_scale(15), tracked_antigen_scale(8),
           serum_outline_width(0.5), reference_antigen_outline_width(0.5), test_antigen_outline_width(0.5), vaccine_antigen_outline_width(0.5),
           sequenced_antigen_outline_width(0.5), tracked_antigen_outline_width(0.5),
@@ -533,7 +534,7 @@ class SettingsAntigenicMaps
     double border_width, grid_line_width;
     Color border_color, grid_color, background_color;
     double gap_between_maps;    // relative to canvas width
-    double map_zoom;
+    double map_zoom, map_x_offset, map_y_offset; // zoom>1 means zoom out, offsets are in the antigenic units
     double serum_scale, reference_antigen_scale, test_antigen_scale, vaccine_antigen_scale, tracked_antigen_scale;
     double serum_outline_width, reference_antigen_outline_width, test_antigen_outline_width, vaccine_antigen_outline_width, sequenced_antigen_outline_width, tracked_antigen_outline_width;
     Color serum_outline_color, reference_antigen_outline_color, test_antigen_outline_color, test_antigen_fill_color, vaccine_antigen_outline_color, sequenced_antigen_outline_color, sequenced_antigen_fill_color, tracked_antigen_outline_color;
@@ -550,6 +551,8 @@ class SettingsAntigenicMaps
                 "grid_color", json::field(&a.grid_color, &Color::to_string, &Color::from_string),
                 "background_color", json::field(&a.background_color, &Color::to_string, &Color::from_string),
                 "gap_between_maps", &a.gap_between_maps,
+                "map_x_offset", &a.map_x_offset,
+                "map_y_offset", &a.map_y_offset,
                 "map_zoom", &a.map_zoom,
                 "egg_antigen_aspect", &a.egg_antigen_aspect,
                 "reassortant_rotation", &a.reassortant_rotation,

@@ -36,6 +36,7 @@ class Location
     double x, y;
 
     inline Location& operator -= (const Location& a) { x -= a.x; y -= a.y; return *this; }
+    inline Location& operator += (const Location& a) { x += a.x; y += a.y; return *this; }
     inline std::string to_string() const { return "Location(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
 
     inline void min(const Location& a) { x = std::min(x, a.x); y = std::min(y, a.y); }
@@ -110,6 +111,7 @@ class Viewport
     inline void set(const Location& a, const Size& s) { origin = a; size = s; }
     inline void set(const Location& a, const Location& b) { origin = a; size = b - a; }
     inline void zoom(double scale) { const Size new_size = size * scale; origin = center() - new_size * 0.5; size = new_size; }
+    inline void center(const Location& aCenter) { origin = aCenter - size * 0.5; }
 
       // make viewport a square by extending the smaller side from center
     inline void square()
@@ -342,10 +344,15 @@ class Surface
       // corner will have coordinates (0, 0), viewport top right
       // corner will have coordinates (0, aWidthScale), drawing
       // outside the viewport will not be possible. Returns the ratio
-      // of the new scal to the old scale, i.e. to draw a line of some
+      // of the new scale to the old scale, i.e. to draw a line of some
       // width in the new region you need to draw the line of
       // width*ratio.
     double set_clip_region(const Viewport& aViewport, double aWidthScale);
+
+      // Sets the cairo clip region to aViewport, clip region
+      // coordinates will correspond to aTargetViewport. Returns the
+      // ratio of the new scale to the old scale
+    double set_clip_region(const Viewport& aViewport, const Viewport& aTargetViewport);
 
     Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing);
     inline Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle) { return text_size(aText, aSize, aTextStyle, nullptr); } // for pybind11 to avoid exposing double* to python

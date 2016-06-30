@@ -39,7 +39,8 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
 
             const auto chart_viewport = aChart->viewport();
 
-            const double scale = aSurface.set_clip_region(map_viewport, chart_viewport.size.width);
+              //const double scale = aSurface.set_clip_region(map_viewport, chart_viewport.size.width);
+            const double scale = aSurface.set_clip_region(map_viewport, chart_viewport);
               // std::cerr << "map scale " << scale << std::endl;
             aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
 
