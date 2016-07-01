@@ -67,7 +67,7 @@ $(DIST)/json-parser-test: $(BUILD)/json-parser-test.o | $(DIST)
 	g++ $(LDFLAGS) -o $@ $^
 
 clean:
-	rm -rf $(DIST) $(BUILD)/*.o $(BUILD)/*.d
+	rm -rf $(DIST) $(BUILD)/*.o $(BUILD)/*.d $(BUILD)/submodules
 
 distclean: clean
 	rm -rf $(BUILD)

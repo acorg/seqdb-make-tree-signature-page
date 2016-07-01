@@ -83,8 +83,12 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
         if (mParts & ShowTitle && mTitle == nullptr) {
             mTitle = new Title(aTree.settings().title);
         }
-        const double padding = aSurface.canvas_size().width * aTree.settings().signature_page.outer_padding;
-        mPageArea.set(Location(padding, padding), aSurface.canvas_size() - Size(padding + padding, padding + padding));
+        const double canvas_width = aSurface.canvas_size().width;
+        const double padding_left = canvas_width * aTree.settings().signature_page.padding_left;
+        const double padding_right = canvas_width * aTree.settings().signature_page.padding_right;
+        const double padding_top = canvas_width * aTree.settings().signature_page.padding_top;
+        const double padding_bottom = canvas_width * aTree.settings().signature_page.padding_bottom;
+        mPageArea.set(Location(padding_left, padding_top), aSurface.canvas_size() - Size(padding_left + padding_right, padding_top + padding_bottom));
 
         mDrawTree->prepare(aTree, aTree.settings().draw_tree);
         if (mParts & ShowLegend) {
@@ -122,13 +126,13 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
 void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface, Chart* aChart)
 {
     const double canvas_width = aSurface.canvas_size().width;
-    const double padding = canvas_width * aTree.settings().signature_page.outer_padding;
+    const double padding_top = canvas_width * aTree.settings().signature_page.padding_top;
 
-    double tree_top = padding;
+    double tree_top = padding_top;
 
     if (mTitle) {
-        mTitleViewport.set(mPageArea.origin, Size(1, 1));
-        tree_top += mTitle->right_bottom(aSurface, mTitleViewport).y + padding * 0.5;
+        mTitleViewport.set(Location(), Size(1, 1));
+          // tree_top += mTitle->right_bottom(aSurface, mTitleViewport).y + padding_top;
     }
 
     if (mDrawTree) {
@@ -137,7 +141,7 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface, Chart* a
             tree_top = time_series_label_height;
         const Location tree_origin {mPageArea.origin.x, tree_top};
 
-        const auto tree_height = std::min(mPageArea.size.height - tree_top, aSurface.canvas_size().height - tree_top - time_series_label_height - padding * 0.2);
+        const auto tree_height = std::min(mPageArea.size.height - tree_top, aSurface.canvas_size().height - tree_top - time_series_label_height /* - padding_top * 0.2 */);
 
         double left = mPageArea.right();
         if (mAntigenicMaps) {

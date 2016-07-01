@@ -327,11 +327,14 @@ class SettingsSignaturePage
     enum Layout { TreeTimeseriesCladesMaps, TreeCladesTimeseriesMaps };
 
     inline SettingsSignaturePage()
-        : layout(TreeCladesTimeseriesMaps), outer_padding(0.01), tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
+        : layout(TreeCladesTimeseriesMaps),
+          padding_left(0.01), padding_right(0.01), padding_top(0.01), padding_bottom(0.01),
+          tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
 
 
     Layout layout;
-    double outer_padding;             // relative to the canvas width
+      // Obsolete double outer_padding;             // relative to the canvas width
+    double padding_left, padding_right, padding_top, padding_bottom;             // relative to the canvas width
     double tree_time_series_space;    // relative to the canvas width
     double time_series_clades_space;  // relative to the canvas width
     double clades_antigenic_maps_space; // relative to the canvas width
@@ -353,13 +356,27 @@ class SettingsSignaturePage
             else throw std::invalid_argument("cannot parse signature page layout from \"" + source + "\", supported values: \"tree-timeseries-clades-maps\", \"tree-clades-timeseries-maps\"");
         }
 
+    inline static double outer_padding_writer(SettingsSignaturePage*)
+        {
+            throw json::no_value();
+        }
+
+    inline static void outer_padding_reader(SettingsSignaturePage* target, double source)
+        {
+            target->padding_left = target->padding_right = target->padding_top = target->padding_bottom = source;
+        }
+
     friend inline auto json_fields(SettingsSignaturePage& a)
         {
             return std::make_tuple(
                 "clades_antigenic_maps_space", &a.clades_antigenic_maps_space, // object_double_non_negative_value
                 "time_series_clades_space", &a.time_series_clades_space, // object_double_non_negative_value
                 "tree_time_series_space", &a.tree_time_series_space, // object_double_non_negative_value
-                "outer_padding", &a.outer_padding, // object_double_non_negative_value
+                "outer_padding", json::field(&a, &outer_padding_writer, &outer_padding_reader), // obsolete, input only
+                "padding_left", &a.padding_left,
+                "padding_right", &a.padding_right,
+                "padding_top", &a.padding_top,
+                "padding_bottom", &a.padding_bottom,
                 "layout", json::field(&a.layout, &layout_to_string, &layout_from_string),
                 "?", json::comment("outer_padding: size of space around the image, fraction of canvas width, default: 0.01; tree_time_series_space: fraction of canvas width")
                                    );
@@ -588,7 +605,7 @@ class SettingsTitle
 {
  public:
     inline SettingsTitle()
-        : offset_x(0), offset_y(10), size(20), color(BLACK), rotation(0)
+        : offset_x(10), offset_y(20), size(20), color(BLACK), rotation(0)
         {}
 
     double offset_x, offset_y, size;
