@@ -328,7 +328,7 @@ class SettingsSignaturePage
 
     inline SettingsSignaturePage()
         : layout(TreeCladesTimeseriesMaps),
-          padding_left(0.01), padding_right(0.01), padding_top(0.01), padding_bottom(0.01),
+          padding_left(0.01), padding_right(0.01), padding_top(0.035), padding_bottom(0.035),
           tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
 
 

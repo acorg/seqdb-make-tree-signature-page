@@ -132,7 +132,6 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface, Chart* a
 
     if (mTitle) {
         mTitleViewport.set(Location(), Size(1, 1));
-          // tree_top += mTitle->right_bottom(aSurface, mTitleViewport).y + padding_top;
     }
 
     if (mDrawTree) {
@@ -141,7 +140,7 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface, Chart* a
             tree_top = time_series_label_height;
         const Location tree_origin {mPageArea.origin.x, tree_top};
 
-        const auto tree_height = std::min(mPageArea.size.height - tree_top, aSurface.canvas_size().height - tree_top - time_series_label_height /* - padding_top * 0.2 */);
+        const auto tree_height = std::min(mPageArea.size.height, aSurface.canvas_size().height - time_series_label_height * 2);
 
         double left = mPageArea.right();
         if (mAntigenicMaps) {
@@ -243,7 +242,6 @@ void SignaturePage::draw(const Tree& aTree, Surface& aSurface, const Chart* aCha
 Title::Title(const SettingsTitle& aSettingsTitle)
     : mTitle(Location(aSettingsTitle.offset_x, aSettingsTitle.offset_y), aSettingsTitle.text, aSettingsTitle.color, aSettingsTitle.size, aSettingsTitle.style, aSettingsTitle.rotation)
 {
-
 } // Title::Title
 
 // ----------------------------------------------------------------------
