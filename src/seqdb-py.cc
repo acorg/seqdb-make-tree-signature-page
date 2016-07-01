@@ -294,6 +294,7 @@ PYBIND11_PLUGIN(seqdb_backend)
 
     py::class_<Settings>(m, "Settings")
             .def_readwrite("draw_tree", &Settings::draw_tree)
+            .def_readwrite("signature_page", &Settings::signature_page)
             ;
 
     py::class_<SettingsDrawTree>(m, "SettingsDrawTree")
@@ -305,6 +306,11 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def_readwrite("show_node_for_left_line", &SettingsAATransition::show_node_for_left_line)
             .def_readwrite("show_empty_left", &SettingsAATransition::show_empty_left)
             .def_readwrite("number_strains_threshold", &SettingsAATransition::number_strains_threshold)
+            ;
+
+    py::class_<SettingsSignaturePage>(m, "SettingsSignaturePage")
+            .def_readwrite("pdf_height", &SettingsSignaturePage::pdf_height)
+            .def_readwrite("pdf_aspect_ratio", &SettingsSignaturePage::pdf_aspect_ratio)
             ;
 
       // ----------------------------------------------------------------------

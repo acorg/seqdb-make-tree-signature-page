@@ -327,11 +327,11 @@ class SettingsSignaturePage
     enum Layout { TreeTimeseriesCladesMaps, TreeCladesTimeseriesMaps };
 
     inline SettingsSignaturePage()
-        : layout(TreeCladesTimeseriesMaps),
+        : pdf_height(800), pdf_aspect_ratio(1.6), layout(TreeCladesTimeseriesMaps),
           padding_left(0.01), padding_right(0.01), padding_top(0.035), padding_bottom(0.035),
           tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
 
-
+    double pdf_height, pdf_aspect_ratio;
     Layout layout;
       // Obsolete double outer_padding;             // relative to the canvas width
     double padding_left, padding_right, padding_top, padding_bottom;             // relative to the canvas width
@@ -377,6 +377,8 @@ class SettingsSignaturePage
                 "padding_right", &a.padding_right,
                 "padding_top", &a.padding_top,
                 "padding_bottom", &a.padding_bottom,
+                "pdf_aspect_ratio", &a.pdf_aspect_ratio,
+                "pdf_height", &a.pdf_height,
                 "layout", json::field(&a.layout, &layout_to_string, &layout_from_string),
                 "?", json::comment("outer_padding: size of space around the image, fraction of canvas width, default: 0.01; tree_time_series_space: fraction of canvas width")
                                    );
@@ -391,7 +393,7 @@ class SettingsTimeSeries
  public:
     inline SettingsTimeSeries()
         : dash_width(0.5), dash_line_width(1), max_number_of_months(20), month_label_scale(0.9), month_separator_color(0),
-          month_separator_width(0.1), month_width(10), month_year_to_timeseries_gap(0) {}
+          month_separator_width(0.1), month_width(10), month_year_to_timeseries_gap(0.0035) {}
 
     Date begin;
     Date end;

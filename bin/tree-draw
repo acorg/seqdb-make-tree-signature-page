@@ -43,12 +43,9 @@ def main(args):
     else:
         tree.settings().draw_tree.aa_transition.number_strains_threshold = args.aa_transition_number_strains_threshold
 
-    if args.chart:
-        # surface = seqdb.Surface(args.output[0], 1422, 800)
-        surface = seqdb.Surface(args.output[0], 1100, 800)
-    else:
-        pdf_height = 750
-        surface = seqdb.Surface(args.output[0], pdf_height * args.pdf_aspect_ratio, pdf_height)
+    pdf_height = tree.settings().signature_page.pdf_height
+    pdf_aspect_ratio = tree.settings().signature_page.pdf_aspect_ratio
+    surface = seqdb.Surface(args.output[0], pdf_height * pdf_aspect_ratio, pdf_height)
 
     # surface.line(seqdb.Location(100, 100), seqdb.Location(300, 200), 0xFFA500, 5, seqdb.LINE_CAP_ROUND)
     # surface.double_arrow(seqdb.Location(100, 200), seqdb.Location(250, 50), 0x80FF00A5, 5, 10)
@@ -128,7 +125,7 @@ with seqdb.timeit(sys.argv[0]):
 
         parser.add_argument('--chart', action='store', dest='chart', default=None, help='Chart (in sdb format) to use for antigenic maps.')
 
-        parser.add_argument('--aspect', action='store', type=float, dest='pdf_aspect_ratio', default=0.7, help='width/height for pdf (if --chart is not provided).')
+        # see signature_page.pdf_aspect_ratio parser.add_argument('--aspect', action='store', type=float, dest='pdf_aspect_ratio', default=0.7, help='width/height for pdf.')
         parser.add_argument('--title', action='store', dest='title', default=None, help='Title (use "" to show no title).')
 
         parser.add_argument('--db', action='store', dest='path_to_seqdb', default=None, help='Path to sequence database (to match tree leaves with seqdb entries).')

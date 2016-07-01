@@ -6,7 +6,7 @@
 Surface::Surface(std::string aFilename, double aWidth, double aHeight)
     : mContext(nullptr)
 {
-    setup(aFilename, {aWidth, aHeight});
+    setup(aFilename, Size(aWidth, aHeight));
 }
 
 // ----------------------------------------------------------------------

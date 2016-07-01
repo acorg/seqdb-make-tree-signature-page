@@ -351,7 +351,7 @@ class Surface
 
       // Sets the cairo clip region to aViewport, clip region
       // coordinates will correspond to aTargetViewport. Returns the
-      // ratio of the new scale to the old scale
+      // ratio of the new scale to the old scale.
     double set_clip_region(const Viewport& aViewport, const Viewport& aTargetViewport);
 
     Size text_size(std::string aText, double aSize, const TextStyle& aTextStyle, double* x_bearing);
