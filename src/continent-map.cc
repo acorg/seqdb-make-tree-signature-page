@@ -4,12 +4,13 @@
 
 // ----------------------------------------------------------------------
 
-void ColoringByContinentMapLegend::draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& aSettings) const
+void ColoringByContinentMapLegend::draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& /*aSettings*/) const
 {
+    const double scale = aViewport.size.width / continent_map_size[0]; // aSurface.draw_path_scale(map_outline, aViewport);
+      // std::cerr << "continent_map_size:" << continent_map_size[0] << " viewport-width:" << aViewport.size.width << std::endl;
     for (const auto& continent: ColoringByContinentLegendLabels) {
         cairo_path_t* map_outline = outline(aSurface, continent_map_path, continent);
-        const double scale = aSurface.draw_path_scale(map_outline, aViewport);
-        aSurface.draw_path(map_outline, aViewport, scale, mColoring.color(continent), aSettings.geographic_map_outline_width);
+        aSurface.draw_path_fill(map_outline, aViewport, scale, mColoring.color(continent));
         aSurface.destroy_path(map_outline);
     }
 
@@ -34,13 +35,14 @@ cairo_path_t* ColoringByContinentMapLegend::outline(Surface& aSurface, const std
         throw std::runtime_error("No path for " + aContinent);
     for (const auto& element: continent_path->second) {
         if (element.x < 0) {
-              //aSurface.close_path();
+            aSurface.close_path();
             aSurface.move_to(- element.x, element.y);
         }
         else {
             aSurface.line_to(element.x, element.y);
         }
     }
+    aSurface.close_path();
     auto path = aSurface.copy_path();
     aSurface.new_path();
     return path;

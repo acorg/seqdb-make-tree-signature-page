@@ -322,6 +322,19 @@ void Surface::draw_path(cairo_path_t* aPath, const Viewport& aViewport, double a
 
 // ----------------------------------------------------------------------
 
+void Surface::draw_path_fill(cairo_path_t* aPath, const Viewport& aViewport, double aScale, Color aFillColor)
+{
+    PushContext pc(*this);
+    cairo_translate(mContext, aViewport.origin.x, aViewport.origin.y);
+    cairo_scale(mContext, aScale, aScale);
+    set_source_rgba(aFillColor);
+    cairo_append_path(mContext, aPath);
+    cairo_fill(mContext);
+
+} // Surface::draw_path_fill
+
+// ----------------------------------------------------------------------
+
 std::string TextStyle::slant_to_string(const cairo_font_slant_t* a)
 {
     switch (*a) {
