@@ -36,7 +36,7 @@ cairo_path_t* ColoringByContinentMapLegend::outline(Surface& aSurface, const std
     for (const auto& element: continent_path->second) {
         if (element.x < 0) {
             aSurface.close_path();
-            aSurface.move_to(- element.x, element.y);
+            aSurface.move_to(std::abs(element.x), std::abs(element.y));
         }
         else {
             aSurface.line_to(element.x, element.y);
