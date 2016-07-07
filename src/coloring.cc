@@ -2,7 +2,8 @@
 #include "legend.hh"
 #include "tree.hh"
 #include "settings.hh"
-#include "geographic-path.inc"
+#include "geographic-map.hh"
+#include "continent-map.hh"
 
 // ----------------------------------------------------------------------
 
@@ -71,8 +72,6 @@ Color ColoringByContinent::color(const Node& aNode) const
 
 // ----------------------------------------------------------------------
 
-static constexpr const char* const ColoringByContinentLegendLabels[] = {"EUROPE", "CENTRAL-AMERICA", "MIDDLE-EAST", "NORTH-AMERICA", "AFRICA", "ASIA", "RUSSIA", "AUSTRALIA-OCEANIA", "SOUTH-AMERICA"};
-
 class ColoringByContinentLegend : public Legend
 {
 
@@ -83,7 +82,7 @@ class ColoringByContinentLegend : public Legend
         {
             auto const label_size = aSurface.text_size("W", aSettings.font_size, aSettings.style);
             auto y = aViewport.origin.y + label_size.height;
-            for (auto& label: ColoringByContinentLegendLabels) {
+            for (const auto& label: ColoringByContinentLegendLabels) {
                 aSurface.text({aViewport.origin.x, y}, label, mColoring.color(label), aSettings.font_size, aSettings.style);
                 y += label_size.height * aSettings.interline;
             }
@@ -92,7 +91,7 @@ class ColoringByContinentLegend : public Legend
     virtual Size size(Surface& aSurface, const SettingsLegend& aSettings) const
         {
             Size size(0, 0);
-            for (auto& label: ColoringByContinentLegendLabels) {
+            for (const auto& label: ColoringByContinentLegendLabels) {
                 const auto label_size = aSurface.text_size(label, aSettings.font_size, aSettings.style);
                 size.height += label_size.height * aSettings.interline;
                 if (label_size.width > size.width)
@@ -108,59 +107,11 @@ class ColoringByContinentLegend : public Legend
 
 // ----------------------------------------------------------------------
 
-class ColoringByContinentMapLegend : public Legend
-{
-
- public:
-    inline ColoringByContinentMapLegend(const ColoringByContinent& aColoring) : Legend(), mColoring(aColoring) {}
-
-    virtual void draw(Surface& aSurface, const Viewport& aViewport, const SettingsLegend& aSettings) const
-        {
-            cairo_path_t* map_outline = outline(aSurface, geographic_map_path);
-            const double scale = aSurface.draw_path_scale(map_outline, aViewport);
-            aSurface.draw_path(map_outline, aViewport, scale, aSettings.geographic_map_outline_color, aSettings.geographic_map_outline_width);
-            aSurface.destroy_path(map_outline);
-            for (auto& label: ColoringByContinentLegendLabels) {
-                cairo_path_t* continent_outline = outline(aSurface, continent_path(label));
-                aSurface.draw_path(continent_outline, aViewport, scale, mColoring.color(label), aSettings.geographic_map_outline_width);
-                aSurface.destroy_path(continent_outline);
-            }
-        }
-
-    virtual Size size(Surface& aSurface, const SettingsLegend& aSettings) const
-        {
-            const double map_height = aSurface.canvas_size().height * aSettings.geographic_map_fraction;
-            return Size(geographic_map_size[0] / geographic_map_size[1] * map_height, map_height);
-        }
-
- private:
-    const ColoringByContinent& mColoring;
-
-    cairo_path_t* outline(Surface& aSurface, const std::vector<GeographicMapPathElement>& aPath) const
-        {
-            aSurface.new_path();
-            for (const auto& element: aPath) {
-                if (element.x < 0) {
-                      //aSurface.close_path();
-                    aSurface.move_to(- element.x, element.y);
-                }
-                else {
-                    aSurface.line_to(element.x, element.y);
-                }
-            }
-            auto path = aSurface.copy_path();
-            aSurface.new_path();
-            return path;
-        }
-
-}; // class ColoringByContinentMapLegend
-
-// ----------------------------------------------------------------------
-
 Legend* ColoringByContinent::legend(const SettingsLegend& aSettings) const
 {
     Legend* legend;
     if (aSettings.geographic_map)
+          // legend = new ColoringByGeographyMapLegend(*this);
         legend = new ColoringByContinentMapLegend(*this);
     else
         legend = new ColoringByContinentLegend(*this);

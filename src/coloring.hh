@@ -54,6 +54,8 @@ class ColoringByContinent : public Coloring
     static const std::map<std::string, Color> mContinents;
 };
 
+constexpr const char* const ColoringByContinentLegendLabels[] = {"EUROPE", "CENTRAL-AMERICA", "MIDDLE-EAST", "NORTH-AMERICA", "AFRICA", "ASIA", "RUSSIA", "AUSTRALIA-OCEANIA", "SOUTH-AMERICA"};
+
 // ----------------------------------------------------------------------
 
 class ColoringByPos : public Coloring
