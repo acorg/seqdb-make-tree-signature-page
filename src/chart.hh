@@ -172,6 +172,7 @@ class Chart
     std::map<std::string, size_t> mPointByName;
     std::string mMinimumColumnBasis;
     std::vector<double> mColumnBases;
+    Transformation mTransformation;
 
     std::set<size_t> mSequencedAntigens;
     mutable std::vector<const DrawPoint*> mDrawPoints;
@@ -186,7 +187,7 @@ class Chart
 
     std::set<std::string> mPrefixName;
 
-      // constexpr const char* SDB_VERSION = "acmacs-sdb-v1";
+      // constexpr const char* SDB_VERSION = "acmacs-sdb-v2";
     std::string json_version;
 
     friend inline auto json_fields(Chart& a)
@@ -199,10 +200,12 @@ class Chart
                 "minimum_column_basis", &a.mMinimumColumnBasis,
                 "points", &a.mPoints,
                 "stress", &a.mStress,
-                "column_bases", &a.mColumnBases
+                "column_bases", &a.mColumnBases,
+                "transformation", &a.mTransformation
                                    );
         }
 
+    void apply_transformation(const SettingsAntigenicMaps& aSettings);
     Viewport bounding_rectangle() const;
 
 }; // class Chart

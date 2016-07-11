@@ -561,6 +561,7 @@ class SettingsAntigenicMaps
     Color serum_outline_color, reference_antigen_outline_color, test_antigen_outline_color, test_antigen_fill_color, vaccine_antigen_outline_color, sequenced_antigen_outline_color, sequenced_antigen_fill_color, tracked_antigen_outline_color;
     double egg_antigen_aspect, reassortant_rotation;
     bool maps_for_sections_without_antigens; // draw maps for sections having no tracked antigens
+    Transformation map_transformation;
 
     friend inline auto json_fields(SettingsAntigenicMaps& a)
         {
@@ -575,6 +576,7 @@ class SettingsAntigenicMaps
                 "map_x_offset", &a.map_x_offset,
                 "map_y_offset", &a.map_y_offset,
                 "map_zoom", &a.map_zoom,
+                "map_transformation", &a.map_transformation,
                 "egg_antigen_aspect", &a.egg_antigen_aspect,
                 "reassortant_rotation", &a.reassortant_rotation,
                 "serum_scale", &a.serum_scale,

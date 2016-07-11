@@ -51,6 +51,33 @@ class Location
 
 // ----------------------------------------------------------------------
 
+class Transformation : public std::vector<std::vector<double>>
+{
+  public:
+    inline Transformation() : std::vector<std::vector<double>>(2) { operator[](0) = {1, 0}; operator[](1) = {0, 1}; }
+    inline Transformation(const Transformation& t) = default;
+    inline Transformation(double a11, double a12, double a21, double a22) : std::vector<std::vector<double>>(2) { operator[](0) = {a11, a12}; operator[](1) = {a21, a22}; }
+    inline Transformation& operator=(const Transformation& t) { operator[](0) = {t[0][0], t[0][1]}; operator[](1) = {t[1][0], t[1][1]}; return *this; }
+
+    inline void multiplyBy(const Transformation& t)
+    {
+        Transformation r((*this)[0][0] * t[0][0] + (*this)[0][1] * t[1][0],
+                         (*this)[0][0] * t[0][1] + (*this)[0][1] * t[1][1],
+                         (*this)[1][0] * t[0][0] + (*this)[1][1] * t[1][0],
+                         (*this)[1][0] * t[0][1] + (*this)[1][1] * t[1][1]
+                         );
+        operator=(r);
+    }
+
+    friend inline std::ostream& operator << (std::ostream& out, const Transformation& t)
+    {
+        return out << "[[" << t[0][0] << ", " << t[0][1] << "], [" << t[1][0] << ", " << t[1][1] << "]]";
+    }
+
+};
+
+// ----------------------------------------------------------------------
+
 class Size
 {
  public:
