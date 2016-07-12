@@ -208,15 +208,23 @@ class Color
 
     inline void from_string(std::string aColor)
         {
-            if (aColor[0] != '#')
-                throw std::invalid_argument("cannot read Color from " + aColor + ": first symbol must be # got " + std::string(1, aColor[0]));
-            if (aColor.size() != 7 && aColor.size() != 9)
-                throw std::invalid_argument("cannot read Color from " + aColor + ": invalid string length, must be 7 or 9 but got " + std::to_string(aColor.size()));
-            try {
-                mColor = static_cast<uint32_t>(std::stoul(std::string(aColor, 1), nullptr, 16));
+            if (aColor[0] != '#') {
+                if (aColor == "transparent") {
+                    mColor = 0xFF000000;
+                }
+                else {
+                    throw std::invalid_argument("cannot read Color from " + aColor + ": first symbol must be # got " + std::string(1, aColor[0]));
+                }
             }
-            catch (std::exception& err) {
-                throw std::invalid_argument("cannot read Color from " + aColor + ": " + err.what());
+            else {
+                if (aColor.size() != 7 && aColor.size() != 9)
+                    throw std::invalid_argument("cannot read Color from " + aColor + ": invalid string length, must be 7 or 9 but got " + std::to_string(aColor.size()));
+                try {
+                    mColor = static_cast<uint32_t>(std::stoul(std::string(aColor, 1), nullptr, 16));
+                }
+                catch (std::exception& err) {
+                    throw std::invalid_argument("cannot read Color from " + aColor + ": " + err.what());
+                }
             }
         }
 
@@ -235,6 +243,7 @@ constexpr const Color LIGHT_GREY = 0xE0E0E0;
 constexpr const Color RED = 0xFF0000;
 constexpr const Color GREEN = 0x00FF00;
 constexpr const Color BLUE = 0x0000FF;
+constexpr const Color PINK = 0xFFC0CB;
 constexpr const Color TRANSPARENT = 0xFF000000;
 constexpr const Color COLOR_NOT_SET = Color::_not_set;
 

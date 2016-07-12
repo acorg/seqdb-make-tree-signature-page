@@ -4,7 +4,6 @@
 #include "tree.hh"
 #include "read-file.hh"
 #include "xz.hh"
-#include "settings.hh"
 #include "json-struct.hh"
 
 // ----------------------------------------------------------------------
@@ -92,7 +91,7 @@ void Chart::draw_points_reset(const SettingsAntigenicMaps& /*aSettings*/) const
     for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
         const auto& p = mPoints[point_no];
         if (p.attributes.antigen) {
-            if (p.attributes.vaccine.enabled) {
+            if (p.attributes.vaccine) {
                 mDrawPoints[point_no] = &mDrawVaccineAntigen;
             }
             else if (mSequencedAntigens.find(point_no) != mSequencedAntigens.end()) {
@@ -160,7 +159,7 @@ void Chart::draw(Surface& aSurface, double aObjectScale, const SettingsAntigenic
     for (size_t level = 0; level < 10 && drawn < mDrawPoints.size(); ++level) {
         for (size_t point_no = 0; point_no < mDrawPoints.size(); ++point_no) {
             if (mDrawPoints[point_no]->level() == level) {
-                mDrawPoints[point_no]->draw(aSurface, mPoints[point_no], aObjectScale, aSettings);
+                mDrawPoints[point_no]->draw(aSurface, mPoints[point_no], mPlot.style(point_no), aObjectScale, aSettings);
                 ++drawn;
             }
         }
@@ -172,19 +171,11 @@ void Chart::draw(Surface& aSurface, double aObjectScale, const SettingsAntigenic
 
 // ----------------------------------------------------------------------
 
-inline double DrawPoint::rotation(const Point& aPoint, const SettingsAntigenicMaps& aSettings) const
-{
-    return aPoint.attributes.reassortant ? aSettings.reassortant_rotation : 0.0;
-
-} // DrawPoint::rotation
-
-// ----------------------------------------------------------------------
-
-void DrawSerum::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+void DrawSerum::draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     const double size = aSettings.serum_scale * aObjectScale;
     if (!aPoint.coordinates.isnan()) {
-        aSurface.rectangle_filled(aPoint.coordinates, {size * aspect(aPoint, aSettings), size}, aSettings.serum_outline_color,
+        aSurface.rectangle_filled(aPoint.coordinates, {size * aspect(aPoint, aStyle, aSettings), size}, aSettings.serum_outline_color,
                                   aSettings.serum_outline_width * aObjectScale, TRANSPARENT);
     }
 
@@ -192,18 +183,10 @@ void DrawSerum::draw(Surface& aSurface, const Point& aPoint, double aObjectScale
 
 // ----------------------------------------------------------------------
 
-double DrawAntigen::aspect(const Point& aPoint, const SettingsAntigenicMaps& aSettings) const
-{
-    return aPoint.attributes.egg ? aSettings.egg_antigen_aspect : 1.0;
-
-} // DrawAntigen::aspect
-
-// ----------------------------------------------------------------------
-
-void DrawReferenceAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+void DrawReferenceAntigen::draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     if (!aPoint.coordinates.isnan()) {
-        aSurface.circle_filled(aPoint.coordinates, aSettings.reference_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+        aSurface.circle_filled(aPoint.coordinates, aSettings.reference_antigen_scale * aObjectScale, aspect(aPoint, aStyle, aSettings), rotation(aPoint, aStyle, aSettings),
                                aSettings.reference_antigen_outline_color,
                                aSettings.reference_antigen_outline_width * aObjectScale, TRANSPARENT);
     }
@@ -212,10 +195,10 @@ void DrawReferenceAntigen::draw(Surface& aSurface, const Point& aPoint, double a
 
 // ----------------------------------------------------------------------
 
-void DrawTestAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+void DrawTestAntigen::draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     if (!aPoint.coordinates.isnan()) {
-        aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+        aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aStyle, aSettings), rotation(aPoint, aStyle, aSettings),
                                aSettings.test_antigen_outline_color,
                                aSettings.test_antigen_outline_width * aObjectScale, aSettings.test_antigen_fill_color);
     }
@@ -224,10 +207,10 @@ void DrawTestAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjec
 
 // ----------------------------------------------------------------------
 
-void DrawSequencedAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+void DrawSequencedAntigen::draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     if (!aPoint.coordinates.isnan()) {
-        aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+        aSurface.circle_filled(aPoint.coordinates, aSettings.test_antigen_scale * aObjectScale, aspect(aPoint, aStyle, aSettings), rotation(aPoint, aStyle, aSettings),
                                aSettings.sequenced_antigen_outline_color,
                                aSettings.sequenced_antigen_outline_width * aObjectScale, aSettings.sequenced_antigen_fill_color);
     }
@@ -236,10 +219,10 @@ void DrawSequencedAntigen::draw(Surface& aSurface, const Point& aPoint, double a
 
 // ----------------------------------------------------------------------
 
-void DrawTrackedAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+void DrawTrackedAntigen::draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     if (!aPoint.coordinates.isnan()) {
-        aSurface.circle_filled(aPoint.coordinates, aSettings.tracked_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+        aSurface.circle_filled(aPoint.coordinates, aSettings.tracked_antigen_scale * aObjectScale, aspect(aPoint, aStyle, aSettings), rotation(aPoint, aStyle, aSettings),
                                aSettings.tracked_antigen_outline_color,
                                aSettings.tracked_antigen_outline_width * aObjectScale, mColor);
     }
@@ -248,12 +231,13 @@ void DrawTrackedAntigen::draw(Surface& aSurface, const Point& aPoint, double aOb
 
 // ----------------------------------------------------------------------
 
-void DrawVaccineAntigen::draw(Surface& aSurface, const Point& aPoint, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+void DrawVaccineAntigen::draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     if (!aPoint.coordinates.isnan()) {
-        aSurface.circle_filled(aPoint.coordinates, aSettings.vaccine_antigen_scale * aObjectScale, aspect(aPoint, aSettings), rotation(aPoint, aSettings),
+        aSurface.circle_filled(aPoint.coordinates, aSettings.vaccine_antigen_scale * aObjectScale, aspect(aPoint, aStyle, aSettings), rotation(aPoint, aStyle, aSettings),
                                aSettings.vaccine_antigen_outline_color, // aPoint.attributes.vaccine.outline_color,
-                               aSettings.vaccine_antigen_outline_width * aObjectScale, aPoint.attributes.vaccine.fill_color);
+                               aSettings.vaccine_antigen_outline_width * aObjectScale,
+                               fill_color(aPoint, aStyle, aSettings) /*aPoint.attributes.vaccine.fill_color*/);
     }
 
 } // DrawVaccineAntigen::draw
@@ -274,15 +258,15 @@ static inline void make_PointAntigenDeserializer(bool* antigen, std::string& sou
         throw json::parsing_error("invalid value for t point attribute: " + source);
 }
 
-inline auto json_fields(VaccineData& a)
-{
-    a.enabled = true;
-    return std::make_tuple(
-        "aspect", &a.aspect,
-        "fill_color", json::field(&a.fill_color, &Color::to_string, &Color::from_string),
-        "outline_color", json::field(&a.outline_color, &Color::to_string, &Color::from_string)
-                           );
-}
+// inline auto json_fields(VaccineData& a)
+// {
+//     a.enabled = true;
+//     return std::make_tuple(
+//         "aspect", &a.aspect,
+//         "fill_color", json::field(&a.fill_color, &Color::to_string, &Color::from_string),
+//         "outline_color", json::field(&a.outline_color, &Color::to_string, &Color::from_string)
+//                            );
+// }
 
 inline auto json_fields(PointAttributes& a)
 {
@@ -302,6 +286,59 @@ inline auto json_fields(Point& a)
         "c", json::field(&a.coordinates, &Location::to_vector, &Location::from_vector),
         "l", &a.lab_id,
         "a", &a.attributes
+                           );
+}
+
+inline auto json_fields(PointStyle& a)
+{
+    return std::make_tuple(
+        "fill_color", json::field(&a.fill_color, &Color::to_string, &Color::from_string),
+        "outline_color", json::field(&a.outline_color, &Color::to_string, &Color::from_string),
+        "aspect", &a.aspect,
+        "size", &a.size,
+        "rotation", &a.rotation,
+        "shape", &a.shape
+                           );
+}
+
+inline auto json_fields(PlotStyle& a)
+{
+    return std::make_tuple(
+        "points", &a.points,
+        "styles", &a.styles
+                           );
+}
+
+inline auto json_fields(ChartInfo& a)
+{
+    return std::make_tuple(
+        "date", &a.date,
+        "lab", &a.lab,
+        "virus_type", &a.virus_type,
+        "lineage", &a.lineage,
+        "name", &a.name,
+        "rbc_species", &a.rbc_species
+                           );
+}
+
+inline auto json_fields(Chart& a)
+{
+    return std::make_tuple(
+        "  version", &a.json_version,
+        " created", json::comment(""),
+        "?points", json::comment(""),
+        "info", &a.mInfo,
+        "minimum_column_basis", &a.mMinimumColumnBasis,
+        "points", &a.mPoints,
+        "stress", &a.mStress,
+        "column_bases", &a.mColumnBases,
+          // v2
+        "transformation", &a.mTransformation,
+        "point?", json::comment(""),
+        "plot", &a.mPlot,
+        "drawing_order", &a.mDrawingOrder,
+        "drawing_orde?", json::comment("")
+          //"layout_sequence", &a?,      // for optimization movie
                            );
 }
 
