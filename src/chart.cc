@@ -326,6 +326,7 @@ inline auto json_fields(Chart& a)
     return std::make_tuple(
         "  version", &a.json_version,
         " created", json::comment(""),
+        "intermediate_layouts", json::comment(std::vector<std::vector<std::vector<double>>>()), // ignored (used for optimization movie)
         "?points", json::comment(""),
         "info", &a.mInfo,
         "minimum_column_basis", &a.mMinimumColumnBasis,
