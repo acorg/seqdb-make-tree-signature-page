@@ -17,7 +17,7 @@ def read_fasta_with_csv(fasta_file, csv_file, lab, virus_type, **_):
         reader = FastaReaderWithCSV_CDC(lab=lab, virus_type=virus_type)
     else:
         reader = FastaReaderWithCSV(lab=lab, virus_type=virus_type)
-    return reader.read(fasta_f=open_file.open_for_reading_text(fasta_file), csv_f=open_file.open_for_reading_text(csv_file))
+    return reader.read(fasta_f=open_file.open_for_reading_text(str(fasta_file)), csv_f=open_file.open_for_reading_text(str(csv_file)))
 
 # ----------------------------------------------------------------------
 

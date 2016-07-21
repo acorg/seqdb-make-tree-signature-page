@@ -13,6 +13,7 @@ sVirusTypes = {
     "B": "B", "BV": "B", "BY": "B", "BVIC": "B", "BYAM": "B", "B/VIC": "B", "B/YAM": "B",
     "H1PDM": "A(H1N1)", "H1SEAS": "A(H1N1)", "H1": "A(H1N1)", "A(H1N1)": "A(H1N1)",
     "H3": "A(H3N2)", "A(H3N2)": "A(H3N2)",
+    "ALL": "ALL",
     }
 
 def virus_type(vt):

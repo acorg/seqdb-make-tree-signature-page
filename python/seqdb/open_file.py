@@ -6,6 +6,7 @@ Files opening and reading/writing functions.
 """
 
 import sys, os, bz2, lzma, json
+from pathlib import Path
 import logging; module_logger = logging.getLogger(__name__)
 
 # ======================================================================
@@ -108,9 +109,10 @@ def json_dumps(data, indent=2, indent_increment=2):
 
 def open_for_writing_binary(filename, compressed=None, backup=True, makedirs=True):
     """Opens binary file for writing. If compressed is None, autodetects if data should be compressed by filename suffix."""
-    if filename == '-' or filename is None:
+    if filename is None or filename == '-':
         f = sys.stdout.buffer
     else:
+        filename = str(filename)
         if compressed is None:
             if filename[-4:] == '.bz2':
                 compressed = 'bz2'
@@ -138,7 +140,7 @@ def open_for_writing_binary(filename, compressed=None, backup=True, makedirs=Tru
 def write_binary(filename, data, compressed=None, backup=True, makedirs=True):
     """Writes data (bytes) into a binary file. If compressed is None,
     autodetects if data should be compressed by filename suffix."""
-    with open_for_writing_binary(filename, compressed=compressed, backup=backup, makedirs=makedirs) as f:
+    with open_for_writing_binary(str(filename), compressed=compressed, backup=backup, makedirs=makedirs) as f:
         f.write(data)
 
 # ======================================================================

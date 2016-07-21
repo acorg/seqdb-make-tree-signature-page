@@ -218,7 +218,7 @@ def read_fasta_with_name_parsing(fasta_file, lab, virus_type, **_):
         entry.update(n_entry)
         return entry
 
-    r = [make_entry(raw_name, sequence) for raw_name, sequence in read_from_string(open_file.open_for_reading_text(fasta_file).read(), fasta_file)]
+    r = [make_entry(raw_name, sequence) for raw_name, sequence in read_from_string(open_file.open_for_reading_text(str(fasta_file)).read(), fasta_file)]
     module_logger.debug('{} sequences imported from {}'.format(len(r), fasta_file))
     return r
 

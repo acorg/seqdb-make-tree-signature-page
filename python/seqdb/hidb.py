@@ -4,6 +4,7 @@
 # ----------------------------------------------------------------------
 
 import os, re, operator, pprint
+from pathlib import Path
 import logging; module_logger = logging.getLogger(__name__)
 from . import open_file
 
@@ -42,7 +43,7 @@ class HiDb:
         self.ids = None
 
     def _load(self, dirname, infix):
-        filename = os.path.join(dirname, "hidb.{}.json.xz".format(infix))
+        filename = Path(dirname, "hidb." + infix + ".json.xz")
         data = open_file.read_json(filename)
         if data.get("  version") != "whocc-antigens-sera-v3":
             raise ValueError("{}: unsupported hidb version: {}".format(filename, data.get("  version")))
