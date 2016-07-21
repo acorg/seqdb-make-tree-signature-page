@@ -236,13 +236,14 @@ class NameParser:
 
     def __init__(self):
         self.parsers = (
-            #(re.compile(r'^(?P<type>B|H3|H1)(?P<location>[A-Z]+)(?P<isolation_number>\d+)(?P<year>\d\d)[A-Z]*\s', re.I), self.nimr_glued),
-            (re.compile(r'^(?P<name>[^\s]+)\s+PileUp\sof', re.I), self.nimr_20090914),
-            (re.compile(r'^(?P<designation>[^|]+)\s+\|\s+(?P<passage>[^\s]+)\s*\|\s+(?P<name>(?:EPI|201)\d+)\s*$', re.I), self.cdc_20100913), # name | passage | fasta_id
-            (re.compile(r'^(?P<name1>EPI\d+)\s+\|\s+(?P<gene>HA|NA)\s+\|\s+(?P<designation>[^\|]+)\s+\|\s+(?P<name>EPI_[A-Z_0-9]+)\s+\|\s*(?P<passage>[^\s]+)?\s*\|\s*(?P<flu_type>.+)?\s*$', re.I), self.gisaid_melb), # name1 | gene | designation | name | passage | flu_type
+            (re.compile(r'^(?P<name>[^|]+)\s+\|\s+(?:(?P<year1>\d+)-(?P<month1>\d+)-(?P<day1>\d+)|(?P<year2>\d+)-(?P<month2>\d+)\s+\(day unknown\)|(?P<year3>\d+)\s+\(month and day unknown\))\s+\|\s+(?P<passage>[^\|]*)\s+\|\s+(?P<lab_id>[^\|]*)?\s+\|\s+(?P<lab>[A-Za-z ]+)\s+\|\s+(?P<virus_type>[AB]\s*/\s*H\d+N\d+)\s+\|\s*(?P<lineage>[A-Za-z0-9]+)?\s*$', re.I), self.gisaid), # name | date | passage | lab_id | lab | virus_type | lineage
             (re.compile(r'^(?P<name>[^|]+)\s+\|\s+(?:(?P<year1>\d+)-(?P<month1>\d+)-(?P<day1>\d+)|(?P<year2>\d+)-(?P<month2>\d+)\s+\(day unknown\)|(?P<year3>\d+)\s+\(month and day unknown\))\s+\|\s+(?P<passage>[^\|]*)\s+\|\s+(?P<lab_id>[^\|]*)?\s+\|\s+(?P<lab>[A-Za-z ]+)\s*$', re.I), self.gisaid), # name | date | passage | lab_id | lab
             (re.compile(r'^(?P<name>[^|]+)\s+\|\s+(?:(?P<year1>\d+)-(?P<month1>\d+)-(?P<day1>\d+)|(?P<year2>\d+)-(?P<month2>\d+)\s+\(day unknown\)|(?P<year3>\d+)\s+\(month and day unknown\))\s+\|\s+(?P<passage>[^\|]+)\s+\|\s+(?P<lab_id>[^\|]+)?\s+\|.*$', re.I), self.gisaid), # name | date | passage | lab_id | something-else
             (re.compile(r'^(?P<name>[^|]+)\s+\|\s+(?:(?P<year1>\d+)-(?P<month1>\d+)-(?P<day1>\d+)|(?P<year2>\d+)-(?P<month2>\d+)\s+\(day unknown\)|(?P<year3>\d+)\s+\(month and day unknown\))\s+\|\s+(?P<passage>[^\|]+)?\s*\|\s*(?P<lab_id>.+)?\s*$', re.I), self.gisaid), # name | date | passage? | lab_id
+            (re.compile(r'^(?P<name1>EPI\d+)\s+\|\s+(?P<gene>HA|NA)\s+\|\s+(?P<designation>[^\|]+)\s+\|\s+(?P<name>EPI_[A-Z_0-9]+)\s+\|\s*(?P<passage>[^\s]+)?\s*\|\s*(?P<flu_type>.+)?\s*$', re.I), self.gisaid_melb), # name1 | gene | designation | name | passage | flu_type
+            #(re.compile(r'^(?P<type>B|H3|H1)(?P<location>[A-Z]+)(?P<isolation_number>\d+)(?P<year>\d\d)[A-Z]*\s', re.I), self.nimr_glued),
+            (re.compile(r'^(?P<name>[^\s]+)\s+PileUp\sof', re.I), self.nimr_20090914),
+            (re.compile(r'^(?P<designation>[^|]+)\s+\|\s+(?P<passage>[^\s]+)\s*\|\s+(?P<name>(?:EPI|201)\d+)\s*$', re.I), self.cdc_20100913), # name | passage | fasta_id
             (re.compile(r'^(?P<name>[^|]+)\s+\|\s+(?P<passage>[^\s]+)\s+\|\s*(?P<lab_id>.+)?\s*$', re.I), self.gisaid_without_date), # name | passage | lab_id
             (re.compile(r'^(?P<name>[^\s]+)\s\s+(?P<date>[\d/]+)\s\s+(?P<passage>[^\s]+)\s*$', re.I), self.melb_20100823), # name  date  passage
             (re.compile(r'^(?P<name>\d+S\d+)\s+\"Contig\s+\d+\"\s+\(\d+,\d+\)$', re.I), self.melb_20110921),
@@ -278,13 +279,14 @@ class NameParser:
     mReCdcId = re.compile(r'^\s*(?P<cdcid>\d{8,10})(?:_\d{6}_v\d(?:_\d)?|_\d|\s+.*)?$')
 
     def gisaid(self, raw_name, m, with_date=True, lab=None, **_):
-        # module_logger.debug('gisaid with_date:{} {} --> {}'.format(with_date, raw_name, m.groupdict()))
-        year = (with_date and (m.group('year1') or m.group('year2') or m.group('year3'))) or None
+        groups = m.groupdict()
+        # module_logger.debug('gisaid with_date:{} {!r} --> {}'.format(with_date, raw_name, groups))
+        year = (with_date and (groups.get('year1') or groups.get('year2') or groups.get('year3'))) or None
         try:
-            lab = self._fix_gisaid_lab(m.group('lab'))
+            lab = self._fix_gisaid_lab(groups.get('lab'))
         except IndexError:
             pass
-        lab_id = m.group('lab_id')
+        lab_id = groups.get('lab_id')
         # module_logger.debug('{} lab_id {} {}'.format(lab, lab_id, self.mReCdcId.match(lab_id)))
         if lab == "CDC" and lab_id is not None:
             m_cdcid = self.mReCdcId.match(lab_id)
@@ -294,12 +296,15 @@ class NameParser:
                 if lab_id:
                     module_logger.warning('Not a cdcid: {}'.format(lab_id))
                 lab_id = None
-        return {k: v for k, v in (('name', m.group('name')),
-                                  ('date', year and '-'.join((year, m.group('month1') or m.group('month2') or '01', m.group('day1') or '01'))),
-                                  ('passage', m.group('passage')),
-                                  ('lab_id', lab_id),
-                                  ('lab', lab),
-                                  ) if v is not None}
+        return {
+            'name': groups.get('name'),
+            'date': year and '-'.join((year, groups.get('month1') or groups.get('month2') or '01', groups.get('day1') or '01')),
+            'passage': groups.get('passage'),
+            'lab_id': lab_id,
+            'lab': lab,
+            'virus_type': self._fix_gisaid_virus_type(groups.get("virus_type")),
+            'lineage': groups.get("lineage"),
+            }
 
     def _fix_gisaid_lab(self, lab):
         return (lab
@@ -311,6 +316,19 @@ class NameParser:
                 .replace("National Institute of Infectious Diseases", "NIID")
                 .replace("Erasmus Medical Center", "EMC")
                 )
+
+    def _fix_gisaid_virus_type(self, virus_type):
+        if virus_type:
+            m = re.match(r"^\s*([AB])\s*/\s*(H\d+N\d+)\s*$", virus_type)
+            if m:
+                if m.group(1) == "B":
+                    virus_type = "B"
+                else:
+                    virus_type = "A(" + m.group(2) + ")"
+                pass
+            else:
+                raise ValueError("Unrecognized gisaid flu virus_type: " + virus_type)
+        return virus_type
 
     def gisaid_without_date(self, raw_name, m, **kw):
         return self.gisaid(raw_name=raw_name, m=m, with_date=False, **kw)

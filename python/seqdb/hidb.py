@@ -54,7 +54,10 @@ class HiDb:
             self.ids = {vt: {aid: antigen for antigen in vt_db["antigens"] for aid in antigen.get("i", [])} for vt, vt_db in self.db.items()}
         look_for = "CDC#{}".format(cdcid)
         if virus_type is not None:
-            ag = self.ids[virus_type].get(look_for)
+            if self.ids.get(virus_type):
+                ag = self.ids[virus_type].get(look_for)
+            else:
+                ag = None
         else:
             for ids in self.ids.values():
                 ag = ids.get(look_for)
@@ -66,7 +69,10 @@ class HiDb:
 
     def find_antigen_by_name(self, name, virus_type=None):
         if virus_type is not None:
-            dbs = [self.db[virus_type]["antigens"]]
+            if self.db.get(virus_type):
+                dbs = [self.db[virus_type]["antigens"]]
+            else:
+                dbs = []
         elif name[0] == "A" and name[8] == ["/"]:
             dbs = [self.db[name[:7]]["antigens"]]
         elif name[:2] == "B/":
