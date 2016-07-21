@@ -283,7 +283,7 @@ class NameParser:
         # module_logger.debug('gisaid with_date:{} {!r} --> {}'.format(with_date, raw_name, groups))
         year = (with_date and (groups.get('year1') or groups.get('year2') or groups.get('year3'))) or None
         try:
-            lab = self._fix_gisaid_lab(groups.get('lab'))
+            lab = self._fix_gisaid_lab(m.group('lab'))   # do NOT use groups here!
         except IndexError:
             pass
         lab_id = groups.get('lab_id')
