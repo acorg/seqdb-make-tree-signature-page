@@ -41,7 +41,7 @@ class FasttreeTask (tree_maker.Task):
 
     def wait(self, kill_rate=None, wait_timeout=None):
         self.wait_begin()
-        self.job.wait()
+        self.job.wait(timeout=wait_timeout)
         self.wait_end()
         return FasttreeResults.import_from(source_dir=self.output_dir, overall_time=self.overall_time, submitted_tasks=self.submitted_tasks)
 

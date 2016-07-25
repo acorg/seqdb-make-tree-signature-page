@@ -49,14 +49,19 @@ class RaxmlTask (tree_maker.Task):
     def __init__(self, job, output_dir, run_ids):
         super().__init__(job=job, output_dir=output_dir, run_ids=run_ids, progname="RAxML")
 
-    def wait(self, kill_rate=None, wait_timeout=None):
-        self.wait_begin()
-        if kill_rate:
-            while self.job.wait(timeout=wait_timeout or 600) != "done":
-                Raxml.analyse_logs(output_dir=self.output_dir, run_ids=self.run_ids, kill_rate=kill_rate, job=self.job)
-        else:
-            self.job.wait()
-        self.wait_end()
+    # def wait(self, kill_rate=None, wait_timeout=None):
+    #     self.wait_begin()
+    #     if kill_rate:
+    #         while self.job.wait(timeout=wait_timeout or 600) != "done":
+    #             Raxml.analyse_logs(output_dir=self.output_dir, run_ids=self.run_ids, kill_rate=kill_rate, job=self.job)
+    #     else:
+    #         self.job.wait(timeout=wait_timeout)
+    #     self.wait_end()
+    #     return RaxmlResults.import_from(source_dir=self.output_dir, overall_time=self.overall_time, submitted_tasks=self.submitted_tasks, survived_tasks=len(self.run_ids))
+
+    def results(self):
+        if not self.finished():
+            raise RuntimeError("Cannot get results: raxml job not finished")
         return RaxmlResults.import_from(source_dir=self.output_dir, overall_time=self.overall_time, submitted_tasks=self.submitted_tasks, survived_tasks=len(self.run_ids))
 
 # ----------------------------------------------------------------------

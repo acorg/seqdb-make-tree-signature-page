@@ -44,10 +44,15 @@ class GarliTask (tree_maker.Task):
     def __init__(self, job, output_dir, run_ids):
         super().__init__(job=job, output_dir=output_dir, run_ids=run_ids, progname="GARLI")
 
-    def wait(self):
-        self.wait_begin()
-        self.job.wait()
-        self.wait_end()
+    # def wait(self, wait_timeout=None):
+    #     self.wait_begin()
+    #     self.job.wait(timeout=wait_timeout)
+    #     self.wait_end()
+    #     return GarliResults((Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids), overall_time=self.overall_time, submitted_tasks=self.submitted_tasks, survived_tasks=len(self.run_ids))
+
+    def results(self):
+        if not self.finished():
+            raise RuntimeError("Cannot get results: garli job not finished")
         return GarliResults((Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids), overall_time=self.overall_time, submitted_tasks=self.submitted_tasks, survived_tasks=len(self.run_ids))
 
 # ----------------------------------------------------------------------

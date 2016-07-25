@@ -89,6 +89,22 @@ class Task:
         self.run_ids = run_ids
         self.progname = progname
         self.submitted_tasks = len(run_ids)
+        self.start = None
+        self.overall_time = None
+
+    def started(self):
+        return self.start is not None
+
+    def finished(self):
+        return self.overall_time is not None
+
+    def wait(self, wait_timeout=None):
+        if not self.started():
+            self.wait_begin()
+        if not self.finished():
+            state = self.job.wait(timeout=wait_timeout)
+            if state == "done":
+                self.wait_end()
 
     def wait_begin(self):
         self.start = time_m.time()
