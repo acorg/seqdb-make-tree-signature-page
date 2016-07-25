@@ -86,7 +86,7 @@ class SeqdbUpdater:
             module_logger.warning('Sequence {} has annotatitions {}'.format(data["name"], data["annotatitions"]))
         message = entry.add_or_update_sequence(sequence=data["sequence"], passage=data.get("passage", ""), reassortant=data.get("reassortant", ""), lab=data.get("lab", ""), lab_id=data.get("lab_id", ""), gene=data.get("gene", ""))
         if message:
-            module_logger.warning("{}: {}".format(data["name"], message))
+            module_logger.warning("{}: {}".format(data["name"], message.replace("\n", " ")))
         # if self.hidb:
         #     self._match_hidb(entry, data)
 

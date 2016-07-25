@@ -30,6 +30,7 @@ def update(seqdb_path :Path, acmacs_url, hidb_dir :Path, sequence_store_dir :Pat
     module_logger.info(db.report())
     if save_seqdb:
         db_updater.save(indent=1)
+    return db
 
 # ----------------------------------------------------------------------
 
