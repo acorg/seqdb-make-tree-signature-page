@@ -23,7 +23,7 @@ class AntigenicMaps
     virtual void calculate_viewports(Tree& aTree, Chart* aChart, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) = 0;
     virtual void draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const;
 
-    virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& aSettings) const = 0;
+    virtual Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& aSettings) const = 0;
     virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const = 0;
 
     inline const std::vector<size_t>& lines_of_sequenced_antigens_in_chart() const { return mLinesOfSequencedAntigensInChart; }
