@@ -136,6 +136,9 @@ class BasicRunner:
                   )
         return self.results
 
+    def on_state_completed(self):
+        pass
+
 # ----------------------------------------------------------------------
 
 class RaxmlBestGarli (BasicRunner):
