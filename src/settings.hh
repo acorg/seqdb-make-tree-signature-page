@@ -293,7 +293,7 @@ class SettingsLegend
 {
  public:
     inline SettingsLegend()
-        : font_size(14), interline(1.2), style("monospace"), geographic_map(false),
+        : font_size(14), interline(1.2), style("monospace"), geographic_map(true),
           geographic_map_fraction(0.1), geographic_map_outline_color(GREY), geographic_map_outline_width(1.0) {}
 
     double font_size;
