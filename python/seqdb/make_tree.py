@@ -44,21 +44,21 @@ class BasicRunner:
 
     def raxml_submit(self):
         self.raxml_output_dir = Path(self.settings["working_dir"], "raxml")
-        raxml = Raxml(email=email)
-        self.raxml_job = raxml.submit_htcondor(
+        raxml = Raxml(email=self.settings["email"])
+        self.raxml_task = raxml.submit_htcondor(
             num_runs=self.settings["raxml"]["num_runs"],
-            source=self.settings["fasta_file"],
+            source=Path(self.settings["fasta_file"]),
             source_tree=self.raxml_source_tree(),
-            output_dir=self.settings["raxml"]["output_dir"],
+            output_dir=Path(self.settings["raxml"]["output_dir"]),
             run_id=self.settings["run_id"],
-            bfgs=self.self.settings["raxml"]["bfgs"],
-            model_optimization_precision=self.self.settings["raxml"]["model_optimization_precision"],
+            bfgs=self.settings["raxml"]["bfgs"],
+            model_optimization_precision=self.settings["raxml"]["model_optimization_precision"],
             outgroups=[self.settings["base_seq_name"]],
             machines=self.settings["machines"])
         self.state = "raxml_submitted"
 
     def raxml_completed(self):
-        self.raxml_results = self.raxml_job.results()
+        self.raxml_results = self.raxml_task.results()
         self.raxml_results.make_txt(Path(self.settings["working_dir"], "result.raxml.txt"))
         self.raxml_results.make_json(Path(self.settings["working_dir"], "result.raxml.json"))
         make_r_score_vs_time(target_dir=self.settings["working_dir"], source_dir=self.settings["raxml"]["output_dir"], results=self.raxml_results)
@@ -69,11 +69,11 @@ class BasicRunner:
     def garli_submit(self, tree):
         self.garli_output_dir = Path(self.settings["working_dir"], "garli")
         garli = Garli(email=self.settings["email"])
-        self.garli_job = garli.submit_htcondor(
+        self.garli_task = garli.submit_htcondor(
             num_runs=self.settings["garli"]["num_runs"],
             source=self.settings["fasta_file"],
             source_tree=tree,
-            output_dir=self.garli_output_dir,
+            output_dir=Path(self.settings["garli"]["output_dir"]),
             run_id=self.settings["run_id"],
             attachmentspertaxon=self.settings["garli"]["attachmentspertaxon"],
             stoptime=self.settings["garli"]["stoptime"],
@@ -81,7 +81,7 @@ class BasicRunner:
         self.state = "garli_submitted"
 
     def garli_completed(self):
-        self.garli_results = self.garli_job.results()
+        self.garli_results = self.garli_task.results()
         module_logger.info('GARLI {}'.format(self.garli_results.report_best()))
         self.garli_results.make_txt(Path(self.settings["working_dir"], "result.garli.txt"))
         self.garli_results.make_json(Path(self.settings["working_dir"], "result.garli.json"))
@@ -144,14 +144,14 @@ class RaxmlBestGarli (BasicRunner):
         self.raxml_submit()
 
     def on_state_raxml_submitted(self):
-        self.raxml_job.wait(self.wait_timeout)
-        if self.raxml_job.finished():
+        self.raxml_task.wait(self.wait_timeout)
+        if self.raxml_task.finished():
             self.raxml_completed()
             self.garli_submit(self.raxml_results.best_tree())
 
     def on_state_garli_submitted(self):
-        self.garli_job.wait(self.wait_timeout)
-        if self.garli_job.finished():
+        self.garli_task.wait(self.wait_timeout)
+        if self.garli_task.finished():
             self.garli_completed()
             self.make_results()
             self.state = "completed"
@@ -161,9 +161,9 @@ class RaxmlBestGarli (BasicRunner):
 class RaxmlSurvivedBestGarli (RaxmlBestGarli):
 
     def on_state_raxml_submitted(self):
-        self.raxml_job.wait(self.wait_timeout)
-        if not self.raxml_job.finished():
-            Raxml.analyse_logs(output_dir=self.raxml_output_dir, run_ids=self.raxml_job.run_ids, kill_rate=self.settings["raxml"]["kill_rate"], job=self.raxml_job)
+        self.raxml_task.wait(self.wait_timeout)
+        if not self.raxml_task.finished():
+            Raxml.analyse_logs(output_dir=self.raxml_output_dir, run_ids=self.raxml_task.run_ids, kill_rate=self.settings["raxml"]["kill_rate"], job=self.raxml_task.job)
         else:
             self.raxml_completed()
             self.garli_submit(self.raxml_results.best_tree())

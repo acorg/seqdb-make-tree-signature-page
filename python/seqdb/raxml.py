@@ -76,9 +76,9 @@ class Raxml (tree_maker.Maker):
 
     # ----------------------------------------------------------------------
 
-    def submit_htcondor(self, source, source_tree, output_dir, run_id, num_runs, bfgs, model_optimization_precision, outgroups :list, machines=None):
+    def submit_htcondor(self, source :Path, source_tree, output_dir :Path, run_id, num_runs, bfgs, model_optimization_precision, outgroups :list, machines=None):
         from . import htcondor
-        Path(output_dir).mkdir(parents=True, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
         general_args = ["-s", str(source.resolve()), "-w", str(output_dir.resolve()), "-m", self.model, "-e", str(model_optimization_precision), "-T", "1", "-N", "1"] + self.default_args
         if source_tree is not None:
             general_args += ["-t", str(source_tree)]

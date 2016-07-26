@@ -64,11 +64,11 @@ class Garli (tree_maker.Maker):
         # self.model = "GTRGAMMAI"
         # self.default_args = ["-c", "4", "-f", "d", "--silent", "--no-seq-check"]
 
-    def submit_htcondor(self, num_runs, source, output_dir, run_id, source_tree=None, outgroup=[1], attachmentspertaxon=1000000, genthreshfortopoterm=20000, stoptime=3600*24*7, searchreps=1, strip_comments=True, machines=None):
+    def submit_htcondor(self, num_runs, source, output_dir :Path, run_id, source_tree=None, outgroup=[1], attachmentspertaxon=1000000, genthreshfortopoterm=20000, stoptime=3600*24*7, searchreps=1, strip_comments=True, machines=None):
         from . import htcondor
-        Path(output_dir).mkdir(parents=True, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
-        conf_files = [self._make_conf(run_id, source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir, attachmentspertaxon=attachmentspertaxon, randseed=self.random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=stoptime, strip_comments=strip_comments) for run_id in run_ids]
+        conf_files = [self._make_conf(run_id, source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir.resolve(), attachmentspertaxon=attachmentspertaxon, randseed=self.random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=stoptime, strip_comments=strip_comments) for run_id in run_ids]
         module_logger.info('{} garli conf files saved to {}'.format(len(conf_files), output_dir))
         args=[[str(Path(c).resolve())] for c in conf_files]
         start = time_m.time()
