@@ -125,7 +125,7 @@ class BasicRunner:
             "garli": [vars(r) for r in self.garli_results.results],
             "raxml": [vars(r) for r in self.raxml_results.results],
             }
-        json.dumpf(Path(self.settings["working_dir"], "result.all.json"), r)
+        json.dumpf(Path(self.settings["working_dir"], "result.all.json"), self.results)
 
         from .draw_tree import draw_tree
         draw_tree(tree_file=r_best["tree"],
