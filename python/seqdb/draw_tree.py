@@ -34,7 +34,7 @@ def draw_tree(tree_file, seqdb, output_file, title, pdf_width=600, pdf_height=85
     signature_page = seqdb_m.SignaturePage()
     (signature_page
      .select_parts(seqdb_m.Show.Title | seqdb_m.Show.Tree | seqdb_m.Show.Legend | seqdb_m.Show.TimeSeries | seqdb_m.Show.Clades)
-     .title(seqdb_m.Text(seqdb_m.Location(0, 10), title.format(virus_type=format_virus_type(tree)), 0, 20))
+     .title(seqdb_m.Text(seqdb_m.Location(0, 20), title.format(virus_type=format_virus_type(tree)), 0, 20))
      .color_by_continent(True)
      .prepare(tree, surface)
      .draw(tree, surface))
