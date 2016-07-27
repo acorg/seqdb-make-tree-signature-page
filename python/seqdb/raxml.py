@@ -223,7 +223,9 @@ def postprocess(target_dir, source_dir):
 def make_r_score_vs_time(target_dir, source_dir, results):
     filepath = Path(target_dir, "raxml.score-vs-time.r")
     module_logger.info('Generating {}'.format(filepath))
-    colors = {results.results[0].tree: "green", results.results[1].tree: "cyan", results.results[2].tree: "blue", results.results[-1].tree: "red"}
+    colors = {k.tree: c for k, c in zip(results.results, ["green", "cyan", "blue"])}
+    if len(results.results) > 3:
+        colors[results.results[-1].tree] = "red"
     with filepath.open("w") as f:
         f.write('doplot <- function(lwd) {\n')
         f.write('    plot(c(0, {longest_time}), c({min_score}, {max_score}), type="n", xlab="time (hours)", ylab="RAxML score", main="RAxML processing" )\n'.format(
