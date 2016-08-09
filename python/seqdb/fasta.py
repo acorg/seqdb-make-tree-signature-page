@@ -35,7 +35,7 @@ def export_from_seqdb(seqdb, filename, output_format, amino_acids, lab, virus_ty
         return - (e["e"].seq.amino_acids_shift() if amino_acids else e["e"].seq.nucleotides_shift())
 
     def exclude_by_hamming_distance(e1, e2, threshold):
-        hd = hamming_distance(e1["s"], e2["s"])
+        hd = hamming_distance(e1["s"], e2["s"], e1["n"], e2["n"])
         if hd >= threshold:
             module_logger.info('{!r} excluded because hamming distance to {!r} is {} (threshold: {})'.format(e2["n"], e1["n"], hd, threshold))
             r = False
@@ -110,16 +110,17 @@ def export_from_seqdb(seqdb, filename, output_format, amino_acids, lab, virus_ty
             del sequences[base_seq_present[0]]
         sequences = base_seqs + sequences
 
+    # convert to most common length BEFORE excluding by hamming distance threshold
+    if truncate_to_most_common_length:
+        truncate_to_most_common(sequences, fill="X" if amino_acids else "-")
+
     if hamming_distance_threshold:
         sequences = list(filter(lambda s: exclude_by_hamming_distance(sequences[0], s, hamming_distance_threshold), sequences))
     if len(sequences) < 2:
         raise ValueError("Too few ({}) sequences found for exporting".format(len(sequences)))
 
-    if truncate_to_most_common_length:
-        truncate_to_most_common(sequences, fill="X" if amino_acids else "-")
-
     if hamming_distance_report:
-        hamming_distances = sorted(([e["n"], hamming_distance(sequences[0]["s"], e["s"])] for e in sequences[1:]), key=operator.itemgetter(1), reverse=True)
+        hamming_distances = sorted(([e["n"], hamming_distance(sequences[0]["s"], e["s"], sequences[0]["n"], e["n"])] for e in sequences[1:]), key=operator.itemgetter(1), reverse=True)
     else:
         hamming_distances = None
 
@@ -150,9 +151,11 @@ def truncate_to_most_common(sequences, fill):
 
 # ----------------------------------------------------------------------
 
-def hamming_distance(s1, s2):
+def hamming_distance(s1, s2, n1, n2):
     l = min(len(s1), len(s2))
-    return sum(1 for pos in range(l) if s1[pos] != s2[pos])
+    hd = sum(1 for pos in range(l) if s1[pos] != s2[pos])
+    # module_logger.debug('HD: {} {!r} {!r}'.format(hd, n1, n2))
+    return hd
 
 # ----------------------------------------------------------------------
 
