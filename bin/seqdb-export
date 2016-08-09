@@ -5,7 +5,7 @@
 Exports seqdb data into fasta.
 """
 
-import sys, re, operator, collections, traceback
+import sys, re, operator, collections, traceback, pprint
 if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
@@ -19,27 +19,31 @@ from seqdb import fasta as fasta_m, open_file, timeit, normalize
 def main(args):
     seq_db = seqdb.Seqdb()
     seq_db.load(filename=args.path_to_seqdb)
-    fasta_m.export_from_seqdb(seqdb=seq_db,
-                              filename=args.output,
-                              output_format=args.output_format,
-                              amino_acids=args.amino_acids,
-                              lab=args.lab,
-                              virus_type=args.virus_type,
-                              lineage=args.lineage,
-                              gene=args.gene,
-                              start_date=args.start_date, end_date=args.end_date,
-                              base_seq=args.base_seq,
-                              name_format=args.name_format,
-                              aligned=args.aligned,
-                              truncate_left=args.truncate_left,
-                              encode_name=args.name_encode,
-                              wrap=args.sequence_wrap,
-                              truncate_to_most_common_length=args.most_common_length,
-                              hamming_distance_threshold=args.hamming_distance_threshold,
-                              hamming_distance_report=args.hamming_distance_report,
-                              sort_by=args.sort_by,
-                              with_hi_name=args.with_hi_name,
-                              name_match=args.name_match)
+    r = fasta_m.export_from_seqdb(
+        seqdb=seq_db,
+        filename=args.output,
+        output_format=args.output_format,
+        amino_acids=args.amino_acids,
+        lab=args.lab,
+        virus_type=args.virus_type,
+        lineage=args.lineage,
+        gene=args.gene,
+        start_date=args.start_date, end_date=args.end_date,
+        base_seq=args.base_seq,
+        name_format=args.name_format,
+        aligned=args.aligned,
+        truncate_left=args.truncate_left,
+        encode_name=args.name_encode,
+        wrap=args.sequence_wrap,
+        truncate_to_most_common_length=args.most_common_length,
+        hamming_distance_threshold=args.hamming_distance_threshold,
+        hamming_distance_report=args.hamming_distance_report,
+        sort_by=args.sort_by,
+        with_hi_name=args.with_hi_name,
+        name_match=args.name_match)
+    if args.hamming_distance_report:
+        print("Hamming distances\n" + "\n".join("{:4d} {}".format(e[1], e[0].strip()) for e in r["hamming_distances"]))
+        # pprint.pprint(r["hamming_distances"])
 
 # ----------------------------------------------------------------------
 
@@ -71,7 +75,7 @@ with timeit(sys.argv[0]):
         parser.add_argument('--amino-acids', action='store_true', dest='amino_acids', default=False, help='Export amino-acids instead of nucleotites')
         parser.add_argument('--no-wrap', action='store_false', dest='sequence_wrap', default=True, help='Do not wrap sequence and generate long lines')
 
-        parser.add_argument('--hamming-distance-threshold', action='store', type=int, dest='hamming_distance_threshold', default=None, help='Select only sequences having hamming distance to the base sequence less than threshold. Use 150 for nucs (H3).')
+        parser.add_argument('--hamming-distance-threshold', action='store', type=int, dest='hamming_distance_threshold', default=None, help='Select only sequences having hamming distance to the base sequence less than threshold. Use 140 for nucs (H1).')
         parser.add_argument('--hamming-distance-report', action='store_true', dest='hamming_distance_report', default=False)
 
         parser.add_argument('--db', action='store', dest='path_to_seqdb', required=True, help='Path to sequence database.')
