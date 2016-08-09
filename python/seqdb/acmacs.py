@@ -59,7 +59,7 @@ class API:
 
     def __init__(self, url_prefix):
         self.url_prefix = url_prefix
-        module_logger.info('acmacs url_prefix {}'.format(self.url_prefix), stack_info=True)
+        # module_logger.info('acmacs url_prefix {}'.format(self.url_prefix), stack_info=True)
 
     def execute(self, command):
         if self.url_prefix:
