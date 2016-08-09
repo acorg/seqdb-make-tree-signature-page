@@ -59,12 +59,13 @@ class API:
 
     def __init__(self, url_prefix):
         self.url_prefix = url_prefix
+        module_logger.info('acmacs url_prefix {}'.format(self.url_prefix))
 
     def execute(self, command):
         if self.url_prefix:
             response = self._execute_http(command)
         else:
-            raise ValueError('No url_prefix')
+            raise ValueError('No url_prefix: ' + repr(self.url_prefix))
         if isinstance(response, dict) and response.get('E'):
             raise CommandError(response['E'])
         return response
