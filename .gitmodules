@@ -1,9 +1,10 @@
 [submodule "modules/axe"]
-	path = modules/axe
-	url = https://github.com/skepner/axe.git
+        path = modules/axe
+        url = https://github.com/skepner/axe.git
 [submodule "modules/pybind11"]
-	path = modules/pybind11
-	url = https://github.com/pybind/pybind11.git
+        path = modules/pybind11
+        url = https://github.com/pybind/pybind11.git
+        branch = v1.8
 [submodule "modules/json-struct"]
-	path = modules/json-struct
-	url = https://github.com/skepner/json-struct.git
+        path = modules/json-struct
+        url = https://github.com/skepner/json-struct.git

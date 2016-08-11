@@ -40,7 +40,7 @@ OPTIMIZATION = -O3 #-fvisibility=hidden -flto
 CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
 LDFLAGS =
 TEST_LDLIBS = $$(pkg-config --libs liblzma)
-SEQDB_LDLIBS = $$(pkg-config --libs cairo) $$(pkg-config --libs liblzma) $$($(PYTHON_CONFIG) --ldflags)
+SEQDB_LDLIBS = $$(pkg-config --libs cairo) $$(pkg-config --libs liblzma) $$($(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
 
 MODULES_INCLUDE = -Imodules/json/src -Imodules/axe/include -Imodules/pybind11/include -Imodules/json-struct
 PKG_INCLUDES = $$(pkg-config --cflags cairo) $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)

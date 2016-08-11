@@ -788,14 +788,15 @@ std::string Tree::json(int indent) const
 
 // ----------------------------------------------------------------------
 
-Tree Tree::from_json(std::string data)
+Tree* Tree::from_json(std::string data)
 {
-    Tree tree;
+    Tree* tree = new Tree();
     try {
-        json::parse(data, tree);
+        json::parse(data, *tree);
     }
     catch (json::parsing_error& err) {
         std::cerr << "tree parsing error: "<< err.what() << std::endl;
+        delete tree;
         throw;
     }
     return tree;

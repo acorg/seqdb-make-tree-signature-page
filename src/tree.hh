@@ -196,7 +196,7 @@ class Tree : public Node
     std::string lineage() const { return mLineage; }
 
     std::string json(int indent) const;
-    static Tree from_json(std::string data);
+    static Tree* from_json(std::string data);
 
     void match_seqdb(const Seqdb& aSeqdb);
     void clade_setup();         // updates mSettings.clades with clade data from tree

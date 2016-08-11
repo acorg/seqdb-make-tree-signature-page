@@ -6,9 +6,9 @@
 
 // ----------------------------------------------------------------------
 
-Tree import_tree(std::string buffer)
+Tree* import_tree(std::string buffer)
 {
-    Tree tree;
+    Tree* tree = nullptr;
     if (buffer == "-")
         buffer = read_stdin();
     else // if (file_exists(buffer))
@@ -17,7 +17,7 @@ Tree import_tree(std::string buffer)
         buffer = xz_decompress(buffer);
     if (buffer[0] == '(') {
         tree = parse_newick(buffer);
-        tree.preprocess_upon_importing_from_external_format();
+        tree->preprocess_upon_importing_from_external_format();
     }
     else if (buffer[0] == '{') {
         tree = Tree::from_json(buffer);

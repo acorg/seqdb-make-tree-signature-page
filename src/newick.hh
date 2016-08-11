@@ -27,6 +27,6 @@ class ParsingError : public std::runtime_error
 
 // ----------------------------------------------------------------------
 
-Tree parse_newick(std::string data);
+Tree* parse_newick(std::string data);
 
 // ----------------------------------------------------------------------

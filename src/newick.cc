@@ -15,7 +15,7 @@ typedef std::stack<Node::Subtree*> NodeStack;
 
 // ----------------------------------------------------------------------
 
-Tree parse_newick(std::string data)
+Tree* parse_newick(std::string data)
 {
     auto parsing_failure = [&](const char* message) -> auto {
         return axe::e_ref([&data, message](auto b, auto e) {
@@ -53,10 +53,10 @@ Tree parse_newick(std::string data)
 
     auto name = +(axe::r_any("!\"#$%&'*+-./<=>?@[\\]^_`{|}~") | axe::r_alnum());
 
-    Tree tree;
+    Tree* tree = new Tree();
 
     NodeStack current_node;
-    current_node.push(&tree.subtree);
+    current_node.push(&tree->subtree);
 
     const double default_edge_length = 0.0;
     double extracted_edge_length = default_edge_length;
@@ -86,7 +86,7 @@ Tree parse_newick(std::string data)
     auto end_root_tree = axe::e_ref([&](auto, auto) {
               // std::cout << "end_root_tree " << extracted_edge_length << std::endl;
             if (extracted_edge_length >= 0.0)
-                tree.edge_length = extracted_edge_length;
+                tree->edge_length = extracted_edge_length;
             extracted_edge_length = default_edge_length;
         });
 
