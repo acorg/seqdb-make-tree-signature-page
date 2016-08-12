@@ -192,7 +192,8 @@ void SignaturePage::calculate_viewports(Tree& aTree, Surface& aSurface, Chart* a
           // Note legend must be drawn after tree, because ColoringByPos needs to collect data to be drawn in the legend
         if (mLegend) {
             const auto legend_size = mLegend->size(aSurface, aTree.settings().legend);
-            mLegendViewport.set({mPageArea.origin.x, mPageArea.bottom() - legend_size.height}, legend_size);
+            const auto& legend_settings = aTree.settings().legend;
+            mLegendViewport.set({mPageArea.origin.x + legend_settings.offset_x, mPageArea.bottom() - legend_size.height + legend_settings.offset_y}, legend_size);
         }
 
         mDrawTree->calculate_viewports(aTree, mTreeViewport);
