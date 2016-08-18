@@ -46,6 +46,7 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
 
             aChart->draw_points_reset(aSettings);
             const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], section_color(aSections, section_no), aSettings);
+            aChart->marked_antigens(aSettings.mark_antigens, names_per_map()[section_no], section_no, aSettings);
             aChart->draw(aSurface, scale, aSettings);
             std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << " names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
         }

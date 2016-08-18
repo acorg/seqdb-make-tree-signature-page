@@ -765,7 +765,7 @@ void Tree::add_vaccine(std::string aId, std::string aLabel)
     const size_t id_len = aId.size();
     auto find_nodes = [this,id_len,&aId,&aLabel](const Node& aNode) {
         if (std::string(aNode.name, 0, id_len) == aId) {
-            settings().draw_tree.vaccines.add(aNode.name, aLabel);
+            settings().draw_tree.mark_nodes.add(aNode.name, aLabel);
         }
     };
     iterate_leaf(*this, find_nodes);

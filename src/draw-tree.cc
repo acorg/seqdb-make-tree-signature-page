@@ -11,9 +11,9 @@ DrawTree& DrawTree::prepare(Tree& aTree, const SettingsDrawTree& aSettings)
     aTree.prepare_for_drawing();
     mNumberOfLines = aTree.height();
 
-    mVaccines.clear();
-    for (const auto& vaccine_data: aTree.settings().draw_tree.vaccines) {
-        mVaccines.emplace(vaccine_data.id, vaccine_data);
+    mNodesToMark.clear();
+    for (const auto& mark_node: aTree.settings().draw_tree.mark_nodes) {
+        mNodesToMark.emplace(mark_node.id, mark_node);
     }
 
     return *this;
@@ -58,7 +58,7 @@ void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewp
     draw_grid(aSurface, aViewport, aSettings);
     draw_node(aTree, aSurface, aViewport.origin, aSettings, aSettings.root_edge);
 
-    draw_vaccines(aSurface);
+    mark_nodes(aSurface);
       // aSurface.line(aViewport.origin, aViewport.bottom_right(), 0xFF00A5, 5, CAIRO_LINE_CAP_ROUND);
 
 } // DrawTree::draw
@@ -76,11 +76,11 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
         const std::string text = aNode.display_name();
         const auto font_size = mVerticalStep * mLabelScale;
         const auto tsize = aSurface.text_size(text, font_size, aSettings.label_style);
-        const auto text_origin = viewport.top_right() + Size(aSettings.name_offset, tsize.height * 0.5);
+        const auto text_origin = viewport.top_right() + Size(aSettings.name_offset, tsize.height / 2);
         aSurface.text(text_origin, text, mColoring->color(aNode), font_size, aSettings.label_style);
-        auto vaccine = mVaccines.find(aNode.name);
-        if (vaccine != mVaccines.end())
-            vaccine->second.set(text_origin, aNode);
+        auto mark_node = mNodesToMark.find(aNode.name);
+        if (mark_node != mNodesToMark.end())
+            mark_node->second.set(text_origin, aNode);
     }
     else {
         // if (aShowBranchIds && !aNode.branch_id.empty()) {
@@ -100,20 +100,20 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
 
 // ----------------------------------------------------------------------
 
-void DrawTree::draw_vaccines(Surface& aSurface)
+void DrawTree::mark_nodes(Surface& aSurface)
 {
-    for (const auto& vaccine_entry: mVaccines) {
-        const auto& vaccine = vaccine_entry.second;
-        const auto text_origin = vaccine.location + Location(vaccine.vaccine.label_offset_x, vaccine.vaccine.label_offset_y);
-        const auto label = vaccine.vaccine.label.empty() ? vaccine.vaccine.id : vaccine.vaccine.label;
-        aSurface.text(text_origin, label, vaccine.vaccine.label_color, vaccine.vaccine.label_size, vaccine.vaccine.label_style);
+    for (const auto& node_entry: mNodesToMark) {
+        const auto& node = node_entry.second;
+        const auto text_origin = node.location + Location(node.mark_data.label_offset_x, node.mark_data.label_offset_y);
+        const auto label = node.mark_data.label.empty() ? node.mark_data.id : node.mark_data.label;
+        aSurface.text(text_origin, label, node.mark_data.label_color, node.mark_data.label_size, node.mark_data.label_style);
 
-        const auto tsize = aSurface.text_size(label, vaccine.vaccine.label_size, vaccine.vaccine.label_style);
-        const auto line_origin = text_origin + Size(tsize.width / 2, vaccine.vaccine.label_offset_y > 0 ? -tsize.height : 0);
-        aSurface.line(line_origin, vaccine.location, vaccine.vaccine.line_color, vaccine.vaccine.line_width);
+        const auto tsize = aSurface.text_size(label, node.mark_data.label_size, node.mark_data.label_style);
+        const auto line_origin = text_origin + Size(tsize.width / 2, node.mark_data.label_offset_y > 0 ? -tsize.height : 0);
+        aSurface.line(line_origin, node.location, node.mark_data.line_color, node.mark_data.line_width);
     }
 
-} // DrawTree::draw_vaccines
+} // DrawTree::mark_nodes
 
 // ----------------------------------------------------------------------
 

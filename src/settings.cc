@@ -48,13 +48,13 @@ void SettingsClades::extract(const Clades& aClades)
 
 // ----------------------------------------------------------------------
 
-void SettingsVaccinesOnTree::add(std::string aId, std::string aLabel)
+void SettingsMarkNodesOnTree::add(std::string aId, std::string aLabel)
 {
     const auto found = std::find_if(begin(), end(), [&](const auto& e) { return e.id == aId; });
     if (found == end())
         emplace_back(aId, aLabel);
 
-} // SettingsVaccinesOnTree::add
+} // SettingsMarkNodesOnTree::add
 
 // ----------------------------------------------------------------------
 /// Local Variables:

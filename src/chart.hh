@@ -83,6 +83,18 @@ class DrawVaccineAntigen : public DrawAntigen
     virtual inline size_t level() const { return 9; }
 };
 
+class DrawMarkedAntigen : public DrawAntigen
+{
+ public:
+    inline DrawMarkedAntigen(const SettingsMarkAntigen& aData) : mData(aData) {}
+
+    virtual void draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
+    virtual inline size_t level() const { return 6; }
+
+ private:
+    SettingsMarkAntigen mData;
+};
+
 // ----------------------------------------------------------------------
 
 // class VaccineData
@@ -214,6 +226,7 @@ class Chart
     size_t tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const;
       // returns line_no for each antigen from aLeaves found in the chart
     std::vector<size_t> sequenced_antigens(const std::vector<const Node*>& aLeaves);
+    size_t marked_antigens(const SettingsMarkAntigens& aData, const std::vector<std::string>& aTrackedNames, size_t aSectionNo, const SettingsAntigenicMaps& aSettings) const;
 
     const Viewport& viewport() const { return mViewport; }
     void draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
@@ -239,6 +252,7 @@ class Chart
     DrawSequencedAntigen mDrawSequencedAntigen;
     mutable DrawTrackedAntigen mDrawTrackedAntigen;
     DrawVaccineAntigen mDrawVaccineAntigen;
+    mutable std::vector<DrawMarkedAntigen> mDrawMarkedAntigens;
 
     Viewport mViewport;
 

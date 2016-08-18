@@ -244,6 +244,7 @@ constexpr const Color RED = 0xFF0000;
 constexpr const Color GREEN = 0x00FF00;
 constexpr const Color BLUE = 0x0000FF;
 constexpr const Color PINK = 0xFFC0CB;
+constexpr const Color ORANGE = 0xFFA500;
 constexpr const Color TRANSPARENT = 0xFF000000;
 constexpr const Color COLOR_NOT_SET = Color::_not_set;
 

@@ -102,11 +102,11 @@ class SettingsAATransition
 
 // ----------------------------------------------------------------------
 
-class SettingsVaccineOnTree
+class SettingsMarkNodeOnTree
 {
  public:
-    inline SettingsVaccineOnTree() : label_size(10), label_offset_x(-50), label_offset_y(50), label_color(BLACK), line_color(BLACK), line_width(1) {}
-    inline SettingsVaccineOnTree(std::string aId, std::string aLabel) : id(aId), label(aLabel), label_size(10), label_offset_x(-50), label_offset_y(50), label_color(BLACK), line_color(BLACK), line_width(1) {}
+    inline SettingsMarkNodeOnTree() : label_size(10), label_offset_x(-50), label_offset_y(50), label_color(BLACK), line_color(BLACK), line_width(1) {}
+    inline SettingsMarkNodeOnTree(std::string aId, std::string aLabel) : id(aId), label(aLabel), label_size(10), label_offset_x(-50), label_offset_y(50), label_color(BLACK), line_color(BLACK), line_width(1) {}
 
     std::string id;
     std::string label;
@@ -118,7 +118,7 @@ class SettingsVaccineOnTree
     Color line_color;
     double line_width;
 
-    friend inline auto json_fields(SettingsVaccineOnTree& a)
+    friend inline auto json_fields(SettingsMarkNodeOnTree& a)
         {
             return std::make_tuple(
                 "id", &a.id,
@@ -133,17 +133,17 @@ class SettingsVaccineOnTree
                                    );
         }
 
-}; // class SettingsVaccineOnTree
+}; // class SettingsMarkNodeOnTree
 
 // ----------------------------------------------------------------------
 
-class SettingsVaccinesOnTree : public std::vector<SettingsVaccineOnTree>
+class SettingsMarkNodesOnTree : public std::vector<SettingsMarkNodeOnTree>
 {
  public:
-    inline SettingsVaccinesOnTree() {}
+    inline SettingsMarkNodesOnTree() {}
     void add(std::string aId, std::string aLabel);
 
-}; // class SettingsVaccinesOnTree
+}; // class SettingsMarkNodesOnTree
 
 // ----------------------------------------------------------------------
 
@@ -261,7 +261,7 @@ class SettingsDrawTree
     TextStyle label_style;
     double name_offset;
     SettingsAATransition aa_transition;
-    SettingsVaccinesOnTree vaccines;
+    SettingsMarkNodesOnTree mark_nodes;
     size_t grid_step;           // 0 - no grid, N - use N*vertical_step as grid cell height
     Color grid_color;
     double grid_width;
@@ -276,12 +276,13 @@ class SettingsDrawTree
                 "name_offset", &a.name_offset,
                 "label_style", &a.label_style,
                 "aa_transition", &a.aa_transition,
-                "vaccines", &a.vaccines,
                 "?grid_step", json::comment("grid_step: 0 - off, N - use N*vertical_step as grid cell height"),
                 "grid_step", &a.grid_step,
                 "grid_color", json::field(&a.grid_color, &Color::to_string, &Color::from_string),
                 "grid_width", &a.grid_width, // object_double_non_negative_value
-                "hz_line_sections", json::field(&a.hz_line_sections)
+                "hz_line_sections", json::field(&a.hz_line_sections),
+                  // "vaccines", &a.mark_nodes,
+                "mark_nodes", &a.mark_nodes
                                    );
         }
 
@@ -541,6 +542,43 @@ class SettingsClades
 
 // ----------------------------------------------------------------------
 
+class SettingsMarkAntigen
+{
+ public:
+    inline SettingsMarkAntigen() : scale(10), outline_color(TRANSPARENT), fill_color(ORANGE), outline_width(0.5), aspect(1), rotation(0) {}
+
+    std::string id, tree_id;    // if tree_id is empty, id is used to match node on the tree (if marked_antigens_on_all_maps is false)
+    double scale;
+    Color outline_color, fill_color;
+    double outline_width, aspect, rotation;
+
+    friend inline auto json_fields(SettingsMarkAntigen& a)
+        {
+            return std::make_tuple(
+                "id", &a.id,
+                "tree_id", &a.tree_id,
+                "scale", &a.scale,
+                "outline_color", json::field(&a.outline_color, &Color::to_string, &Color::from_string),
+                "fill_color", json::field(&a.fill_color, &Color::to_string, &Color::from_string),
+                "outline_width", &a.outline_width,
+                "aspect", &a.aspect,
+                "rotation", &a.rotation
+                                   );
+        }
+
+}; // class SettingsMarkAntigen
+
+// ----------------------------------------------------------------------
+
+class SettingsMarkAntigens : public std::vector<SettingsMarkAntigen>
+{
+ public:
+    inline SettingsMarkAntigens() {}
+
+}; // class SettingsMarkNodesOnTree
+
+// ----------------------------------------------------------------------
+
 class SettingsAntigenicMaps
 {
  public:
@@ -553,7 +591,7 @@ class SettingsAntigenicMaps
           serum_outline_color(LIGHT_GREY), reference_antigen_outline_color(LIGHT_GREY), test_antigen_outline_color(LIGHT_GREY),
           test_antigen_fill_color(LIGHT_GREY), vaccine_antigen_outline_color(BLACK), sequenced_antigen_outline_color(BLACK), sequenced_antigen_fill_color(LIGHT_GREY),
           tracked_antigen_outline_color(BLACK),
-          egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0), maps_for_sections_without_antigens(false)
+          egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false)
         {}
 
     double border_width, grid_line_width;
@@ -566,6 +604,8 @@ class SettingsAntigenicMaps
     double egg_antigen_aspect, reassortant_rotation;
     bool maps_for_sections_without_antigens; // draw maps for sections having no tracked antigens
     Transformation map_transformation;
+    SettingsMarkAntigens mark_antigens;
+    bool marked_antigens_on_all_maps; // if false, antigen is marked if it is tracked on this map
 
     friend inline auto json_fields(SettingsAntigenicMaps& a)
         {
@@ -601,7 +641,9 @@ class SettingsAntigenicMaps
                 "tracked_antigen_outline_color", json::field(&a.tracked_antigen_outline_color, &Color::to_string, &Color::from_string),
                 "sequenced_antigen_outline_width", &a.sequenced_antigen_outline_width,
                 "sequenced_antigen_outline_color", json::field(&a.sequenced_antigen_outline_color, &Color::to_string, &Color::from_string),
-                "sequenced_antigen_fill_color", json::field(&a.sequenced_antigen_fill_color, &Color::to_string, &Color::from_string)
+                "sequenced_antigen_fill_color", json::field(&a.sequenced_antigen_fill_color, &Color::to_string, &Color::from_string),
+                "marked_antigens_on_all_maps", &a.marked_antigens_on_all_maps,
+                "mark_antigens", &a.mark_antigens
                                    );
         }
 

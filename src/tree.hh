@@ -289,6 +289,7 @@ class Tree : public Node
     friend inline auto json_fields(Tree& a)
         {
             return std::make_tuple(
+                "_", json::comment("-*- js-indent-level: 1 -*-"),
                 "  version", &a.mJsonDumpVersion,
                 "settings", &a.mSettings,
                 "tree", static_cast<Node*>(&a)

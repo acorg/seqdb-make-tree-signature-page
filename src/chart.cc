@@ -153,13 +153,42 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
 
 // ----------------------------------------------------------------------
 
+size_t Chart::marked_antigens(const SettingsMarkAntigens& aData, const std::vector<std::string>& aTrackedNames, size_t /*aSectionNo*/, const SettingsAntigenicMaps& aSettings) const
+{
+    mDrawMarkedAntigens.clear();
+    mDrawMarkedAntigens.reserve(aData.size()); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
+
+    for (const auto& entry: aData) {
+        const bool tracked = std::find(aTrackedNames.begin(), aTrackedNames.end(), entry.tree_id.empty() ? entry.id : entry.tree_id) != aTrackedNames.end();
+        if (aSettings.marked_antigens_on_all_maps || tracked) {
+            const auto p = mPointByName.find(entry.id);
+            if (p != mPointByName.end()) {
+                mDrawMarkedAntigens.emplace_back(entry);
+                mDrawPoints[p->second] = &mDrawMarkedAntigens[mDrawMarkedAntigens.size() - 1];
+            }
+            else {
+                const std::string prefix(entry.id, 0, entry.id.find(1, ' '));
+                if (mPrefixName.find(prefix) != mPrefixName.end())
+                    std::cerr << "Error: cannot find chart antigen by name: " << entry.id << std::endl;
+            }
+        }
+        else {
+              //std::cout << "section " << aSectionNo << " not tracked [" << entry.id << "] [" << entry.tree_id << "]" << std::endl;
+        }
+    }
+    return mDrawMarkedAntigens.size();
+
+} // Chart::marked_antigens
+
+// ----------------------------------------------------------------------
+
 void Chart::draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     size_t drawn = 0;
     for (size_t level = 0; level < 10 && drawn < mDrawPoints.size(); ++level) {
         for (size_t point_no = 0; point_no < mDrawPoints.size(); ++point_no) {
-            if (mDrawPoints[point_no]->level() == level) {
-                mDrawPoints[point_no]->draw(aSurface, mPoints[point_no], mPlot.style(point_no), aObjectScale, aSettings);
+           if (mDrawPoints[point_no]->level() == level) {
+                 mDrawPoints[point_no]->draw(aSurface, mPoints[point_no], mPlot.style(point_no), aObjectScale, aSettings);
                 ++drawn;
             }
         }
@@ -241,6 +270,16 @@ void DrawVaccineAntigen::draw(Surface& aSurface, const Point& aPoint, const Poin
     }
 
 } // DrawVaccineAntigen::draw
+
+// ----------------------------------------------------------------------
+
+void DrawMarkedAntigen::draw(Surface& aSurface, const Point& aPoint, const PointStyle& /*aStyle*/, double aObjectScale, const SettingsAntigenicMaps& /*aSettings*/) const
+{
+    if (!aPoint.coordinates.isnan()) {
+        aSurface.circle_filled(aPoint.coordinates, mData.scale * aObjectScale, mData.aspect, mData.rotation, mData.outline_color, mData.outline_width * aObjectScale, mData.fill_color);
+    }
+
+} // DrawMarkedAntigen::draw
 
 // ----------------------------------------------------------------------
 // json
