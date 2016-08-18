@@ -19,6 +19,8 @@ class BasicRunner:
     def __init__(self, working_dir, wait_timeout, seqdb, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_settings, garli_settings, email, machines):
         self.seqdb = seqdb
         self.wait_timeout = wait_timeout
+        self.raxml_output_dir = Path(working_dir, "raxml")
+        self.garli_output_dir = Path(working_dir, "garli")
         self.settings = {
             "working_dir": working_dir,
             "run_id": run_id.replace(' ', '-').replace('/', '-'), # raxml cannot handle spaces and slashes in run-id
@@ -30,6 +32,8 @@ class BasicRunner:
             "email": email,
             "machines": machines,
             }
+        self.settings["raxml"]["output_dir"] = str(self.raxml_output_dir)
+        self.settings["garli"]["output_dir"] = str(self.garli_output_dir)
         self.state = "init"               # init, raxml_submitted, garli_submitted, completed
         self.save_settings()
 
@@ -43,13 +47,12 @@ class BasicRunner:
         getattr(self, "on_state_" + self.state)()   # on_state_* must be provided by derived classes
 
     def raxml_submit(self):
-        self.raxml_output_dir = Path(self.settings["working_dir"], "raxml")
         raxml = Raxml(email=self.settings["email"])
         self.raxml_task = raxml.submit_htcondor(
             num_runs=self.settings["raxml"]["num_runs"],
             source=Path(self.settings["fasta_file"]),
             source_tree=self.raxml_source_tree(),
-            output_dir=Path(self.settings["raxml"]["output_dir"]),
+            output_dir=self.settings["raxml"]["output_dir"],
             run_id=self.settings["run_id"],
             bfgs=self.settings["raxml"]["bfgs"],
             model_optimization_precision=self.settings["raxml"]["model_optimization_precision"],
@@ -67,13 +70,12 @@ class BasicRunner:
         return None
 
     def garli_submit(self, tree):
-        self.garli_output_dir = Path(self.settings["working_dir"], "garli")
         garli = Garli(email=self.settings["email"])
         self.garli_task = garli.submit_htcondor(
             num_runs=self.settings["garli"]["num_runs"],
             source=self.settings["fasta_file"],
             source_tree=tree,
-            output_dir=Path(self.settings["garli"]["output_dir"]),
+            output_dir=self.settings["garli"]["output_dir"],
             run_id=self.settings["run_id"],
             attachmentspertaxon=self.settings["garli"]["attachmentspertaxon"],
             stoptime=self.settings["garli"]["stoptime"],
