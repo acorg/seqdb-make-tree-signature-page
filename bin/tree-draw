@@ -90,7 +90,7 @@ def main(args):
 
     signature_page = seqdb.SignaturePage()
     if args.title:
-        signature_page.title(seqdb.Text(seqdb.Location(0, 11), title, 0, 18))   # 20
+        signature_page.title(seqdb.Text(seqdb.Location(0, 11), args.title, 0, 18))   # 20
     (signature_page
      .select_parts(parts)
      .color_by_continent(args.color_by_continent)
