@@ -32,8 +32,8 @@ class BasicRunner:
             "email": email,
             "machines": machines,
             }
-        self.settings["raxml"]["output_dir"] = str(self.raxml_output_dir)
-        self.settings["garli"]["output_dir"] = str(self.garli_output_dir)
+        self.settings["raxml"]["output_dir"] = self.raxml_output_dir
+        self.settings["garli"]["output_dir"] = self.garli_output_dir
         self.state = "init"               # init, raxml_submitted, garli_submitted, completed
         self.save_settings()
 
