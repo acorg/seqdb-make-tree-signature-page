@@ -153,14 +153,14 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
 
 // ----------------------------------------------------------------------
 
-size_t Chart::marked_antigens(const SettingsMarkAntigens& aData, const std::vector<std::string>& aTrackedNames, size_t /*aSectionNo*/, const SettingsAntigenicMaps& aSettings) const
+size_t Chart::marked_antigens(const SettingsMarkAntigens& aData, const std::vector<std::string>& aTrackedNames, size_t aSectionNo, const SettingsAntigenicMaps& aSettings) const
 {
     mDrawMarkedAntigens.clear();
     mDrawMarkedAntigens.reserve(aData.size()); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
 
     for (const auto& entry: aData) {
         const bool tracked = std::find(aTrackedNames.begin(), aTrackedNames.end(), entry.tree_id.empty() ? entry.id : entry.tree_id) != aTrackedNames.end();
-        if (aSettings.marked_antigens_on_all_maps || tracked) {
+        if (aSettings.marked_antigens_on_all_maps || tracked || (entry.show_on_map >= 0  && static_cast<size_t>(entry.show_on_map) == aSectionNo)) {
             const auto p = mPointByName.find(entry.id);
             if (p != mPointByName.end()) {
                 mDrawMarkedAntigens.emplace_back(entry);
@@ -277,6 +277,14 @@ void DrawMarkedAntigen::draw(Surface& aSurface, const Point& aPoint, const Point
 {
     if (!aPoint.coordinates.isnan()) {
         aSurface.circle_filled(aPoint.coordinates, mData.scale * aObjectScale, mData.aspect, mData.rotation, mData.outline_color, mData.outline_width * aObjectScale, mData.fill_color);
+        if (!mData.label.empty()) {
+            const TextStyle style(mData.label_font);
+            const auto text_size = aSurface.text_size(mData.label, mData.label_scale, style);
+            const Location text_origin = aPoint.coordinates + Size(mData.label_offset_x, mData.label_offset_y);
+            aSurface.text(text_origin, mData.label, mData.label_color, mData.label_scale, style);
+            const Location text_middle = text_origin + Size(text_size.width / 2, text_origin.y > aPoint.coordinates.y ? - text_size.height * 1.2 : text_size.height * 0.2);
+            aSurface.line(aPoint.coordinates, text_middle, mData.label_line_color, mData.label_line_width);
+        }
     }
 
 } // DrawMarkedAntigen::draw

@@ -545,12 +545,18 @@ class SettingsClades
 class SettingsMarkAntigen
 {
  public:
-    inline SettingsMarkAntigen() : scale(10), outline_color(TRANSPARENT), fill_color(ORANGE), outline_width(0.5), aspect(1), rotation(0) {}
+    inline SettingsMarkAntigen() : scale(10), outline_color(TRANSPARENT), fill_color(ORANGE), outline_width(0.5), aspect(1), rotation(0), show_on_map(-1),
+                                   label_scale(1), label_offset_x(0), label_offset_y(0), label_line_width(0.1), label_color(BLACK), label_line_color(BLACK), label_font("default") {}
 
     std::string id, tree_id;    // if tree_id is empty, id is used to match node on the tree (if marked_antigens_on_all_maps is false)
     double scale;
     Color outline_color, fill_color;
     double outline_width, aspect, rotation;
+    int show_on_map;            // force showing antigen on the map corresponding to this section number, -1 - ignore this
+    std::string label;
+    double label_scale, label_offset_x, label_offset_y, label_line_width;
+    Color label_color, label_line_color;
+    std::string label_font;
 
     friend inline auto json_fields(SettingsMarkAntigen& a)
         {
@@ -562,7 +568,16 @@ class SettingsMarkAntigen
                 "fill_color", json::field(&a.fill_color, &Color::to_string, &Color::from_string),
                 "outline_width", &a.outline_width,
                 "aspect", &a.aspect,
-                "rotation", &a.rotation
+                "rotation", &a.rotation,
+                "show_on_map", &a.show_on_map,
+                "label_scale", &a.label_scale,
+                "label_offset_x", &a.label_offset_x,
+                "label_offset_y", &a.label_offset_y,
+                "label_line_width", &a.label_line_width,
+                "label_color", json::field(&a.label_color, &Color::to_string, &Color::from_string),
+                "label_line_color", json::field(&a.label_line_color, &Color::to_string, &Color::from_string),
+                "label_font", &a.label_font,
+                "label", &a.label
                                    );
         }
 
