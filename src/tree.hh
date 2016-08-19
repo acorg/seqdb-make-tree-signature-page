@@ -144,6 +144,9 @@ class Node
     double edge_length_to_next;
     mutable size_t vertical_gap_before; // if this node is the beginning of the hz line section, we may need to add gap when enumerating lines
 
+      // for matching hi names for signature page
+    std::vector<std::string> hi_names;
+
     inline Node* find_path_to_first_leaf(std::vector<std::pair<size_t, Node*>>& path)
         {
             if (is_leaf()) {

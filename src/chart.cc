@@ -118,7 +118,14 @@ std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aL
     mSequencedAntigens.clear();
     std::vector<size_t> lines;
     for (const auto& leaf: aLeaves) {
-        const auto p = mPointByName.find(leaf->name);
+        auto p = mPointByName.find(leaf->name);
+        if (p == mPointByName.end()) {
+            for (const std::string& hi_name: leaf->hi_names) {
+                p = mPointByName.find(hi_name);
+                if (p != mPointByName.end())
+                    break;
+            }
+        }
         if (p != mPointByName.end()) {
             mSequencedAntigens.insert(p->second);
             lines.push_back(leaf->line_no);

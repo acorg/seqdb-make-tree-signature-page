@@ -48,8 +48,10 @@ class SeqdbUpdater:
 
     def match_hidb(self):
         if self.hidb:
+            module_logger.debug('Removing old hi names')
             self.seqdb.remove_hi_names()
             self.hidb_already_matched = set()
+            module_logger.debug('Matching hi names')
             for seqdb_entry in self.seqdb.iter_entry():
                 self._match_hidb(seqdb_entry)
 
@@ -95,11 +97,13 @@ class SeqdbUpdater:
     def _match_hidb(self, seqdb_entry):
         hi_entry = self.hidb.find_antigen_by_name(seqdb_entry.name, virus_type=seqdb_entry.virus_type)
         if not hi_entry: # and seqdb_member.seq.has_lab("CDC"):
-            # module_logger.debug('find by cdcid {} {}'.format(name, seqdb_entry.cdcids()))
+            # module_logger.debug('find by cdcid {} {}'.format(seqdb_entry.name, seqdb_entry.cdcids()))
             for cdcid in seqdb_entry.cdcids():
                 hi_entry = self.hidb.find_antigen_by_cdcid(cdcid, virus_type=seqdb_entry.virus_type)
                 if hi_entry:
                     break
+            if hi_entry and seqdb_entry.name == "A(H3N2)/TEXAS/88/2016":
+                module_logger.debug('by cdcid {} {} -> {}'.format(seqdb_entry.name, seqdb_entry.cdcids(), hi_entry["N"]))
         if hi_entry:
             try:
                 matches = self.hidb.match(name=seqdb_entry.name,
@@ -109,7 +113,7 @@ class SeqdbUpdater:
                 module_logger.error('hi_entry {}'.format(hi_entry))
                 #module_logger.error('e2l {}'.format(e2l))
                 raise
-            # if "B/TEXAS/2/2013" in seqdb_entry.name: # "RV2366" in name:
+            # if "TEXAS/88/2016" in seqdb_entry.name: # "RV2366" in name:
             #     module_logger.debug('{}\n{}\nseq_passages_reassortant:{}\nhi_entry:{}\n'.format(seqdb_entry.name, pprint.pformat(matches), pprint.pformat([{"p": seq.passages or [""], "r": seq.reassortant or [""]} for seq in seqdb_entry]), pprint.pformat(hi_entry, width=200)))
             if matches:
                 self._apply_matches(matches, seqdb_entry.name, seqdb_entry, hi_entry)
@@ -117,18 +121,20 @@ class SeqdbUpdater:
     def _apply_matches(self, matches, name, seqdb_entry, hi_entry):
         # matches is list of dicts {"s": seq_passage, "r": seq_reassortant, "h": hi_variant}
         for m in matches:
-            hi_name = self._make_hi_name(name, m["h"])
-            if hi_name not in self.hidb_already_matched:
-                for seq in seqdb_entry:
-                    if m["p"] in seq.passages and set(m["r"]) & set(seq.reassortant):
-                        self.hidb_already_matched.add(hi_name)
-                        seq.add_hi_name(hi_name)
-                        msg = seqdb_entry.update_lineage(lineage=hi_entry.get("l", ""))
-                        if msg:
-                            module_logger.warning('Lineage mismatch for {} {}: seq:{} hi:{}'.format(name, hi_name, seqdb_entry.lineage, hi_entry.get("l", "")))
-                        for date in hi_entry.get("d", []):
-                            seqdb_entry.add_date(date)
-                        break
+            for hi_name in (self._make_hi_name(name, m["h"]), self._make_hi_name(hi_entry["N"], m["h"])):
+                # if "TEXAS/88/2016" in name:
+                #     module_logger.debug('{} hi_name: {} hi-entry: {}\n{}'.format(name, hi_name, hi_entry["N"], m))
+                if hi_name not in self.hidb_already_matched:
+                    for seq in seqdb_entry:
+                        if m["p"] in seq.passages and set(m["r"]) & set(seq.reassortant):
+                            self.hidb_already_matched.add(hi_name)
+                            seq.add_hi_name(hi_name)
+                            msg = seqdb_entry.update_lineage(lineage=hi_entry.get("l", ""))
+                            if msg:
+                                module_logger.warning('Lineage mismatch for {} {}: seq:{} hi:{}'.format(name, hi_name, seqdb_entry.lineage, hi_entry.get("l", "")))
+                            for date in hi_entry.get("d", []):
+                                seqdb_entry.add_date(date)
+                            break
 
     sVariantFieldOrder = [hidb_m.sReassortantKey, hidb_m.sSerumIdKey, hidb_m.sPassageKey, hidb_m.sAnnotationsKey, hidb_m.sExtraKey, hidb_m.sSerumSpeciesKey]
 

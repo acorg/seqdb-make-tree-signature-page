@@ -346,6 +346,7 @@ void Tree::match_seqdb(const Seqdb& aSeqdb)
             aNode.aa = entry_seq.seq().amino_acids(true);
             ++virus_types[entry_seq.entry().virus_type()];
             ++lineages[entry_seq.entry().lineage()];
+            aNode.hi_names = entry_seq.seq().hi_names();
         }
     };
     iterate_leaf(*this, match_name);
@@ -388,10 +389,16 @@ std::vector<std::string> Tree::names_between(std::string first, std::string last
         if (!collect && aNode.name == first)
             collect = true;
         if (collect) {
-            if (aNode.name == last)
+            if (aNode.name == last) {
                 collect = false;
-            else
+            }
+            else {
                 names.push_back(aNode.name);
+                for (const std::string& hi_name: aNode.hi_names) {
+                    if (hi_name != aNode.name)
+                        names.push_back(hi_name);
+                }
+            }
         }
     };
     iterate_leaf(*this, get_name);

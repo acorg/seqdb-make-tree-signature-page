@@ -26,8 +26,20 @@ def update(seqdb_path :Path, acmacs_url, hidb_dir :Path, sequence_store_dir :Pat
     db_updater = SeqdbUpdater(db, filename=seqdb_path, load=load_existing_seqdb, hidb=hidb)
     read_file_one_by_one_update_db(db_updater, files)
     db_updater.match_hidb()
-    db_updater.add_clades()               # note clades must be updated after matching with hidb, because matching provides infor about B lineage
+    db_updater.add_clades()               # clades must be updated after matching with hidb, because matching provides info about B lineage
     module_logger.info(db.report())
+    if save_seqdb:
+        db_updater.save(indent=1)
+    return db
+
+# ----------------------------------------------------------------------
+
+def match_hidb(seqdb_path :Path, hidb_dir :Path, save_seqdb=True):
+    db = Seqdb()
+    hidb = HiDb(hidb_dir)
+    db_updater = SeqdbUpdater(db, filename=seqdb_path, load=True, hidb=hidb)
+    db_updater.match_hidb()
+    db_updater.add_clades()               # clades must be updated after matching with hidb, because matching provides info about B lineage
     if save_seqdb:
         db_updater.save(indent=1)
     return db
