@@ -7,8 +7,6 @@
 
 // ----------------------------------------------------------------------
 
-class Surface;
-class Viewport;
 class Tree;
 class DrawTree;
 

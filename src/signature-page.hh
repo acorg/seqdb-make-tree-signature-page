@@ -14,7 +14,6 @@ class AntigenicMaps;
 class SettingsSignaturePage;
 class SettingsTitle;
 
-class Surface;
 class Tree;
 class Node;
 class Chart;

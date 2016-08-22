@@ -17,7 +17,7 @@ class SettingsAATransition
     class TransitionData
     {
      public:
-        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("monospace"), interline(empty ? -1 : 1.2) {}
+        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("Courier New"), interline(empty ? -1 : 1.2) {}
         inline TransitionData(std::string aBranchId, std::vector<std::string>&& aLabels) : TransitionData(true) { branch_id = aBranchId; labels = std::move(aLabels); }
 
         double size;
@@ -252,7 +252,7 @@ class SettingsDrawTree
 {
  public:
     inline SettingsDrawTree()
-        : root_edge(0), line_color(0), line_width(1), label_style(), name_offset(0.2), grid_step(0), grid_color(0x80000000), grid_width(0.3)
+        : root_edge(0), line_color(0), line_width(1), label_style("Helvetica Neue"), name_offset(0.2), grid_step(0), grid_color(0x80000000), grid_width(0.3)
            {}
 
     double root_edge;

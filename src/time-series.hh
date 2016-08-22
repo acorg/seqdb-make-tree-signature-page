@@ -3,8 +3,6 @@
 #include "draw.hh"
 #include "date.hh"
 
-class Surface;
-class Viewport;
 class DrawTree;
 class SettingsTimeSeries;
 class Tree;

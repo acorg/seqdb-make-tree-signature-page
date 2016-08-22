@@ -18,6 +18,8 @@ SEQDB_SOURCES = seqdb.cc seqdb-py.cc amino-acids.cc clades.cc \
 		signature-page.cc draw-tree.cc time-series.cc draw-clades.cc antigenic-maps.cc \
 		read-file.cc xz.cc
 
+TEST_CAIRO_SOURCES = test-cairo.cc draw.cc
+
 # ----------------------------------------------------------------------
 
 CLANG = $(shell if g++ --version 2>&1 | grep -i llvm >/dev/null; then echo Y; else echo N; fi)
@@ -39,7 +41,7 @@ PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 OPTIMIZATION = -O3 #-fvisibility=hidden -flto
 CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
 LDFLAGS =
-TEST_LDLIBS = $$(pkg-config --libs liblzma)
+TEST_CAIRO_LDLIBS = $$(pkg-config --libs cairo)
 SEQDB_LDLIBS = $$(pkg-config --libs cairo) $$(pkg-config --libs liblzma) $$($(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
 
 MODULES_INCLUDE = -Imodules/json/src -Imodules/axe/include -Imodules/pybind11/include -Imodules/json-struct
@@ -50,14 +52,14 @@ PKG_INCLUDES = $$(pkg-config --cflags cairo) $$(pkg-config --cflags liblzma) $$(
 BUILD = build
 DIST = dist
 
-all: $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX)
+all: $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX) $(DIST)/test-cairo
 
 -include $(BUILD)/*.d
 
 # ----------------------------------------------------------------------
 
-$(DIST)/test: $(patsubst %.cc,$(BUILD)/%.o,$(TEST_SOURCES)) | $(DIST)
-	g++ $(LDFLAGS) -o $@ $^ $(TEST_LDLIBS)
+$(DIST)/test-cairo: $(patsubst %.cc,$(BUILD)/%.o,$(TEST_CAIRO_SOURCES)) | $(DIST)
+	g++ $(LDFLAGS) -o $@ $^ $(TEST_CAIRO_LDLIBS)
 
 $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX): $(patsubst %.cc,$(BUILD)/%.o,$(SEQDB_SOURCES)) | $(DIST)
 	g++ -shared $(LDFLAGS) -o $@ $^ $(SEQDB_LDLIBS)
