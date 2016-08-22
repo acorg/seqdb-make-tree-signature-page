@@ -598,20 +598,21 @@ class SettingsAntigenicMaps
 {
  public:
     inline SettingsAntigenicMaps()
-        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(WHITE), gap_between_maps(0.005),
+        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(0xFFFFF8), gap_between_maps(0.005), max_number_columns(100),
           map_zoom(1.1), map_x_offset(0), map_y_offset(0),
-          serum_scale(5), reference_antigen_scale(8), test_antigen_scale(5), vaccine_antigen_scale(15), tracked_antigen_scale(8),
+          serum_scale(5), reference_antigen_scale(5), test_antigen_scale(3), vaccine_antigen_scale(8), tracked_antigen_scale(5),
           serum_outline_width(0.5), reference_antigen_outline_width(0.5), test_antigen_outline_width(0.5), vaccine_antigen_outline_width(0.5),
           sequenced_antigen_outline_width(0.5), tracked_antigen_outline_width(0.5),
           serum_outline_color(LIGHT_GREY), reference_antigen_outline_color(LIGHT_GREY), test_antigen_outline_color(LIGHT_GREY),
-          test_antigen_fill_color(LIGHT_GREY), vaccine_antigen_outline_color(BLACK), sequenced_antigen_outline_color(BLACK), sequenced_antigen_fill_color(LIGHT_GREY),
-          tracked_antigen_outline_color(BLACK),
+          test_antigen_fill_color(LIGHT_GREY), vaccine_antigen_outline_color(WHITE), sequenced_antigen_outline_color(WHITE), sequenced_antigen_fill_color(0xA0A0A0),
+          tracked_antigen_outline_color(WHITE),
           egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false)
         {}
 
     double border_width, grid_line_width;
     Color border_color, grid_color, background_color;
     double gap_between_maps;    // relative to canvas width
+    size_t max_number_columns;  // do not make more columns that this value in the bw_vpos layout
     double map_zoom, map_x_offset, map_y_offset; // zoom>1 means zoom out, offsets are in the antigenic units
     double serum_scale, reference_antigen_scale, test_antigen_scale, vaccine_antigen_scale, tracked_antigen_scale;
     double serum_outline_width, reference_antigen_outline_width, test_antigen_outline_width, vaccine_antigen_outline_width, sequenced_antigen_outline_width, tracked_antigen_outline_width;
@@ -625,13 +626,14 @@ class SettingsAntigenicMaps
     friend inline auto json_fields(SettingsAntigenicMaps& a)
         {
             return std::make_tuple(
+                "gap_between_maps", &a.gap_between_maps,
+                "max_number_columns", &a.max_number_columns,
                 "maps_for_sections_without_antigens", &a.maps_for_sections_without_antigens,
                 "border_width", &a.border_width, // object_double_non_negative_value
                 "border_color", json::field(&a.border_color, &Color::to_string, &Color::from_string),
                 "grid_line_width", &a.grid_line_width, // object_double_non_negative_value
                 "grid_color", json::field(&a.grid_color, &Color::to_string, &Color::from_string),
                 "background_color", json::field(&a.background_color, &Color::to_string, &Color::from_string),
-                "gap_between_maps", &a.gap_between_maps,
                 "map_x_offset", &a.map_x_offset,
                 "map_y_offset", &a.map_y_offset,
                 "map_zoom", &a.map_zoom,
