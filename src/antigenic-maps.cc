@@ -136,7 +136,7 @@ Size AntigenicMapsVpos::size(const Viewport& /*aPageArea*/, const SettingsAntige
 
 AntigenicMapsVpos& AntigenicMapsVpos::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
 {
-    mCellHeight = aPageArea.size.height * aSections.map_height_fraction_of_page;
+    mCellHeight = aPageArea.size.height * aSettings.map_height_fraction_of_page;
     AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
 
     return *this;

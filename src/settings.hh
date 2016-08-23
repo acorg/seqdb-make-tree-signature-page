@@ -184,7 +184,7 @@ class HzLineSections : public std::vector<HzLineSection>
  public:
     enum Mode { ColoredGrid, BWVpos };
 
-    inline HzLineSections() : mode(ColoredGrid), map_height_fraction_of_page(0.25), hz_line_width(0.5), hz_line_color(GREY),
+    inline HzLineSections() : mode(ColoredGrid), hz_line_width(0.5), hz_line_color(GREY),
                               sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
                               this_section_antigen_color(0x75DB51),
                               connecting_pipe_border_color(BLACK), connecting_pipe_background_color(0xFFFFF8), connecting_pipe_border_width(1),
@@ -196,7 +196,6 @@ class HzLineSections : public std::vector<HzLineSection>
         }
 
     Mode mode;
-    double map_height_fraction_of_page;
     double hz_line_width;
     Color hz_line_color;
     bool sequenced_antigen_line_show;
@@ -227,7 +226,6 @@ class HzLineSections : public std::vector<HzLineSection>
     friend inline auto json_fields(HzLineSections& a)
         {
             return std::make_tuple(
-                "map_height_fraction_of_page", &a.map_height_fraction_of_page,
                 "this_section_antigen_color", json::field(&a.this_section_antigen_color, &Color::to_string, &Color::from_string),
                 "connecting_pipe_border_color", json::field(&a.connecting_pipe_border_color, &Color::to_string, &Color::from_string),
                 "connecting_pipe_background_color", json::field(&a.connecting_pipe_background_color, &Color::to_string, &Color::from_string),
@@ -598,7 +596,8 @@ class SettingsAntigenicMaps
 {
  public:
     inline SettingsAntigenicMaps()
-        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(0xFFFFF8), gap_between_maps(0.005), max_number_columns(100),
+        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(0xFFFFF8),
+          map_height_fraction_of_page(0.15), gap_between_maps(0.005), max_number_columns(100),
           map_zoom(1.1), map_x_offset(0), map_y_offset(0),
           serum_scale(5), reference_antigen_scale(5), test_antigen_scale(3), vaccine_antigen_scale(8), tracked_antigen_scale(5),
           serum_outline_width(0.5), reference_antigen_outline_width(0.5), test_antigen_outline_width(0.5), vaccine_antigen_outline_width(0.5),
@@ -611,6 +610,7 @@ class SettingsAntigenicMaps
 
     double border_width, grid_line_width;
     Color border_color, grid_color, background_color;
+    double map_height_fraction_of_page;
     double gap_between_maps;    // relative to canvas width
     size_t max_number_columns;  // do not make more columns that this value in the bw_vpos layout
     double map_zoom, map_x_offset, map_y_offset; // zoom>1 means zoom out, offsets are in the antigenic units
@@ -626,6 +626,7 @@ class SettingsAntigenicMaps
     friend inline auto json_fields(SettingsAntigenicMaps& a)
         {
             return std::make_tuple(
+                "map_height_fraction_of_page", &a.map_height_fraction_of_page,
                 "gap_between_maps", &a.gap_between_maps,
                 "max_number_columns", &a.max_number_columns,
                 "maps_for_sections_without_antigens", &a.maps_for_sections_without_antigens,
