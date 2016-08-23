@@ -156,7 +156,6 @@ void AntigenicMapsVpos::calculate_viewports(Tree& aTree, Chart* aChart, const Vi
         vertical_step = aViewport.size.height / (aTree.height() + 2); // preliminary step to get preliminary maps layout
 
     std::vector<double> slot_bottom;
-    const size_t max_num_slots = 4;
 
     for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
         const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], WHITE, aSettings);
@@ -180,12 +179,13 @@ void AntigenicMapsVpos::calculate_viewports(Tree& aTree, Chart* aChart, const Vi
                 }
             }
             if (slot_no == SLOT_NOT_CHOSEN) {
-                if (slot_bottom.size() < max_num_slots) {
+                if (slot_bottom.size() < aSettings.max_number_columns) {
                     slot_bottom.push_back(0.0);
                     slot_no = slot_bottom.size() - 1;
                 }
                 else {
-                    slot_no = 0;
+                    const auto best = std::min_element(slot_bottom.begin(), slot_bottom.end());
+                    slot_no = static_cast<size_t>(best - slot_bottom.begin());
                     top = slot_bottom[slot_no] + gap_between_maps();
                 }
             }
