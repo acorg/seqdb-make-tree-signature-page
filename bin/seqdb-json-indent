@@ -1,0 +1,43 @@
+#! /usr/bin/env python3
+# -*- Python -*-
+
+"""Reformats json, e.g. tree"""
+
+import sys, traceback
+if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
+from pathlib import Path
+sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
+import logging; module_logger = logging.getLogger(__name__)
+
+from seqdb import json
+
+# ----------------------------------------------------------------------
+
+def main(args):
+    data = json.loadf(args.input[0])
+    json.dumpf(args.output[0], data, indent=args.indent)
+
+# ----------------------------------------------------------------------
+
+try:
+    import argparse
+    # print(" ".join(repr(a) for a in sys.argv))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
+
+    parser.add_argument('input', nargs=1, help='source json.')
+    parser.add_argument('output', nargs=1, help='output json.')
+    parser.add_argument('-i', '--indent', action='store', type=int, dest='indent', default=1, help='Indent level.')
+
+    args = parser.parse_args()
+    logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")
+    exit_code = main(args)
+except Exception as err:
+    logging.error('{}\n{}'.format(err, traceback.format_exc()))
+    exit_code = 1
+exit(exit_code)
+
+# ======================================================================
+### Local Variables:
+### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+### End:
