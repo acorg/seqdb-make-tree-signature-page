@@ -1,0 +1,7 @@
+#! /bin/bash
+if [ $# -ne 3 ]; then
+    echo Usage: $0 "<chart.sdb>" "<tree.json>" "<output.pdf>" >&2
+    exit 1
+fi
+~/GH/seqdb/bin/seqdb-tree-draw --db ~/WHO/seqdb.json.xz --continents --show-aa-transitions all --chart "$1" "$2" "$3" &&
+    open "$3"

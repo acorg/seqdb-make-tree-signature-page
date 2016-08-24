@@ -117,7 +117,9 @@ std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aL
 {
     mSequencedAntigens.clear();
     std::vector<size_t> lines;
+    size_t number_of_leaves = 0;
     for (const auto& leaf: aLeaves) {
+        ++number_of_leaves;
         auto p = mPointByName.find(leaf->name);
         if (p == mPointByName.end()) {
             for (const std::string& hi_name: leaf->hi_names) {
@@ -131,6 +133,8 @@ std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aL
             lines.push_back(leaf->line_no);
         }
     }
+    std::cout << lines.size() << " sequenced antigens found in the chart" << std::endl;
+    std::cout << number_of_leaves << " leaves in the tree" << std::endl;
     return lines;
 
 } // Chart::sequenced_antigens

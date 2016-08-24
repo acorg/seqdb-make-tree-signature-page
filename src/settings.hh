@@ -184,11 +184,11 @@ class HzLineSections : public std::vector<HzLineSection>
  public:
     enum Mode { ColoredGrid, BWVpos };
 
-    inline HzLineSections() : mode(ColoredGrid), hz_line_width(0.5), hz_line_color(GREY),
+    inline HzLineSections() : mode(BWVpos), hz_line_width(0.5), hz_line_color(GREY),
                               sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
                               this_section_antigen_color(0x75DB51),
                               connecting_pipe_border_color(BLACK), connecting_pipe_background_color(0xFFFFF8), connecting_pipe_border_width(1),
-                              vertical_gap(1) {}
+                              vertical_gap(25) {}
 
     inline void sort()
         {
@@ -226,18 +226,18 @@ class HzLineSections : public std::vector<HzLineSection>
     friend inline auto json_fields(HzLineSections& a)
         {
             return std::make_tuple(
+                "vertical_gap", &a.vertical_gap,
+                "hz_line_sections", static_cast<std::vector<HzLineSection>*>(&a),
+                "hz_line_width", &a.hz_line_width,
+                "hz_line_color", json::field(&a.hz_line_color, &Color::to_string, &Color::from_string),
                 "this_section_antigen_color", json::field(&a.this_section_antigen_color, &Color::to_string, &Color::from_string),
                 "connecting_pipe_border_color", json::field(&a.connecting_pipe_border_color, &Color::to_string, &Color::from_string),
                 "connecting_pipe_background_color", json::field(&a.connecting_pipe_background_color, &Color::to_string, &Color::from_string),
                 "connecting_pipe_border_width", &a.connecting_pipe_border_width,
-                "hz_line_width", &a.hz_line_width,
-                "hz_line_color", json::field(&a.hz_line_color, &Color::to_string, &Color::from_string),
                 "sequenced_antigen_line_show", &a.sequenced_antigen_line_show,
                 "sequenced_antigen_line_width", &a.sequenced_antigen_line_width,
                 "sequenced_antigen_line_length", &a.sequenced_antigen_line_length,
                 "sequenced_antigen_line_color", json::field(&a.sequenced_antigen_line_color, &Color::to_string, &Color::from_string),
-                "vertical_gap", &a.vertical_gap,
-                "hz_line_sections", static_cast<std::vector<HzLineSection>*>(&a),
                 "mode", json::field(&a.mode, &HzLineSections::mode_to_string, &HzLineSections::mode_from_string)
                                    );
         }
@@ -331,7 +331,7 @@ class SettingsSignaturePage
 
     inline SettingsSignaturePage()
         : pdf_height(800), pdf_aspect_ratio(1.6), layout(TreeCladesTimeseriesMaps),
-          padding_left(0.01), padding_right(0.01), padding_top(0.035), padding_bottom(0.035),
+          padding_left(0.01), padding_right(0.01), padding_top(0.03), padding_bottom(0.03),
           tree_time_series_space(0), time_series_clades_space(0.01), clades_antigenic_maps_space(0.02) {}
 
     double pdf_height, pdf_aspect_ratio;
@@ -605,7 +605,7 @@ class SettingsAntigenicMaps
           serum_outline_color(LIGHT_GREY), reference_antigen_outline_color(LIGHT_GREY), test_antigen_outline_color(LIGHT_GREY),
           test_antigen_fill_color(LIGHT_GREY), vaccine_antigen_outline_color(WHITE), sequenced_antigen_outline_color(WHITE), sequenced_antigen_fill_color(0xA0A0A0),
           tracked_antigen_outline_color(WHITE),
-          egg_antigen_aspect(0.75), reassortant_rotation(M_PI / 6.0), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false)
+          egg_antigen_aspect(0.75), reassortant_rotation(0.5 /* M_PI / 6.0 */), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false)
         {}
 
     double border_width, grid_line_width;
@@ -715,13 +715,14 @@ class Settings
     friend inline auto json_fields(Settings& a)
         {
             return std::make_tuple(
-                "title", &a.title,
-                "tree", &a.draw_tree,
-                "legend", &a.legend,
                 "signature_page", &a.signature_page,
+                "antigenic_maps", &a.antigenic_maps,
+                "legend", &a.legend,
                 "time_series", &a.time_series,
                 "clades", &a.clades,
-                "antigenic_maps", &a.antigenic_maps);
+                "title", &a.title,
+                "tree", &a.draw_tree
+                );
         }
 
 }; // class Settings

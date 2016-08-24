@@ -356,7 +356,7 @@ class Surface
     inline Surface() : mContext(nullptr) {}
     Surface(std::string aFilename, double aWidth, double aHeight);
 
-    inline ~Surface() { if (mContext != nullptr) cairo_destroy(mContext); }
+    inline ~Surface() { if (mContext != nullptr) { cairo_destroy(mContext); } }
 
     void setup(std::string aFilename, const Size& aCanvasSize);
 
