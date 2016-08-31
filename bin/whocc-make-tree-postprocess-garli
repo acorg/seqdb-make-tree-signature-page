@@ -19,6 +19,7 @@ def main(args):
     results_dir = Path(args.dir[0], "garli")
     if results_dir.is_dir():
         r_garli = garli_m.postprocess(target_dir=Path(args.dir[0]), source_dir=results_dir)
+        results = make_tree.BasicRunner.make_results(raxml_results=, garli_results=r_garli, working_dir=Path(args.dir[0]), seqdb=args.path_to_seqdb)
     else:
         raise RuntimeError("No {}".format(results_dir))
 

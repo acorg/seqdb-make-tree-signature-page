@@ -88,58 +88,62 @@ class BasicRunner:
         self.garli_results.make_txt(Path(self.settings["working_dir"], "result.garli.txt"))
         self.garli_results.make_json(Path(self.settings["working_dir"], "result.garli.json"))
 
-    def make_results(self):
-        longest_time = self.raxml_results.longest_time + self.garli_results.longest_time
+    def make_results_for_self(self):
+        self.results = self.make_results(raxml_results=self.raxml_results, garli_results=self.garli_results, working_dir=self.settings["working_dir"], seqdb=self.seqdb)
+
+    def on_state_completed(self):
+        pass
+
+    @classmethod
+    def make_results(cls, raxml_results, garli_results, working_dir, seqdb):
+        longest_time = raxml_results.longest_time + garli_results.longest_time
         longest_time_s = RaxmlResult.time_str(longest_time)
         module_logger.info('Longest time: ' + longest_time_s)
-        if self.raxml_results.overall_time and self.garli_results.overall_time:
-            overall_time = self.raxml_results.overall_time + self.garli_results.overall_time
+        if raxml_results.overall_time and garli_results.overall_time:
+            overall_time = raxml_results.overall_time + garli_results.overall_time
             overall_time_s = RaxmlResult.time_str(overall_time)
             module_logger.info('Overall time: ' + overall_time_s)
         else:
             overall_time = None
             overall_time_s = ""
 
-        r_best = vars(self.garli_results.results[0])
+        r_best = vars(garli_results.results[0])
         r_best["longest_time"] = longest_time
         r_best["longest_time_s"] = longest_time_s
         if overall_time:
             r_best["overall_time"] = overall_time
         if overall_time_s:
             r_best["overall_time_s"] = overall_time_s
-        json.dumpf(Path(self.settings["working_dir"], "result.best.json"), r_best)
+        json.dumpf(Path(working_dir, "result.best.json"), r_best)
 
-        with Path(self.settings["working_dir"], "result.all.txt").open("w") as f:
+        with Path(working_dir, "result.all.txt").open("w") as f:
             f.write("Longest time: " + longest_time_s + "\n")
             if overall_time_s:
                 f.write("Overall time: " + overall_time_s + "\n")
             f.write("GARLI score : " + str(r_best["score"]) + "\n")
             f.write("Tree        : " + str(r_best["tree"]) + "\n")
-        self.results = {
+        results = {
             " total": {
                 "longest_time": longest_time,
                 "longest_time_s": longest_time_s,
                 "overall_time": overall_time,
                 "overall_time_s": overall_time_s,
-                "tree": str(self.garli_results.results[0].tree),
-                "garli_score": self.garli_results.results[0].score,
+                "tree": str(garli_results.results[0].tree),
+                "garli_score": garli_results.results[0].score,
                 },
-            "garli": [vars(r) for r in self.garli_results.results],
-            "raxml": [vars(r) for r in self.raxml_results.results],
+            "garli": [vars(r) for r in garli_results.results],
+            "raxml": [vars(r) for r in raxml_results.results],
             }
-        json.dumpf(Path(self.settings["working_dir"], "result.all.json"), self.results)
+        json.dumpf(Path(working_dir, "result.all.json"), results)
 
         from .draw_tree import draw_tree
         draw_tree(tree_file=r_best["tree"],
-                  seqdb=self.seqdb,
-                  output_file=Path(self.settings["working_dir"], "tree.pdf"),
+                  seqdb=seqdb,
+                  output_file=Path(working_dir, "tree.pdf"),
                   title="{{virus_type}} GARLI-score: {} Time: {} ({})".format(r_best["score"], overall_time_s, longest_time_s),
                   pdf_width=1000, pdf_height=850
                   )
-        return self.results
-
-    def on_state_completed(self):
-        pass
+        return results
 
 # ----------------------------------------------------------------------
 
@@ -158,7 +162,7 @@ class RaxmlBestGarli (BasicRunner):
         self.garli_task.wait(self.wait_timeout)
         if self.garli_task.finished():
             self.garli_completed()
-            self.make_results()
+            self.make_results_for_self()
             self.state = "completed"
 
 # ----------------------------------------------------------------------
