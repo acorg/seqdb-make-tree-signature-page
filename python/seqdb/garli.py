@@ -9,6 +9,12 @@ from . import tree_maker
 
 # ----------------------------------------------------------------------
 
+class GarliNoResult (Exception):
+
+    pass
+
+# ----------------------------------------------------------------------
+
 class GarliResult (tree_maker.Result):
 
     def __init__(self, run_id, tree, score, start_score, time):
@@ -53,7 +59,14 @@ class GarliTask (tree_maker.Task):
     def results(self):
         if not self.finished():
             raise RuntimeError("Cannot get results: garli job not finished")
-        return GarliResults((Garli.get_result(output_dir=self.output_dir, run_id=ri) for ri in self.run_ids), overall_time=self.overall_time, submitted_tasks=self.submitted_tasks, survived_tasks=len(self.run_ids))
+        return GarliResults(self.get_results(), overall_time=self.overall_time, submitted_tasks=self.submitted_tasks, survived_tasks=len(self.run_ids))
+
+    def get_results(self):
+        for ri in self.run_ids:
+            try:
+                yield Garli.get_result(output_dir=self.output_dir, run_id=ri)
+            except GarliNoResult as err:
+                module_logger.warning('No result for {}: {}'.format(ri, err))
 
 # ----------------------------------------------------------------------
 
@@ -99,7 +112,7 @@ class Garli (tree_maker.Maker):
                 elif fields[0] == "0":
                     start_score = - float(fields[1])
         if score is None or execution_time is None or start_score is None:
-            raise RuntimeError("Unable to parse " + str(logfile))
+            raise GarliNoResult("Unable to parse " + str(logfile))   # perhaps this condor task was killed
         return GarliResult(run_id=run_id, tree=str(tree), score=score, start_score=start_score, time=execution_time)
 
     # ----------------------------------------------------------------------
