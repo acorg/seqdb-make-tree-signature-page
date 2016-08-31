@@ -4,7 +4,7 @@
 
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
-import os, time as time_m, datetime, operator, random, subprocess
+import os, time as time_m, datetime, operator, random, subprocess, copy
 from . import json
 
 # ----------------------------------------------------------------------
@@ -77,7 +77,9 @@ class Results:
             f.write("\n".join(rr.tabbed_report() for rr in self.results) + "\n")
 
     def make_json(self, filepath :Path):
-        json.dumpf(filepath, vars(self))
+        data = copy.copy(vars(self))
+        data["results"] = [e.json() for e in data["results"]]
+        json.dumpf(filepath, data)
 
 # ----------------------------------------------------------------------
 
