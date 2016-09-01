@@ -132,7 +132,7 @@ class BasicRunner:
                 "garli_score": garli_results.results[0].score,
                 },
             "garli": [vars(r) for r in garli_results.results],
-            "raxml": [vars(r) for r in raxml_results.results],
+            "raxml": [r if isinstance(r, dict) else vars(r) for r in raxml_results.results],
             }
         json.dumpf(Path(working_dir, "result.all.json"), results)
 

@@ -81,6 +81,14 @@ class Results:
         data["results"] = [e.json() for e in data["results"]]
         json.dumpf(filepath, data)
 
+    @classmethod
+    def from_json(cls, filepath :Path):
+        r = cls()
+        data = json.loadf(filepath)
+        for k, v in data.items():
+            setattr(r, k, v)
+        return r
+
 # ----------------------------------------------------------------------
 
 class Task:
