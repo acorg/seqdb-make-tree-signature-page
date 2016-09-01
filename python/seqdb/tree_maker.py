@@ -87,6 +87,8 @@ class Results:
         data = json.loadf(filepath)
         for k, v in data.items():
             setattr(r, k, v)
+        if getattr(r, "results", None) and isinstance(r.results[0], str)
+            r.results = []                # bug in output, ignore it
         return r
 
 # ----------------------------------------------------------------------
