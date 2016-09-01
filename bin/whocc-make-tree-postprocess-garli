@@ -11,7 +11,7 @@ import traceback
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
 import logging; module_logger = logging.getLogger(__name__)
-from seqdb import make_tree, json, garli as garli_m
+from seqdb import make_tree, json, raxml as raxml_m, garli as garli_m
 
 # ----------------------------------------------------------------------
 
