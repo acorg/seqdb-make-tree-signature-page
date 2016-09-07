@@ -22,7 +22,6 @@ Clades& Clades::prepare(const Tree& aTree, const SettingsClades& aSettings)
     iterate_leaf(aTree, scan);
 
     for (auto& c: clades) {
-          // std::cerr << c.first << ' ' << c.second.first << ' ' << c.second.second << std::endl;
         add_clade(c.second.first, c.second.second, c.first, c.first, aSettings);
     }
     assign_slots(aSettings);
@@ -35,6 +34,7 @@ Clades& Clades::prepare(const Tree& aTree, const SettingsClades& aSettings)
 
 void Clades::add_clade(const std::pair<std::string, size_t>& aBegin, const std::pair<std::string, size_t>& aEnd, std::string aLabel, std::string aId, const SettingsClades& aSettings)
 {
+      // std::cerr << "Clade: " << aLabel << "   " << aBegin.first << ' ' << aBegin.second << " --> " << aEnd.first << ' ' << aEnd.second << std::endl;
     SettingsClade clade(aBegin.first, aEnd.first, aBegin.second, aEnd.second, aLabel, aId);
     const auto found = std::find_if(aSettings.per_clade.begin(), aSettings.per_clade.end(), [&](const auto& e) -> bool { return aId == e.id; });
     if (found != aSettings.per_clade.end())
@@ -96,6 +96,7 @@ void Clades::draw(Surface& aSurface, const Tree& aTree, const Viewport& aViewpor
             const auto clade_end = aTree.find_node_by_name(clade.end);
             if (clade_end == nullptr)
                 throw std::runtime_error("cannot find clade last node by name: " + clade.end);
+            std::cerr << "Clade: " << clade.label << "   " << clade_begin->line_no << ' ' << clade_begin->name << " --> " << clade_end->line_no << ' ' << clade_end->name << std::endl;
             const auto node_after_clade_end = aTree.find_next_leaf_node(*clade_end);
             const auto base_y = aViewport.origin.y;
             const auto vertical_step = aDrawTree.vertical_step();
