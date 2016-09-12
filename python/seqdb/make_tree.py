@@ -43,10 +43,10 @@ class BasicRunner:
     def finished(self):
         return self.state == "completed"
 
-    def iteration(self):
-        getattr(self, "on_state_" + self.state)()   # on_state_* must be provided by derived classes
+    def iteration(self, **kwargs):
+        getattr(self, "on_state_" + self.state)(**kwargs)   # on_state_* must be provided by derived classes
 
-    def raxml_submit(self):
+    def raxml_submit(self, submit=True):
         raxml = Raxml(email=self.settings["email"])
         self.raxml_task = raxml.submit_htcondor(
             num_runs=self.settings["raxml"]["num_runs"],
@@ -57,8 +57,12 @@ class BasicRunner:
             bfgs=self.settings["raxml"]["bfgs"],
             model_optimization_precision=self.settings["raxml"]["model_optimization_precision"],
             outgroups=[self.settings["base_seq_name"]],
-            machines=self.settings["machines"])
-        self.state = "raxml_submitted"
+            machines=self.settings["machines"],
+            submit=submit)
+        if submit:
+            self.state = "raxml_submitted"
+        else:
+            self.state = "raxml_submission_prepared"
 
     def raxml_completed(self):
         self.raxml_results = self.raxml_task.results()
@@ -91,7 +95,7 @@ class BasicRunner:
     def make_results_for_self(self):
         self.results = self.make_results(raxml_results=self.raxml_results, garli_results=self.garli_results, working_dir=self.settings["working_dir"], seqdb=self.seqdb)
 
-    def on_state_completed(self):
+    def on_state_completed(self, **kwargs):
         pass
 
     @classmethod
@@ -149,16 +153,16 @@ class BasicRunner:
 
 class RaxmlBestGarli (BasicRunner):
 
-    def on_state_init(self):
-        self.raxml_submit()
+    def on_state_init(self, submit=True, **kwargs):
+        self.raxml_submit(submit=submit)
 
-    def on_state_raxml_submitted(self):
+    def on_state_raxml_submitted(self, **kwargs):
         self.raxml_task.wait(self.wait_timeout)
         if self.raxml_task.finished():
             self.raxml_completed()
             self.garli_submit(self.raxml_results.best_tree())
 
-    def on_state_garli_submitted(self):
+    def on_state_garli_submitted(self, **kwargs):
         self.garli_task.wait(self.wait_timeout)
         if self.garli_task.finished():
             self.garli_completed()
@@ -169,7 +173,7 @@ class RaxmlBestGarli (BasicRunner):
 
 class RaxmlSurvivedBestGarli (RaxmlBestGarli):
 
-    def on_state_raxml_submitted(self):
+    def on_state_raxml_submitted(self, **kwargs):
         self.raxml_task.wait(self.wait_timeout)
         if not self.raxml_task.finished():
             Raxml.analyse_logs(output_dir=self.raxml_output_dir, run_ids=self.raxml_task.run_ids, kill_rate=self.settings["raxml"]["kill_rate"], job=self.raxml_task.job)
@@ -184,7 +188,7 @@ class FasttreeRaxmlSurvivedBestGarli (RaxmlSurvivedBestGarli):
     def __init__(self, *a, **kw):
         raise NotImplementedError()
 
-    def on_state_init(self):
+    def on_state_init(self, submit=True, **kwargs):
         self.run_fasttree()
 
 # ----------------------------------------------------------------------
@@ -194,8 +198,8 @@ class RaxmlAllGarli (BasicRunner):
     def __init__(self, *a, **kw):
         raise NotImplementedError()
 
-    def on_state_init(self):
-        self.raxml_submit()
+    def on_state_init(self, submit=True, **kwargs):
+        self.raxml_submit(submit=submit)
 
 # ----------------------------------------------------------------------
 

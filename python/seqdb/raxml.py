@@ -76,7 +76,7 @@ class Raxml (tree_maker.Maker):
 
     # ----------------------------------------------------------------------
 
-    def submit_htcondor(self, source :Path, source_tree, output_dir :Path, run_id, num_runs, bfgs, model_optimization_precision, outgroups :list, machines=None):
+    def submit_htcondor(self, source :Path, source_tree, output_dir :Path, run_id, num_runs, bfgs, model_optimization_precision, outgroups :list, machines=None, submit=True):
         from . import htcondor
         output_dir.mkdir(parents=True, exist_ok=True)
         general_args = ["-s", str(source.resolve()), "-w", str(output_dir.resolve()), "-m", self.model, "-e", str(model_optimization_precision), "-T", "1", "-N", "1"] + self.default_args
@@ -86,14 +86,26 @@ class Raxml (tree_maker.Maker):
             general_args += ["-o", ",".join(outgroups)]
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
         args = [(general_args + ["-n", ri, "-p", str(self.random_seed())]) for ri in run_ids]
-        job = htcondor.submit(program=self.program,
-                              program_args=args,
-                              description="RAxML {run_id} {num_runs} {bfgs}".format(run_id=run_id, num_runs=num_runs, bfgs="" if bfgs else "no-bfgs"),
-                              current_dir=output_dir,
-                              capture_stdout=False, email=self.email, notification="Error", machines=machines)
-        module_logger.info('Submitted RAxML: {}'.format(job))
-        module_logger.info('RAxML parameters: bfgs:{} model_optimization_precision: {} outgroups:{}'.format(bfgs, model_optimization_precision, outgroups))
-        return RaxmlTask(job=job, output_dir=output_dir, run_ids=run_ids)
+        if submit:
+            job = htcondor.submit(
+                program=self.program,
+                program_args=args,
+                description="RAxML {run_id} {num_runs} {bfgs}".format(run_id=run_id, num_runs=num_runs, bfgs="" if bfgs else "no-bfgs"),
+                current_dir=output_dir,
+                capture_stdout=False, email=self.email, notification="Error", machines=machines)
+            module_logger.info('Submitted RAxML: {}'.format(job))
+            module_logger.info('RAxML parameters: bfgs:{} model_optimization_precision: {} outgroups:{}'.format(bfgs, model_optimization_precision, outgroups))
+            return RaxmlTask(job=job, output_dir=output_dir, run_ids=run_ids)
+        else:
+            desc_filename = htcondor.prepare_submission(
+                program=self.program,
+                program_args=args,
+                description="RAxML {run_id} {num_runs} {bfgs}".format(run_id=run_id, num_runs=num_runs, bfgs="" if bfgs else "no-bfgs"),
+                current_dir=output_dir,
+                capture_stdout=False, email=self.email, notification="Error", machines=machines)
+            module_logger.info('Prepared submission RAxML: {}'.format(desc_filename))
+            module_logger.info('RAxML parameters: bfgs:{} model_optimization_precision: {} outgroups:{}'.format(bfgs, model_optimization_precision, outgroups))
+            return None
 
     # ----------------------------------------------------------------------
 

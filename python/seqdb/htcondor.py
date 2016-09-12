@@ -91,9 +91,7 @@ class Job:
 
 # ----------------------------------------------------------------------
 
-sReCondorProc = re.compile(r'\*\*\s+Proc\s+(\d+)\.(\d+):')
-
-def submit(program, program_args :list, description :str, current_dir :Path, capture_stdout=False, email=None, notification="Error", machines :list = None):
+def prepare_submission(program, program_args :list, description :str, current_dir :Path, capture_stdout=False, email=None, notification="Error", machines :list = None):
     current_dir = Path(current_dir).resolve()
     current_dir.chmod(0o777)        # to allow remote processes runinnig under user nobody to write files
     condor_log = Path(current_dir, "condor.log")
@@ -135,6 +133,14 @@ def submit(program, program_args :list, description :str, current_dir :Path, cap
         f.write(desc_s)
     desc_filename = desc_filename.resolve()
     module_logger.info('HTCondor desc {}'.format(desc_filename))
+    return desc_filename
+
+# ----------------------------------------------------------------------
+
+sReCondorProc = re.compile(r'\*\*\s+Proc\s+(\d+)\.(\d+):')
+
+def submit(program, program_args :list, description :str, current_dir :Path, capture_stdout=False, email=None, notification="Error", machines :list = None):
+    desc_filename = prepare_submission(program=program, program_args=program_args, description=description, current_dir=current_dir, capture_stdout=capture_stdout, email=email, notification=notification, machines=machines)
     output = _run("condor_submit", "-verbose", str(desc_filename))
     cluster = collections.defaultdict(int)
     for line in output.splitlines():
@@ -144,6 +150,7 @@ def submit(program, program_args :list, description :str, current_dir :Path, cap
     if not cluster:
         logging.error(output)
         raise RuntimeError("cluster id not found in the submission results {}".format(cluster))
+    condor_log = Path(current_dir, "condor.log")
     return Job(dict(cluster), condor_log=condor_log)
 
 # ----------------------------------------------------------------------
