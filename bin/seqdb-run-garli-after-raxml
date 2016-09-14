@@ -1,0 +1,60 @@
+#! /usr/bin/env python3
+# -*- Python -*-
+
+"""
+Runs garli on the cluster after raxml part completion (performed by whocc-make-tree)
+"""
+
+import sys
+if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
+import os, datetime, getpass, socket, traceback
+from pathlib import Path
+sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("python"))]
+import logging; module_logger = logging.getLogger(__name__)
+
+import seqdb as seqdb_m
+from seqdb import RaxmlBestGarli, raxml as raxml_m, email
+
+# ----------------------------------------------------------------------
+
+def main(args):
+    working_dir = Path(args.working_dir[0]).resolve()
+    runner = RaxmlBestGarli(
+        working_dir=working_dir, wait_timeout=None, seqdb=None, run_id="garli-after-raxml", fasta_file=None, number_of_sequences=None, base_seq_name=None,
+        raxml_settings=None,
+        garli_settings={"num_runs": args.garli_num_runs, "attachmentspertaxon": args.garli_attachmentspertaxon, "stoptime": args.garli_stoptime, "genthreshfortopoterm": args.garli_genthreshfortopoterm},
+        email=args.email, machines=args.machines)
+    runner.raxml_results = raxml_m.RaxmlResults.from_json(working_dir.joinpath("result.raxml.json"))
+    runner.garli_submit(runner.raxml_results.best_tree())
+    while not runner.finished():
+        runner.iteration()
+
+# ----------------------------------------------------------------------
+
+try:
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
+
+    parser.add_argument('working_dir', nargs=1, help='parent directory of raxml, should contain source.fasta and result.raxml.json.')
+
+    parser.add_argument('--garli-num-runs', action='store', dest='garli_num_runs', type=int, default=8, help='Number of runs of GARLI with different random seeds.')
+    parser.add_argument('--garli-attachmentspertaxon', action='store', type=int, dest='garli_attachmentspertaxon', default=1000000, help='GARLI: the number of attachment branches evaluated for each taxon to be added to the tree during the creation of an ML stepwise-addition starting tree (when garli is run without raxml step).')
+    parser.add_argument('--garli-genthreshfortopoterm', action='store', type=int, dest='garli_genthreshfortopoterm', default=20000, help='GARLI termination condition: when no new significantly better scoring topology has been encountered in greater than this number of generations, garli stops.')
+    parser.add_argument('--garli-stoptime', action='store', type=int, dest='garli_stoptime', default=60*60*24*7, help='GARLI termination condition: the maximum number of seconds for the run to continue.')
+
+    parser.add_argument('--email', action='store', dest='email', default=getpass.getuser(), help='Email to report status of the tasks running in the cluster.')
+    parser.add_argument('--machines', action='store', dest='machines', default=None, help="Comma separated list: odette,i19,i20,i21,o16,o17") # odette.antigenic-cartography.org
+
+    args = parser.parse_args()
+    logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")
+    exit_code = main(args)
+except Exception as err:
+    logging.error('{}\n{}'.format(err, traceback.format_exc()))
+    exit_code = 1
+exit(exit_code)
+
+# ======================================================================
+### Local Variables:
+### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+### End:

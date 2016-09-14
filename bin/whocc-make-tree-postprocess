@@ -16,23 +16,24 @@ from seqdb import make_tree, json, raxml as raxml_m, garli as garli_m
 # ----------------------------------------------------------------------
 
 def main(args):
-    if False: # Path(args.dir[0], "result.all.json").exists():
-        results = json.loadf(Path(args.dir[0], "result.all.json"))
+    working_dir = Path(args.dir[0]).resolve()
+    if False: # working_dir.joinpath("result.all.json").exists():
+        results = json.loadf(working_dir.joinpath("result.all.json"))
     else:
-        if Path(args.dir[0], "raxml").is_dir():
-            r_raxml = raxml_m.postprocess(target_dir=Path(args.dir[0]), source_dir=Path(args.dir[0], "raxml"))
+        if working_dir.joinpath("raxml").is_dir():
+            r_raxml = raxml_m.postprocess(target_dir=working_dir, source_dir=working_dir.joinpath("raxml"))
         else:
             r_raxml = None
-        if Path(args.dir[0], "garli").is_dir():
-            r_garli = garli_m.postprocess(target_dir=Path(args.dir[0]), source_dir=Path(args.dir[0], "garli"))
+        if working_dir.joinpath("garli").is_dir():
+            r_garli = garli_m.postprocess(target_dir=working_dir, source_dir=working_dir.joinpath("garli"))
         else:
             r_garli = None
         if r_raxml and r_garli:
-            results = make_tree.make_results(Path(args.dir[0]), r_raxml=r_raxml, r_garli=r_garli, seqdb=args.path_to_seqdb)
+            results = make_tree.make_results(working_dir, r_raxml=r_raxml, r_garli=r_garli, seqdb=args.path_to_seqdb)
         else:
             results = None
     if results:
-        make_tree.make_r_garli_start_final_scores(Path(args.dir[0]), results)
+        make_tree.make_r_garli_start_final_scores(working_dir, results)
 
 # ----------------------------------------------------------------------
 
