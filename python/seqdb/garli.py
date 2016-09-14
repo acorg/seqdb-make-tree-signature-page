@@ -4,7 +4,7 @@
 
 import logging; module_logger = logging.getLogger(__name__)
 from pathlib import Path
-import re, random, subprocess, time as time_m
+import sys, re, random, subprocess, time as time_m
 from . import tree_maker
 
 # ----------------------------------------------------------------------
@@ -83,18 +83,50 @@ class Garli (tree_maker.Maker):
     def submit_htcondor(self, num_runs, source, output_dir :Path, run_id, source_tree=None, outgroup=[1], attachmentspertaxon=1000000, genthreshfortopoterm=20000, stoptime=3600*24*7, searchreps=1, strip_comments=True, machines=None):
         from . import htcondor
         output_dir.mkdir(parents=True, exist_ok=True)
+        availablememory = self.find_memory_requirements(source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir.resolve(), attachmentspertaxon=attachmentspertaxon, randseed=self.random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=stoptime, strip_comments=strip_comments)
         run_ids = ["{}.{:04d}".format(run_id, run_no) for run_no in range(num_runs)]
-        conf_files = [self._make_conf(run_id, source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir.resolve(), attachmentspertaxon=attachmentspertaxon, randseed=self.random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=stoptime, strip_comments=strip_comments) for run_id in run_ids]
+        conf_files = [self._make_conf(run_id, source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir.resolve(), availablememory=availablememory, attachmentspertaxon=attachmentspertaxon, randseed=self.random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=stoptime, strip_comments=strip_comments) for run_id in run_ids]
         module_logger.info('{} garli conf files saved to {}'.format(len(conf_files), output_dir))
-        args=[[str(Path(c).resolve())] for c in conf_files]
-        start = time_m.time()
+        args=[[str(c.resolve())] for c in conf_files]
         job = htcondor.submit(program=self.program,
                               program_args=args,
                               description="GARLI {run_id} {num_runs}".format(run_id=run_id, num_runs=num_runs),
                               current_dir=output_dir,
+                              request_memory=availablememory,
                               capture_stdout=False, email=self.email, notification="Error", machines=machines)
         module_logger.info('Jobs submitted to htcondor: {}'.format(job))
         return GarliTask(job=job, output_dir=output_dir, run_ids=run_ids)
+
+    # ----------------------------------------------------------------------
+
+    sGreat = re.compile(r"\s*great\s+>=\s+(\d+)\s+MB", re.I)
+
+    def find_memory_requirements(self, source, source_tree, outgroup, output_dir, attachmentspertaxon, randseed, genthreshfortopoterm, searchreps, stoptime, strip_comments):
+        conf_file = self._make_conf(run_id="find_memory_requirements", source=source, source_tree=source_tree, outgroup=outgroup, output_dir=output_dir.resolve(), availablememory=2000, attachmentspertaxon=attachmentspertaxon, randseed=self.random_seed(), genthreshfortopoterm=genthreshfortopoterm, searchreps=searchreps, stoptime=1, strip_comments=strip_comments)
+        start = time_m.time()
+        proc = subprocess.Popen([self.program, str(conf_file.resolve())], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        availablememory = None # default, in case the code below fails or times out
+        timeout = 60
+        while True:
+            line = proc.stdout.readline().decode("utf-8")
+            m = self.sGreat.match(line)
+            if m:
+                availablememory = m.group(1)
+                break
+            if (time_m.time() - start) > timeout:
+                from . import email
+                import socket
+                hostname = socket.getfqdn().split(".")[0]
+                email.send(to=self.email, subject="{} {} warning".format(hostname, sys.argv[0]),
+                               body="{} {}\nCannot find availablememory for garli in {}\ntimout {} seconds expired".format(hostname, sys.argv[0], output_dir, timeout))
+                break
+        proc.kill()
+        if availablememory is not None:
+            module_logger.info('availablememory required by garli: {}'.format(availablememory))
+        else:
+            availablememory = 2000
+            module_logger.warning('Cannot obtain availablememory required by garli in {} seconds: default {} will be used'.format(timeout, availablememory))
+        return availablememory
 
     # ----------------------------------------------------------------------
 
@@ -120,13 +152,14 @@ class Garli (tree_maker.Maker):
 
     # ----------------------------------------------------------------------
 
-    def _make_conf(self, run_id, source, source_tree, output_dir, outgroup, attachmentspertaxon, randseed, genthreshfortopoterm, searchreps, stoptime, strip_comments):
+    def _make_conf(self, run_id, source, source_tree, output_dir, outgroup, availablememory, attachmentspertaxon, randseed, genthreshfortopoterm, searchreps, stoptime, strip_comments):
         """Returns filename of the written conf file"""
         if not outgroup or not isinstance(outgroup, list) or not all(isinstance(e, int) and e > 0 for e in outgroup):
             raise ValueError("outgroup must be non-empty list of taxa indices in the fasta file starting with 1")
         global GARLI_CONF
         garli_args = {
             "source": str(Path(source).resolve()),
+            "availablememory": availablememory,
             "streefname": str(Path(source_tree).resolve()) if source_tree else "stepwise",
             "output_prefix": str(Path(output_dir, run_id)),
             "attachmentspertaxon": attachmentspertaxon, # 2000,      # default: 50
@@ -188,7 +221,7 @@ attachmentspertaxon = {attachmentspertaxon}
 randseed = {randseed}
 
 # in Mb
-availablememory = 4000
+availablememory = {availablememory}
 
 # The frequency with which the best score is written to the log file, default: 10
 logevery = 1000
