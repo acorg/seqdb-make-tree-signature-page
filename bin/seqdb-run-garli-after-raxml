@@ -20,10 +20,10 @@ from seqdb import RaxmlBestGarli, raxml as raxml_m, email
 def main(args):
     working_dir = Path(args.working_dir[0]).resolve()
     runner = RaxmlBestGarli(
-        working_dir=working_dir, wait_timeout=None, seqdb=None, run_id="garli-after-raxml", fasta_file=None, number_of_sequences=None, base_seq_name=None,
-        raxml_settings=None,
+        working_dir=working_dir, wait_timeout=None, seqdb=None, run_id="garli-after-raxml", fasta_file=working_dir.joinpath("source.fasta").resolve(),
+        number_of_sequences=None, base_seq_name=None, raxml_settings=None,
         garli_settings={"num_runs": args.garli_num_runs, "attachmentspertaxon": args.garli_attachmentspertaxon, "stoptime": args.garli_stoptime, "genthreshfortopoterm": args.garli_genthreshfortopoterm},
-        email=args.email, machines=args.machines)
+        email=args.email, machines=args.machines, save_settings=False)
     runner.raxml_results = raxml_m.RaxmlResults.from_json(working_dir.joinpath("result.raxml.json"))
     runner.garli_submit(runner.raxml_results.best_tree())
     while not runner.finished():

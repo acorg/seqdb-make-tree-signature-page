@@ -17,8 +17,8 @@ class GarliNoResult (Exception):
 
 class GarliResult (tree_maker.Result):
 
-    def __init__(self, run_id, tree, score, start_score, time):
-        super().__init__(run_id=run_id, tree=tree, score=score, time=time)
+    def __init__(self, *args, start_score=None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.start_score = start_score
 
     def tabbed_report(self):
@@ -42,6 +42,9 @@ class GarliResults (tree_maker.Results):
         else:
             r = GarliResults((Garli.get_result(output_dir=source_dir, run_id=".".join(tree.parts[-1].split(".")[:-2])) for tree in source_dir.glob("*.best.phy")), overall_time=overall_time, submitted_tasks=submitted_tasks, survived_tasks=survived_tasks)
         return r
+
+    def result_class(self):
+        return RaxmlResult
 
 # ----------------------------------------------------------------------
 

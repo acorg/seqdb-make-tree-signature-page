@@ -16,7 +16,7 @@ class Error (Exception):
 
 class Result:
 
-    def __init__(self, run_id, tree, score, time):
+    def __init__(self, run_id=None, tree=None, score=None, time=None):
         self.run_id = run_id
         self.tree = tree
         self.score = score
@@ -38,6 +38,13 @@ class Result:
             return s[:s.index('.')]
         except:
             return s
+
+    @classmethod
+    def from_dict(cls, data):
+        r = cls()
+        for k, v in data.items():
+            setattr(r, k, v)
+        return r
 
 # ----------------------------------------------------------------------
 
@@ -89,6 +96,8 @@ class Results:
             setattr(r, k, v)
         if getattr(r, "results", None) and isinstance(r.results[0], str):
             r.results = []                # bug in output, ignore it
+        elif isinstance(r.results[0], dict):
+            r.results = [r.result_class().from_dict(result) for result in r.results]
         return r
 
 # ----------------------------------------------------------------------

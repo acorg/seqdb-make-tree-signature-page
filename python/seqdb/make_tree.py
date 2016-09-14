@@ -16,7 +16,7 @@ from .fasttree import Fasttree, FasttreeResults
 
 class BasicRunner:
 
-    def __init__(self, working_dir, wait_timeout, seqdb, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_settings, garli_settings, email, machines):
+    def __init__(self, working_dir, wait_timeout, seqdb, run_id, fasta_file, number_of_sequences, base_seq_name, raxml_settings, garli_settings, email, machines, save_settings=True):
         self.seqdb = seqdb
         self.wait_timeout = wait_timeout
         self.raxml_output_dir = Path(working_dir, "raxml")
@@ -32,10 +32,12 @@ class BasicRunner:
             "email": email,
             "machines": machines,
             }
-        self.settings["raxml"]["output_dir"] = self.raxml_output_dir
+        if self.settings["raxml"] is not None:
+            self.settings["raxml"]["output_dir"] = self.raxml_output_dir
         self.settings["garli"]["output_dir"] = self.garli_output_dir
         self.state = "init"               # init, raxml_submitted, garli_submitted, completed
-        self.save_settings()
+        if save_settings:
+            self.save_settings()
 
     def save_settings(self):
         json.dumpf(Path(self.settings["working_dir"], "settings.json"), self.settings)

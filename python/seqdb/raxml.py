@@ -17,8 +17,8 @@ from .timeit import timeit
 
 class RaxmlResult (tree_maker.Result):
 
-    def __init__(self, run_id, tree, score, start_scores, time):
-        super().__init__(run_id=run_id, tree=tree, score=score, time=time)
+    def __init__(self, *args, start_scores=None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.start_scores = start_scores
 
     def tabbed_report(self):
@@ -41,6 +41,9 @@ class RaxmlResults (tree_maker.Results):
     @classmethod
     def import_from(cls, source_dir, overall_time, submitted_tasks, survived_tasks):
         return RaxmlResults((Raxml.get_result(source_dir, ".".join(tree.parts[-1].split(".")[1:])) for tree in source_dir.glob("RAxML_bestTree.*")), overall_time=overall_time, submitted_tasks=submitted_tasks, survived_tasks=survived_tasks)
+
+    def result_class(self):
+        return RaxmlResult
 
 # ----------------------------------------------------------------------
 
