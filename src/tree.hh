@@ -97,6 +97,7 @@ class Node
 {
  public:
     typedef std::vector<Node> Subtree;
+    enum class LadderizeMethod { MaxEdgeLength, NumberOfLeaves };
 
     inline Node() : edge_length(0), line_no(0), number_strains(1), vertical_gap_before(0) {}
     inline Node(std::string aName, double aEdgeLength, const Date& aDate = Date()) : edge_length(aEdgeLength), name(aName), date(aDate), line_no(0), number_strains(1), vertical_gap_before(0) {}
@@ -159,7 +160,7 @@ class Node
         }
 
  protected:
-    void ladderize();
+    void ladderize(LadderizeMethod aLadderizeMethod);
     bool find_name_r(std::string aName, std::vector<const Node*>& aPath) const;
 
     friend inline auto json_fields(Node& a)
@@ -241,7 +242,7 @@ class Tree : public Node
         }
 
     void preprocess_upon_importing_from_external_format();
-    void ladderize();
+    void ladderize(LadderizeMethod aLadderizeMethod);
 
       // hz line sections
     void make_hz_line_sections(double tolerance);

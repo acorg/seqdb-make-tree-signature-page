@@ -54,7 +54,7 @@ std::string Node::display_name() const
 
 // ----------------------------------------------------------------------
 
-void Node::ladderize()
+void Node::ladderize(LadderizeMethod aLadderizeMethod)
 {
     auto set_max_edge = [](Node& aNode) {
         aNode.ladderize_max_edge_length = aNode.edge_length;
@@ -72,7 +72,7 @@ void Node::ladderize()
       // set max_edge_length field for every node
     iterate_leaf_post(*this, set_max_edge, compute_max_edge);
 
-    auto reorder_subtree_cmp = [](const Node& a, const Node& b) -> bool {
+    auto reorder_by_max_edge_length = [](const Node& a, const Node& b) -> bool {
         bool r = false;
         if (float_equal(a.ladderize_max_edge_length, b.ladderize_max_edge_length)) {
             if (a.ladderize_max_date == b.ladderize_max_date) {
@@ -88,19 +88,34 @@ void Node::ladderize()
         return r;
     };
 
-      // re-order subtree based on max_edge_length of its nodes
-    auto reorder_subtree = [&reorder_subtree_cmp](Node& aNode) {
-        std::sort(aNode.subtree.begin(), aNode.subtree.end(), reorder_subtree_cmp);
+    auto reorder_by_number_of_leaves = [&reorder_by_max_edge_length](const Node& a, const Node& b) -> bool {
+        bool r = false;
+        if (a.number_strains == b.number_strains) {
+            r = reorder_by_max_edge_length(a, b);
+        }
+        else {
+            r = a.number_strains < b.number_strains;
+        }
+        return r;
     };
-    iterate_post(*this, reorder_subtree);
+
+    switch (aLadderizeMethod) {
+      case LadderizeMethod::MaxEdgeLength:
+          iterate_post(*this, [&reorder_by_max_edge_length](Node& aNode) { std::sort(aNode.subtree.begin(), aNode.subtree.end(), reorder_by_max_edge_length); });
+          break;
+      case LadderizeMethod::NumberOfLeaves:
+          iterate_post(*this, [&reorder_by_number_of_leaves](Node& aNode) { std::sort(aNode.subtree.begin(), aNode.subtree.end(), reorder_by_number_of_leaves); });
+          break;
+    }
 
 } // Node::ladderize
 
 // ----------------------------------------------------------------------
 
-void Tree::ladderize()
+void Tree::ladderize(LadderizeMethod aLadderizeMethod)
 {
-    Node::ladderize();
+    Node::ladderize(aLadderizeMethod);
+    std::cerr << "WARNING: ladderizing destroys hz line sections" << std::endl;
     set_branch_id();
     init_hz_line_sections(true);
 

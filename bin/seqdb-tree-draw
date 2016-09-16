@@ -13,18 +13,18 @@ from seqdb import open_file
 # ----------------------------------------------------------------------
 
 def main(args):
-    ladderize = args.ladderize and ".json" not in args.input[0]
+    ladderize = ladderize_detect(args.ladderize)
     tree = seqdb.import_tree(args.input[0])
     if args.path_to_seqdb:
         seq_db = seqdb.Seqdb()
         seq_db.load(filename=args.path_to_seqdb)
         tree.match_seqdb(seq_db)
-        if ladderize:
-            tree.ladderize()        # must be before clade_setup()
+        if ladderize is not None:
+            tree.ladderize(ladderize)        # must be before clade_setup()
         tree.clade_setup()
     else:
-        if ladderize:
-            tree.ladderize()
+        if ladderize is not None:
+            tree.ladderize(ladderize)
     if args.show_aa_transitions:
         if args.show_aa_transitions.lower() == "all":
             tree.make_aa_transitions()
@@ -100,6 +100,20 @@ def main(args):
 
 # ----------------------------------------------------------------------
 
+def ladderize_detect(ladderize_spec):
+    ladderize_spec = ladderize_spec.lower().replace("-", "").replace("_", "")
+    if ladderize_spec == "none":
+        ladderize = None
+    elif ladderize_spec == "maxedgelength":
+        ladderize = seqdb.LadderizeMethod.MaxEdgeLength
+    elif ladderize_spec == "numberofleaves":
+        ladderize = seqdb.LadderizeMethod.NumberOfLeaves
+    else:
+        raise ValueError("Unrecognized --ladderize value")
+    return ladderize
+
+# ----------------------------------------------------------------------
+
 with seqdb.timeit(sys.argv[0]):
     try:
         import argparse
@@ -113,7 +127,7 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('--continents', action='store_true', dest='color_by_continent', default=False, help='Color tree and time series by continent.')
         parser.add_argument('--pos', action='store', type=int, dest='color_by_pos', default=-1, help='Color tree and time series by AA at the provided position.')
         parser.add_argument('--show-aa-transitions', action='store', dest='show_aa_transitions', default=None, help='Show aa transition labels for the provided comma separated list of positions, use all to show all.')
-        parser.add_argument('--no-ladderize', action='store_false', dest='ladderize', default=True, help='No ladderize the tree')
+        parser.add_argument('--ladderize', action='store', dest='ladderize', default="none", help='none, max-edge-length, number-of-leaves')
 
         parser.add_argument('--no-clades', action='store_false', dest='show_clades', default=True, help='Do not show clades.')
         parser.add_argument('--show-aa-transition-left-line', action='store_true', dest='aa_transition_left_line', default=False, help='Show line telling how left part of aa transition has been calculated.')

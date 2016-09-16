@@ -206,10 +206,16 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def_readonly("cumulative_edge_length", &Node::cumulative_edge_length)
             ;
 
+    py::enum_<Node::LadderizeMethod>(m, "LadderizeMethod")
+            .value("MaxEdgeLength", Node::LadderizeMethod::MaxEdgeLength)
+            .value("NumberOfLeaves", Node::LadderizeMethod::NumberOfLeaves)
+            .export_values()
+            ;
+
     py::class_<Tree>(m, "Tree", py::base<Node>())
               //.def("json", static_cast<std::string (Tree::*)(int) const>(&Tree::json), py::arg("indent") = 0)
             .def("json", &Tree::json, py::arg("indent") = size_t(0))
-            .def("ladderize", &Tree::ladderize)
+            .def("ladderize", &Tree::ladderize, py::arg("method") = Node::LadderizeMethod::MaxEdgeLength)
             .def("make_hz_line_sections", &Tree::make_hz_line_sections, py::arg("tolerance"))
             .def("match_seqdb", &Tree::match_seqdb, py::arg("seqdb"))
             .def("clade_setup", &Tree::clade_setup)
