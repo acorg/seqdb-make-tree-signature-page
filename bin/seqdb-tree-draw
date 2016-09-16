@@ -44,7 +44,7 @@ def main(args):
         tree.settings().draw_tree.aa_transition.number_strains_threshold = args.aa_transition_number_strains_threshold
 
     pdf_height = tree.settings().signature_page.pdf_height
-    pdf_aspect_ratio = tree.settings().signature_page.pdf_aspect_ratio
+    pdf_aspect_ratio = args.pdf_aspect_ratio or tree.settings().signature_page.pdf_aspect_ratio
     surface = seqdb.Surface(args.output[0], pdf_height * pdf_aspect_ratio, pdf_height)
 
     # surface.line(seqdb.Location(100, 100), seqdb.Location(300, 200), 0xFFA500, 5, seqdb.LINE_CAP_ROUND)
@@ -128,6 +128,7 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('--pos', action='store', type=int, dest='color_by_pos', default=-1, help='Color tree and time series by AA at the provided position.')
         parser.add_argument('--show-aa-transitions', action='store', dest='show_aa_transitions', default=None, help='Show aa transition labels for the provided comma separated list of positions, use all to show all.')
         parser.add_argument('--ladderize', action='store', dest='ladderize', default="none", help='none, max-edge-length, number-of-leaves')
+        parser.add_argument('--pdf-aspect-ratio', action='store', type=float, dest='pdf_aspect_ratio', default=None, help="0.7 or 1.6")
 
         parser.add_argument('--no-clades', action='store_false', dest='show_clades', default=True, help='Do not show clades.')
         parser.add_argument('--show-aa-transition-left-line', action='store_true', dest='aa_transition_left_line', default=False, help='Show line telling how left part of aa transition has been calculated.')

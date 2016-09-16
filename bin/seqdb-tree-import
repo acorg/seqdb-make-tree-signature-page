@@ -71,6 +71,8 @@ def main(args):
     if args.hz_line_section_tolerance > 0:
         tree.make_hz_line_sections(args.hz_line_section_tolerance)
     mark_vaccines(tree)
+    if args.pdf_aspect_ratio is not None:
+        tree.settings().signature_page.pdf_aspect_ratio = args.pdf_aspect_ratio
     open_file.write_binary(filename=args.output[0], data=tree.json(indent=1).encode("utf-8"))
 
 # ----------------------------------------------------------------------
@@ -101,6 +103,7 @@ with seqdb.timeit(sys.argv[0]):
 
         parser.add_argument('--ladderize', action='store', dest='ladderize', default="max-edge-length", help='none, max-edge-length, number-of-leaves')
         parser.add_argument('--no-aa-transitions', action='store_false', dest='aa_transitions', default=True, help='Do not generate aa transition labels')
+        parser.add_argument('--pdf-aspect-ratio', action='store', type=float, dest='pdf_aspect_ratio', default=None, help="0.7 or 1.6")
 
         parser.add_argument('--hz-line-section-tolerance', action='store', type=float, dest='hz_line_section_tolerance', default=0, help='')
 
