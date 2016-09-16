@@ -89,14 +89,13 @@ def main(args):
     #     title = args.title
 
     signature_page = seqdb.SignaturePage()
-    if args.title:
-        signature_page.title(seqdb.Text(seqdb.Location(0, 11), args.title, 0, 18))   # 20
-    (signature_page
-     .select_parts(parts)
-     .color_by_continent(args.color_by_continent)
-     .color_by_pos(args.color_by_pos - 1)
-     .prepare(tree, surface, chart)
-     .draw(tree, surface, chart))
+    signature_page.select_parts(parts)
+    if args.title is not None:
+        signature_page.title(seqdb.Text(seqdb.Location(10, 20), args.title, 0, 18))   # 20
+    signature_page.color_by_continent(args.color_by_continent)
+    signature_page.color_by_pos(args.color_by_pos - 1)
+    signature_page.prepare(tree, surface, chart)
+    signature_page.draw(tree, surface, chart)
 
 # ----------------------------------------------------------------------
 
@@ -140,7 +139,6 @@ with seqdb.timeit(sys.argv[0]):
 
         parser.add_argument('--chart', action='store', dest='chart', default=None, help='Chart (in sdb format) to use for antigenic maps.')
 
-        # see signature_page.pdf_aspect_ratio parser.add_argument('--aspect', action='store', type=float, dest='pdf_aspect_ratio', default=0.7, help='width/height for pdf.')
         parser.add_argument('--title', action='store', dest='title', default=None, help='Title (use "" to show no title).')
 
         parser.add_argument('--db', action='store', dest='path_to_seqdb', default=None, help='Path to sequence database (to match tree leaves with seqdb entries).')
