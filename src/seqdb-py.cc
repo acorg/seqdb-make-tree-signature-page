@@ -49,6 +49,7 @@ struct PySeqdbEntrySeqIterator
         }
 
     inline PySeqdbEntrySeqIterator& filter_lab(std::string aLab) { mCurrent.filter_lab(aLab); return *this; }
+    inline PySeqdbEntrySeqIterator& filter_labid(std::string aLab, std::string aId) { mCurrent.filter_labid(aLab, aId); return *this; }
     inline PySeqdbEntrySeqIterator& filter_subtype(std::string aSubtype) { mCurrent.filter_subtype(aSubtype); return *this; }
     inline PySeqdbEntrySeqIterator& filter_lineage(std::string aLineage) { mCurrent.filter_lineage(aLineage); return *this; }
     inline PySeqdbEntrySeqIterator& filter_aligned(bool aAligned) { mCurrent.filter_aligned(aAligned); return *this; }
@@ -130,8 +131,11 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def("nucleotides_shift", &SeqdbSeq::nucleotides_shift)
             .def("lab", &SeqdbSeq::lab)
             .def("lab_id", &SeqdbSeq::lab_id)
+            .def("lab_ids", &SeqdbSeq::lab_ids_for_lab, py::arg("lab"))
+            .def("lab_ids", &SeqdbSeq::lab_ids)
             .def("passage", &SeqdbSeq::passage)
             .def("gene", &SeqdbSeq::gene)
+            .def("clades", &SeqdbSeq::clades)
             ;
 
     py::class_<SeqdbEntry>(m, "SeqdbEntry")
@@ -160,6 +164,7 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def("__iter__", [](PySeqdbEntrySeqIterator& it) { return it; })
             .def("__next__", &PySeqdbEntrySeqIterator::next)
             .def("filter_lab", &PySeqdbEntrySeqIterator::filter_lab)
+            .def("filter_labid", &PySeqdbEntrySeqIterator::filter_labid, py::arg("lab"), py::arg("id"))
             .def("filter_subtype", &PySeqdbEntrySeqIterator::filter_subtype)
             .def("filter_lineage", &PySeqdbEntrySeqIterator::filter_lineage)
             .def("filter_aligned", &PySeqdbEntrySeqIterator::filter_aligned)

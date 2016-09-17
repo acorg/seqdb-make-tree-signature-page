@@ -93,6 +93,9 @@ class SeqdbSeq
     inline std::string lab() const { return mLabIds.empty() ? std::string() : mLabIds.begin()->first; }
     inline std::string lab_id() const { return mLabIds.empty() ? std::string() : (mLabIds.begin()->second.empty() ? std::string() : mLabIds.begin()->second[0]); }
     inline const std::vector<std::string> cdcids() const { auto i = mLabIds.find("CDC"); return i == mLabIds.end() ? std::vector<std::string>() : i->second; }
+    inline const std::vector<std::string> lab_ids_for_lab(std::string lab) const { auto i = mLabIds.find(lab); return i == mLabIds.end() ? std::vector<std::string>() : i->second; }
+    inline const std::vector<std::string> lab_ids() const { std::vector<std::string> r; for (const auto& lid: mLabIds) { for (const auto& id: lid.second) { r.emplace_back(lid.first + "#" + id); } } return r; }
+    inline bool match_labid(std::string lab, std::string id) const { auto i = mLabIds.find(lab); return i != mLabIds.end() && std::find(i->second.begin(), i->second.end(), id) != i->second.end(); }
     inline const std::vector<std::string>& passages() const { return mPassages; }
     inline std::string passage() const { return mPassages.empty() ? std::string() : mPassages[0]; }
     inline bool passage_present(std::string aPassage) const { return mPassages.empty() ? aPassage.empty() : std::find(mPassages.begin(), mPassages.end(), aPassage) != mPassages.end(); }
@@ -314,6 +317,7 @@ class SeqdbIteratorBase : public std::iterator<std::input_iterator_tag, SeqdbEnt
     inline virtual bool operator!=(const SeqdbIteratorBase& aNother) const { return ! operator==(aNother); }
 
     inline SeqdbIteratorBase& filter_lab(std::string aLab) { mLab = aLab; filter_added(); return *this; }
+    inline SeqdbIteratorBase& filter_labid(std::string aLab, std::string aId) { mLabId = std::make_pair(aLab, aId); filter_added(); return *this; }
     inline SeqdbIteratorBase& filter_subtype(std::string aSubtype) { mSubtype = aSubtype; filter_added(); return *this; }
     inline SeqdbIteratorBase& filter_lineage(std::string aLineage) { mLineage = aLineage; filter_added(); return *this; }
     inline SeqdbIteratorBase& filter_aligned(bool aAligned) { mAligned = aAligned; filter_added(); return *this; }
@@ -356,6 +360,7 @@ class SeqdbIteratorBase : public std::iterator<std::input_iterator_tag, SeqdbEnt
     bool mHasHiName;
     bool mNameMatcherSet;
     std::regex mNameMatcher;
+    std::pair<std::string, std::string> mLabId;
 
     inline void end() { mEntryNo = mSeqNo = std::numeric_limits<size_t>::max(); }
     inline void filter_added() { if (!suitable_entry() || !suitable_seq()) operator ++(); }
@@ -550,6 +555,7 @@ inline bool SeqdbIteratorBase::suitable_seq() const
             && (mGene.empty() || seq.mGene == mGene)
             && (!mHasHiName || !seq.mHiNames.empty())
             && (mLab.empty() || seq.has_lab(mLab))
+            && (mLabId.first.empty() || seq.match_labid(mLabId.first, mLabId.second))
             && (!mNameMatcherSet || std::regex_search(make_name(), mNameMatcher))
             ;
 
