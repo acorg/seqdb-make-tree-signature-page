@@ -29,3 +29,12 @@ Set of tools to build, query sequence database and to generate phylogenetic tree
 - Drawing tree
 
         tree-draw -h
+
+- TODO
+
+    + [http://www.libharu.org/](http://www.libharu.org/) (2015-06-28) (homebrew)
+      HPDF\_Page\_CreateTextAnnot
+    + [http://podofo.sourceforge.net](http://podofo.sourceforge.net) (0.9.4 - 2016-06-08, 0.9.3 - 2014)
+      (homebrew and apt-get)
+
+    + [http://www.jagpdf.org](http://www.jagpdf.org) (Oct 2009)
