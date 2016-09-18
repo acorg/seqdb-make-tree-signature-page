@@ -96,6 +96,7 @@ class BasicRunner:
 
     def make_results_for_self(self):
         self.results = self.make_results(raxml_results=self.raxml_results, garli_results=self.garli_results, working_dir=self.settings["working_dir"], seqdb=self.seqdb)
+        return self.results
 
     def on_state_completed(self, **kwargs):
         pass
