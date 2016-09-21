@@ -17,7 +17,7 @@ class SettingsAATransition
     class TransitionData
     {
      public:
-        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("Courier New"), interline(empty ? -1 : 1.2) {}
+        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("Courier New"), interline(empty ? -1 : 1.2), label_offset_x(empty ? 0 : -20), label_offset_y(empty ? 0 : 40) {}
         inline TransitionData(std::string aBranchId, std::vector<std::string>&& aLabels) : TransitionData(true) { branch_id = aBranchId; labels = std::move(aLabels); }
 
         double size;
@@ -26,6 +26,7 @@ class SettingsAATransition
         double interline;
         std::string branch_id;
         std::vector<std::string> labels;
+        double label_offset_x, label_offset_y;
 
         inline void update(const TransitionData& source)
             {
@@ -53,7 +54,10 @@ class SettingsAATransition
         }
     };
 
-    inline SettingsAATransition() : data(false), show_empty_left(false), show_node_for_left_line(false), node_for_left_line_color(0x00FF00), node_for_left_line_width(1), number_strains_threshold(20) {}
+    inline SettingsAATransition()
+        : data(false), show_empty_left(false), show_node_for_left_line(false),
+          node_for_left_line_color(0x00FF00), node_for_left_line_width(1), number_strains_threshold(20)
+        {}
 
     inline void add(std::string branch_id, const std::vector<std::pair<std::string, const Node*>>& aLabels)
         {
@@ -84,17 +88,19 @@ class SettingsAATransition
     friend inline auto json_fields(SettingsAATransition& a)
         {
             return std::make_tuple(
-                "size", &a.data.size,
-                "color", json::field(&a.data.color, &Color::to_string, &Color::from_string),
-                "style", &a.data.style,
-                "interline", &a.data.interline,
                 "show_empty_left", &a.show_empty_left,
                 "show_node_for_left_line", &a.show_node_for_left_line,
                 "node_for_left_line_color", json::field(&a.node_for_left_line_color, &Color::to_string, &Color::from_string),
                 "node_for_left_line_width", &a.node_for_left_line_width,
                 "number_strains_threshold", &a.number_strains_threshold,
                 "?per_branch", json::comment("add size, color, style, interline, if different from the default listed above."),
-                "per_branch", json::field(&a.per_branch, json::output_if_not_empty)
+                "per_branch", json::field(&a.per_branch, json::output_if_not_empty),
+                "label_offset_x", &a.data.label_offset_x,
+                "label_offset_y", &a.data.label_offset_y,
+                "interline", &a.data.interline,
+                "size", &a.data.size,
+                "color", json::field(&a.data.color, &Color::to_string, &Color::from_string),
+                "style", &a.data.style
                                    );
         }
 

@@ -1,5 +1,6 @@
 #include "draw-tree.hh"
 
+#include "float.hh"
 #include "tree.hh"
 #include "antigenic-maps.hh"
 
@@ -125,8 +126,10 @@ void DrawTree::draw_aa_transition(const Node& aNode, Surface& aSurface, const Vi
         if (!labels.empty()) {
             const auto longest_label = std::max_element(labels.begin(), labels.end(), [](const auto& a, const auto& b) { return a.first.size() < b.first.size(); });
             const auto longest_label_size = aSurface.text_size(longest_label->first, branch_settings.size, branch_settings.style);
-            const Size offset(aViewport.size.width > longest_label_size.width ? (aViewport.size.width - longest_label_size.width) / 2 : (aViewport.size.width - longest_label_size.width),
-                              longest_label_size.height * branch_settings.interline);
+            Size offset(aViewport.size.width > longest_label_size.width ? (aViewport.size.width - longest_label_size.width) / 2 : (aViewport.size.width - longest_label_size.width),
+                        longest_label_size.height * branch_settings.interline);
+            Location connection_line_start = (aViewport.origin + offset);
+            offset += Size(float_zero(branch_settings.label_offset_x) ? aSettings.data.label_offset_x : branch_settings.label_offset_x, float_zero(branch_settings.label_offset_y) ? aSettings.data.label_offset_y : branch_settings.label_offset_y);
             Location origin(aViewport.origin + offset);
             for (const auto& label: labels) {
                 const auto label_width = aSurface.text_size(label.first, branch_settings.size, branch_settings.style).width;

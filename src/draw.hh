@@ -89,6 +89,8 @@ class Size
 
     inline std::string to_string() const { return "Size(" + std::to_string(width) + ", " + std::to_string(height) + ")"; }
 
+    Size& operator += (const Size& sz) { width += sz.width; height += sz.height; return *this; }
+
 }; // class Size
 
 inline Location operator + (const Location& a, const Size& s)
