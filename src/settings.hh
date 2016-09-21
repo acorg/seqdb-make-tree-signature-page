@@ -188,7 +188,7 @@ class HzLineSections : public std::vector<HzLineSection>
                               sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
                               this_section_antigen_color(0x75DB51),
                               connecting_pipe_border_color(BLACK), connecting_pipe_background_color(0xFFFFF8), connecting_pipe_border_width(1),
-                              vertical_gap(25) {}
+                              vertical_gap(25), section_label_color(BLACK), section_label_offset_x(-2), section_label_offset_y(2), section_label_size(10) {}
 
     inline void sort()
         {
@@ -204,15 +204,13 @@ class HzLineSections : public std::vector<HzLineSection>
     Color connecting_pipe_border_color, connecting_pipe_background_color; // BWVpos mode only
     double connecting_pipe_border_width; // BWVpos mode only
     size_t vertical_gap;
+    Color section_label_color;
+    double section_label_offset_x, section_label_offset_y, section_label_size;
 
  private:
     friend inline auto json_fields(HzLineSections& a)
         {
             return std::make_tuple(
-                "vertical_gap", &a.vertical_gap,
-                "hz_line_sections", static_cast<std::vector<HzLineSection>*>(&a),
-                "hz_line_width", &a.hz_line_width,
-                "hz_line_color", json::field(&a.hz_line_color, &Color::to_string, &Color::from_string),
                 "this_section_antigen_color", json::field(&a.this_section_antigen_color, &Color::to_string, &Color::from_string),
                 "connecting_pipe_border_color", json::field(&a.connecting_pipe_border_color, &Color::to_string, &Color::from_string),
                 "connecting_pipe_background_color", json::field(&a.connecting_pipe_background_color, &Color::to_string, &Color::from_string),
@@ -220,7 +218,15 @@ class HzLineSections : public std::vector<HzLineSection>
                 "sequenced_antigen_line_show", &a.sequenced_antigen_line_show,
                 "sequenced_antigen_line_width", &a.sequenced_antigen_line_width,
                 "sequenced_antigen_line_length", &a.sequenced_antigen_line_length,
-                "sequenced_antigen_line_color", json::field(&a.sequenced_antigen_line_color, &Color::to_string, &Color::from_string)
+                "sequenced_antigen_line_color", json::field(&a.sequenced_antigen_line_color, &Color::to_string, &Color::from_string),
+                "section_label_color", json::field(&a.section_label_color, &Color::to_string, &Color::from_string),
+                "section_label_offset_x", &a.section_label_offset_x,
+                "section_label_offset_y", &a.section_label_offset_y,
+                "section_label_size", &a.section_label_size,
+                "hz_line_sections", static_cast<std::vector<HzLineSection>*>(&a),
+                "hz_line_width", &a.hz_line_width,
+                "hz_line_color", json::field(&a.hz_line_color, &Color::to_string, &Color::from_string),
+                "vertical_gap", &a.vertical_gap
                                    );
         }
 

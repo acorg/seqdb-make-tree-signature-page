@@ -284,10 +284,10 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeriesViewport, c
         for (size_t section_no = 0; section_no < aSections.size(); ++section_no) {
             const auto& section = aSections[section_no];
             double first_y = aTimeSeriesViewport.origin.y;
+            const double line_y = section_no == 0 ? first_y : (aTimeSeriesViewport.origin.y + vertical_step * (section.first_line - (1 + aSections.vertical_gap) * 0.5));
             if (section_no != 0) {
                 first_y += vertical_step * (section.first_line - 0.5);
                   // draw hz line in the time series area
-                const double line_y = aTimeSeriesViewport.origin.y + vertical_step * (section.first_line - (1 + aSections.vertical_gap) * 0.5);
                 aSurface.line({aTimeSeriesViewport.origin.x, line_y}, {aTimeSeriesViewport.right(), line_y}, aSections.hz_line_color, aSections.hz_line_width);
             }
 
@@ -309,10 +309,10 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeriesViewport, c
                   }
                       break;
                   case SettingsAntigenicMaps::NamedGrid:
-                        // draw brackets
                       const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, section_no);
                       if (map_viewport.size.width > 0) { // map viewport with zero size means that map has no tracked antigens and must not be shown according to settings (maps_for_sections_without_antigens)
-                          draw_section_brackets(aSurface, aTimeSeriesViewport, aAntigenicMapsSettings, first_y, last_y, vertical_step, aSections);
+                          draw_section_bracket(aSurface, aTimeSeriesViewport, aAntigenicMapsSettings, first_y, last_y, vertical_step, aSections);
+                          draw_section_label(aSurface, aTimeSeriesViewport, line_y, last_y, aSections, section_no);
                       }
                       break;
                 }
@@ -344,6 +344,7 @@ void DrawHzLines::draw_section_lines_right(Surface& aSurface, const Viewport& aT
 
 void DrawHzLines::draw_section_lines_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const Viewport& aMapViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const
 {
+    Surface::PushContext pc(aSurface);
     const double gap = aAntigenicMapsViewport.size.height * 0.01;
     const double map_top_y = aMapViewport.center().y - gap;
     const double map_bottom_y = map_top_y + gap * 2;
@@ -372,25 +373,6 @@ void DrawHzLines::draw_section_lines_left(Surface& aSurface, const Viewport& aTi
 
 // ----------------------------------------------------------------------
 
-void DrawHzLines::draw_section_brackets(Surface& aSurface, const Viewport& aTimeSeriesViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const
-{
-    const double brace_vertical_x = aTimeSeriesViewport.right() + aSections.sequenced_antigen_line_length * 3;
-    first_y -= vertical_step * 10;
-    last_y += vertical_step * 10;
-
-    std::vector<Location> vertices;
-    vertices.emplace_back(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, first_y);
-    vertices.emplace_back(brace_vertical_x, first_y);
-    vertices.emplace_back(brace_vertical_x, last_y);
-    vertices.emplace_back(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, last_y);
-
-    aSurface.path_outline(vertices.begin(), vertices.end(), aAntigenicMapsSettings.bracket_border_color, aAntigenicMapsSettings.bracket_border_width);
-    aSurface.path_fill(vertices.begin(), vertices.end(), aAntigenicMapsSettings.bracket_background_color);
-
-} // DrawHzLines::draw_section_brackets
-
-// ----------------------------------------------------------------------
-
 void DrawHzLines::draw_sequenced_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const AntigenicMaps& aAntigenicMaps, const Viewport& aAntigenicMapsViewport, const HzLineSections& aSections, double vertical_step) const
 {
     const double mark_x1 = aAntigenicMapsViewport.origin.x - aSections[0].line_width;
@@ -414,6 +396,52 @@ void DrawHzLines::draw_sequenced_left(Surface& aSurface, const Viewport& aTimeSe
     }
 
 } // DrawHzLines::draw_left
+
+// ----------------------------------------------------------------------
+
+void DrawHzLines::draw_section_bracket(Surface& aSurface, const Viewport& aTimeSeriesViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const
+{
+    Surface::PushContext pc(aSurface);
+    const double brace_vertical_x = aTimeSeriesViewport.right() + aSections.sequenced_antigen_line_length * 3;
+    first_y -= vertical_step * 10;
+    last_y += vertical_step * 10;
+
+    std::vector<Location> vertices;
+    vertices.emplace_back(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, first_y);
+    vertices.emplace_back(brace_vertical_x, first_y);
+    vertices.emplace_back(brace_vertical_x, last_y);
+    vertices.emplace_back(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, last_y);
+
+    aSurface.path_outline(vertices.begin(), vertices.end(), aAntigenicMapsSettings.bracket_border_color, aAntigenicMapsSettings.bracket_border_width);
+    aSurface.path_fill(vertices.begin(), vertices.end(), aAntigenicMapsSettings.bracket_background_color);
+
+} // DrawHzLines::draw_section_bracket
+
+// ----------------------------------------------------------------------
+
+std::string DrawHzLines::section_label(const HzLineSections& aSections, size_t aSectionNo)
+{
+    std::string label = aSections[aSectionNo].label;
+    if (label.empty()) {
+        label = std::string(1, static_cast<char>(aSectionNo) + 'A');
+    }
+    return label;
+
+} // DrawHzLines::section_label
+
+// ----------------------------------------------------------------------
+
+void DrawHzLines::draw_section_label(Surface& aSurface, const Viewport& aTimeSeriesViewport, double first_y, double last_y, const HzLineSections& aSections, size_t aSectionNo) const
+{
+    Surface::PushContext pc(aSurface);
+    std::string label = section_label(aSections, aSectionNo);
+    TextStyle label_style;
+    const Size text_size = aSurface.text_size(label, aSections.section_label_size, label_style);
+    Location label_location((aSections.section_label_offset_x >= 0 ? aTimeSeriesViewport.origin.x : (aTimeSeriesViewport.right() - text_size.width)) + aSections.section_label_offset_x,
+                            (aSections.section_label_offset_y >= 0 ? (first_y + text_size.height) : last_y) + aSections.section_label_offset_y);
+    aSurface.text(label_location, label, aSections.section_label_color, aSections.section_label_size, label_style);
+
+} // DrawHzLines::draw_section_label
 
 // ----------------------------------------------------------------------
 /// Local Variables:

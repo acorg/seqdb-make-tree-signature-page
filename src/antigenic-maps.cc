@@ -148,11 +148,10 @@ void AntigenicMapsNamedGrid::draw(Surface& aSurface, const Viewport& aViewport, 
     for (size_t section_no = 0; section_no < number_of_maps(); ++section_no) {
         const Viewport map_viewport = viewport_of(aViewport, section_no);
         if (map_viewport.size.width > 0) {
-            std::string label = aSections[section_no].label;
-            if (label.empty()) {
-                label = std::string(1, static_cast<char>(section_no) + 'A');
+            std::string label = DrawHzLines::section_label(aSections, section_no);
+            if (label.size() == 1) {
+                label.append(1, '.');
             }
-            label.append(1, '.');
             Surface::PushContext pc(aSurface);
             aSurface.text(map_viewport.origin + Size(aSettings.map_label_offset_x, aSettings.map_label_offset_y), label, aSettings.map_label_color, aSettings.map_label_size);
         }

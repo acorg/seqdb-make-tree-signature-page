@@ -80,12 +80,15 @@ class DrawHzLines
     DrawHzLines& prepare(Tree& aTree, HzLineSections& aSections);
     void draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const SettingsAntigenicMaps& aAntigenicMapsSettings, const HzLineSections& aSections, SettingsSignaturePage::Layout aLayout) const;
 
+    static std::string section_label(const HzLineSections& aSections, size_t aSectionNo);
+
  private:
     void draw_section_lines_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const Viewport& aMapViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const;
     void draw_section_lines_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const Viewport& aMapViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const;
-    void draw_section_brackets(Surface& aSurface, const Viewport& aTimeSeriesViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const;
     void draw_sequenced_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const AntigenicMaps& aAntigenicMaps, const Viewport& aAntigenicMapsViewport, const HzLineSections& aSections, double vertical_step) const;
     void draw_sequenced_left(Surface& aSurface, const Viewport& aTimeSeriesViewport, const AntigenicMaps& aAntigenicMaps, const Viewport& aAntigenicMapsViewport, const HzLineSections& aSections, double vertical_step) const;
+    void draw_section_bracket(Surface& aSurface, const Viewport& aTimeSeriesViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const;
+    void draw_section_label(Surface& aSurface, const Viewport& aTimeSeriesViewport, double first_y, double last_y, const HzLineSections& aSections, size_t aSectionNo) const;
 
 }; // class DrawHzLines
 
