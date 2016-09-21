@@ -275,7 +275,7 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeriesViewport, c
               break;
         }
 
-        // if (aSections.mode == HzLineSections::BWVpos) {
+        // if (aAntigenicMapsSettings.mode == SettingsAntigenicMaps::BWVpos) {
         //       // make grey background for the antigenic map area
         //     aSurface.rectangle_filled(Location(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, 0), aSurface.canvas_size(), TRANSPARENT, 0, 0xF0F0F0);
         // }
@@ -295,12 +295,12 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeriesViewport, c
                 const double last_y = section_no == (aSections.size() - 1)
                         ? aTimeSeriesViewport.bottom()
                         : aTimeSeriesViewport.origin.y + vertical_step * (aSections[section_no+1].first_line - aSections.vertical_gap - 0.5);
-                switch (aSections.mode) {
-                  case HzLineSections::ColoredGrid:
+                switch (aAntigenicMapsSettings.mode) {
+                  case SettingsAntigenicMaps::ColoredGrid:
                         // draw section vertical colored bar
                       aSurface.line({aAntigenicMapsViewport.origin.x, first_y}, {aAntigenicMapsViewport.origin.x, last_y}, section.color, section.line_width);
                       break;
-                  case HzLineSections::BWVpos: {
+                  case SettingsAntigenicMaps::BWVpos: {
                         // draw section direction lines
                       const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, section_no);
                       if (map_viewport.size.width > 0) { // map viewport with zero size means that map has no tracked antigens and must not be shown according to settings (maps_for_sections_without_antigens)
@@ -308,7 +308,12 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeriesViewport, c
                       }
                   }
                       break;
-                  case HzLineSections::NamedGrid:
+                  case SettingsAntigenicMaps::NamedGrid:
+                        // draw brackets
+                      const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, section_no);
+                      if (map_viewport.size.width > 0) { // map viewport with zero size means that map has no tracked antigens and must not be shown according to settings (maps_for_sections_without_antigens)
+                          draw_section_brackets(aSurface, aTimeSeriesViewport, aAntigenicMapsSettings, first_y, last_y, vertical_step, aSections);
+                      }
                       break;
                 }
             }
@@ -364,6 +369,25 @@ void DrawHzLines::draw_section_lines_left(Surface& aSurface, const Viewport& aTi
     aSurface.path_fill(vertices.begin(), vertices.end(), aSections.connecting_pipe_background_color);
 
 } // DrawHzLines::draw_section_lines_left
+
+// ----------------------------------------------------------------------
+
+void DrawHzLines::draw_section_brackets(Surface& aSurface, const Viewport& aTimeSeriesViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const
+{
+    const double brace_vertical_x = aTimeSeriesViewport.right() + aSections.sequenced_antigen_line_length * 3;
+    first_y -= vertical_step * 10;
+    last_y += vertical_step * 10;
+
+    std::vector<Location> vertices;
+    vertices.emplace_back(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, first_y);
+    vertices.emplace_back(brace_vertical_x, first_y);
+    vertices.emplace_back(brace_vertical_x, last_y);
+    vertices.emplace_back(aTimeSeriesViewport.right() + aAntigenicMapsSettings.border_width, last_y);
+
+    aSurface.path_outline(vertices.begin(), vertices.end(), aAntigenicMapsSettings.bracket_border_color, aAntigenicMapsSettings.bracket_border_width);
+    aSurface.path_fill(vertices.begin(), vertices.end(), aAntigenicMapsSettings.bracket_background_color);
+
+} // DrawHzLines::draw_section_brackets
 
 // ----------------------------------------------------------------------
 

@@ -31,6 +31,7 @@ class AntigenicMaps
     const auto& names_per_map() const { return mNamesPerMap; }
     double gap_between_maps() const { return mGap; }
     virtual Color section_color(const HzLineSections& aSections, size_t section_no) const = 0;
+    inline size_t number_of_maps() const { return mNamesPerMap.size(); }
 
  private:
     std::vector<std::vector<std::string>> mNamesPerMap;
@@ -42,7 +43,7 @@ class AntigenicMaps
 
 // ----------------------------------------------------------------------
 
-class AntigenicMapsColoredGrid : public AntigenicMaps
+class AntigenicMapsGrid : public AntigenicMaps
 {
  public:
     virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const
@@ -50,9 +51,25 @@ class AntigenicMapsColoredGrid : public AntigenicMaps
             return Size(mCellSize.width * mGridWidth + gap_between_maps() * (mGridWidth - 1) + left_offset(), aPageArea.size.height);
         }
 
-    virtual AntigenicMapsColoredGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+    virtual AntigenicMapsGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
     virtual void calculate_viewports(Tree& aTree, Chart* aChart, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
     virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
+
+ protected:
+    std::pair<size_t, size_t> grid(const SettingsAntigenicMaps& aSettings) const;
+
+ private:
+    size_t mGridWidth, mGridHeight;
+    Size mCellSize;
+
+};
+
+// ----------------------------------------------------------------------
+
+class AntigenicMapsNamedGrid : public AntigenicMapsGrid
+{
+ public:
+    virtual void draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const;
 
  protected:
     virtual Color section_color(const HzLineSections& aSections, size_t section_no) const;
@@ -61,7 +78,16 @@ class AntigenicMapsColoredGrid : public AntigenicMaps
     size_t mGridWidth, mGridHeight;
     Size mCellSize;
 
-    std::pair<size_t, size_t> grid() const;
+    std::pair<size_t, size_t> grid(const SettingsAntigenicMaps& aSettings) const;
+
+}; // class AntigenicMapsNamedGrid
+
+// ----------------------------------------------------------------------
+
+class AntigenicMapsColoredGrid : public AntigenicMapsGrid
+{
+ protected:
+    virtual Color section_color(const HzLineSections& aSections, size_t section_no) const;
 
 }; // class AntigenicMapsColoredGrid
 
@@ -85,31 +111,6 @@ class AntigenicMapsVpos : public AntigenicMaps
     double mCellHeight;
 
 }; // class AntigenicMapsVpos
-
-// ----------------------------------------------------------------------
-
-class AntigenicMapsNamedGrid : public AntigenicMaps
-{
- public:
-    virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const
-        {
-            return Size(mCellSize.width * mGridWidth + gap_between_maps() * (mGridWidth - 1) + left_offset(), aPageArea.size.height);
-        }
-
-    virtual AntigenicMapsNamedGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
-    virtual void calculate_viewports(Tree& aTree, Chart* aChart, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
-    virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
-
- protected:
-    virtual Color section_color(const HzLineSections& aSections, size_t section_no) const;
-
- private:
-    size_t mGridWidth, mGridHeight;
-    Size mCellSize;
-
-    std::pair<size_t, size_t> grid() const;
-
-}; // class AntigenicMapsNamedGrid
 
 // ----------------------------------------------------------------------
 /// Local Variables:

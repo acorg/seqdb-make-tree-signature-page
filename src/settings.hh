@@ -164,14 +164,16 @@ class HzLineSection
     size_t first_line;
     Color color;
     double line_width;
+    std::string label;          // for named_grid mode, empty to set automatically
 
     friend inline auto json_fields(HzLineSection& a)
         {
             return std::make_tuple(
                 "first_name", &a.first_name,
                   // "first_line", &a.first_line,
-                "color", json::field(&a.color, &Color::to_string, &Color::from_string),
-                "line_width", &a.line_width
+                "line_width", &a.line_width,
+                "label", &a.label,
+                "color", json::field(&a.color, &Color::to_string, &Color::from_string)
                                    );
         }
 
@@ -182,9 +184,7 @@ class HzLineSection
 class HzLineSections : public std::vector<HzLineSection>
 {
  public:
-    enum Mode { ColoredGrid, BWVpos, NamedGrid };
-
-    inline HzLineSections() : mode(BWVpos), hz_line_width(0.5), hz_line_color(GREY),
+    inline HzLineSections() : hz_line_width(0.5), hz_line_color(GREY),
                               sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
                               this_section_antigen_color(0x75DB51),
                               connecting_pipe_border_color(BLACK), connecting_pipe_background_color(0xFFFFF8), connecting_pipe_border_width(1),
@@ -195,36 +195,17 @@ class HzLineSections : public std::vector<HzLineSection>
             std::sort(begin(), end(), [](const auto& a, const auto& b) { return a.first_line < b.first_line; });
         }
 
-    Mode mode;
     double hz_line_width;
     Color hz_line_color;
     bool sequenced_antigen_line_show;
     double sequenced_antigen_line_width, sequenced_antigen_line_length;
     Color sequenced_antigen_line_color;
-    Color this_section_antigen_color; // BWVpos mode only
+    Color this_section_antigen_color; // BWVpos, NamedGrid mode only
     Color connecting_pipe_border_color, connecting_pipe_background_color; // BWVpos mode only
     double connecting_pipe_border_width; // BWVpos mode only
     size_t vertical_gap;
 
  private:
-    inline static std::string mode_to_string(const Mode* a)
-        {
-            switch (*a) {
-              case ColoredGrid: return "colored_grid";
-              case BWVpos: return "bw_vpos";
-              case NamedGrid: return "named_grid";
-            }
-            return "named_grid";            // to shut compiler up
-        }
-
-    inline static void mode_from_string(Mode* target, std::string source)
-        {
-            if (source == "colored_grid" || source == "colored-grid") *target = ColoredGrid;
-            else if (source == "bw_vpos" || source == "bw-vpos" || source == "bwvpos") *target = BWVpos;
-            else if (source == "named_grid" || source == "named-grid") *target = NamedGrid;
-            else throw std::invalid_argument("cannot parse hz line section mode from \"" + source + "\", supported values: \"colored_grid\", \"bw_vpos\", \"named_grid\"");
-        }
-
     friend inline auto json_fields(HzLineSections& a)
         {
             return std::make_tuple(
@@ -239,8 +220,7 @@ class HzLineSections : public std::vector<HzLineSection>
                 "sequenced_antigen_line_show", &a.sequenced_antigen_line_show,
                 "sequenced_antigen_line_width", &a.sequenced_antigen_line_width,
                 "sequenced_antigen_line_length", &a.sequenced_antigen_line_length,
-                "sequenced_antigen_line_color", json::field(&a.sequenced_antigen_line_color, &Color::to_string, &Color::from_string),
-                "mode", json::field(&a.mode, &HzLineSections::mode_to_string, &HzLineSections::mode_from_string)
+                "sequenced_antigen_line_color", json::field(&a.sequenced_antigen_line_color, &Color::to_string, &Color::from_string)
                                    );
         }
 
@@ -597,9 +577,12 @@ class SettingsMarkAntigens : public std::vector<SettingsMarkAntigen>
 class SettingsAntigenicMaps
 {
  public:
+    enum Mode { ColoredGrid, BWVpos, NamedGrid };
+
     inline SettingsAntigenicMaps()
-        : border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(0xFFFFF8),
-          map_height_fraction_of_page(0.15), gap_between_maps(0.005), max_number_columns(100),
+        : mode(NamedGrid),
+          border_width(1), grid_line_width(0.5), border_color(BLACK), grid_color(GREY), background_color(0xFFFFF8),
+          map_height_fraction_of_page(0.15), gap_between_maps(0.005),
           map_zoom(1.1), map_x_offset(0), map_y_offset(0),
           serum_scale(5), reference_antigen_scale(5), test_antigen_scale(3), vaccine_antigen_scale(8), tracked_antigen_scale(5),
           serum_outline_width(0.5), reference_antigen_outline_width(0.5), test_antigen_outline_width(0.5), vaccine_antigen_outline_width(0.5),
@@ -607,14 +590,16 @@ class SettingsAntigenicMaps
           serum_outline_color(LIGHT_GREY), reference_antigen_outline_color(LIGHT_GREY), test_antigen_outline_color(LIGHT_GREY),
           test_antigen_fill_color(LIGHT_GREY), vaccine_antigen_outline_color(WHITE), sequenced_antigen_outline_color(WHITE), sequenced_antigen_fill_color(0xA0A0A0),
           tracked_antigen_outline_color(WHITE),
-          egg_antigen_aspect(0.75), reassortant_rotation(0.5 /* M_PI / 6.0 */), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false)
+          egg_antigen_aspect(0.75), reassortant_rotation(0.5 /* M_PI / 6.0 */), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false),
+          max_number_columns(100), grid_width(0), bracket_border_color(BLACK), bracket_background_color(TRANSPARENT), bracket_border_width(1),
+          map_label_color(BLACK), map_label_offset_x(2), map_label_offset_y(10), map_label_size(10)
         {}
 
+    Mode mode;
     double border_width, grid_line_width;
     Color border_color, grid_color, background_color;
     double map_height_fraction_of_page;
     double gap_between_maps;    // relative to canvas width
-    size_t max_number_columns;  // do not make more columns that this value in the bw_vpos layout
     double map_zoom, map_x_offset, map_y_offset; // zoom>1 means zoom out, offsets are in the antigenic units
     double serum_scale, reference_antigen_scale, test_antigen_scale, vaccine_antigen_scale, tracked_antigen_scale;
     double serum_outline_width, reference_antigen_outline_width, test_antigen_outline_width, vaccine_antigen_outline_width, sequenced_antigen_outline_width, tracked_antigen_outline_width;
@@ -624,6 +609,33 @@ class SettingsAntigenicMaps
     Transformation map_transformation;
     SettingsMarkAntigens mark_antigens;
     bool marked_antigens_on_all_maps; // if false, antigen is marked if it is tracked on this map
+      // BWVpos
+    size_t max_number_columns;  // do not make more columns that this value in the bw_vpos layout
+      // NamedGrid
+    size_t grid_width;          // 0 - choose autmatically
+    Color bracket_border_color, bracket_background_color;
+    double bracket_border_width;
+    Color map_label_color;
+    double map_label_offset_x, map_label_offset_y, map_label_size;
+
+ private:
+    inline static std::string mode_to_string(const Mode* a)
+        {
+            switch (*a) {
+              case ColoredGrid: return "colored_grid";
+              case BWVpos: return "bw_vpos";
+              case NamedGrid: return "named_grid";
+            }
+            return "named_grid";            // to shut compiler up
+        }
+
+    inline static void mode_from_string(Mode* target, std::string source)
+        {
+            if (source == "colored_grid" || source == "colored-grid") *target = ColoredGrid;
+            else if (source == "bw_vpos" || source == "bw-vpos" || source == "bwvpos") *target = BWVpos;
+            else if (source == "named_grid" || source == "named-grid") *target = NamedGrid;
+            else throw std::invalid_argument("cannot parse hz line section mode from \"" + source + "\", supported values: \"colored_grid\", \"bw_vpos\", \"named_grid\"");
+        }
 
     friend inline auto json_fields(SettingsAntigenicMaps& a)
         {
@@ -636,6 +648,7 @@ class SettingsAntigenicMaps
                 "border_color", json::field(&a.border_color, &Color::to_string, &Color::from_string),
                 "grid_line_width", &a.grid_line_width, // object_double_non_negative_value
                 "grid_color", json::field(&a.grid_color, &Color::to_string, &Color::from_string),
+                "grid_width", &a.grid_width,
                 "background_color", json::field(&a.background_color, &Color::to_string, &Color::from_string),
                 "map_x_offset", &a.map_x_offset,
                 "map_y_offset", &a.map_y_offset,
@@ -663,7 +676,15 @@ class SettingsAntigenicMaps
                 "sequenced_antigen_outline_color", json::field(&a.sequenced_antigen_outline_color, &Color::to_string, &Color::from_string),
                 "sequenced_antigen_fill_color", json::field(&a.sequenced_antigen_fill_color, &Color::to_string, &Color::from_string),
                 "marked_antigens_on_all_maps", &a.marked_antigens_on_all_maps,
-                "mark_antigens", &a.mark_antigens
+                "mark_antigens", &a.mark_antigens,
+                "bracket_background_color", json::field(&a.bracket_background_color, &Color::to_string, &Color::from_string),
+                "bracket_border_color", json::field(&a.bracket_border_color, &Color::to_string, &Color::from_string),
+                "bracket_border_width", &a.bracket_border_width,
+                "map_label_color", json::field(&a.map_label_color, &Color::to_string, &Color::from_string),
+                "map_label_offset_x", &a.map_label_offset_x,
+                "map_label_offset_y", &a.map_label_offset_y,
+                "map_label_size", &a.map_label_size,
+                "mode", json::field(&a.mode, &SettingsAntigenicMaps::mode_to_string, &SettingsAntigenicMaps::mode_from_string)
                                    );
         }
 

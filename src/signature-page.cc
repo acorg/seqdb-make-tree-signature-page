@@ -101,16 +101,16 @@ SignaturePage& SignaturePage::prepare(Tree& aTree, Surface& aSurface, Chart* aCh
         if (mDrawHzLines) {
             mDrawHzLines->prepare(aTree, aTree.settings().draw_tree.hz_line_sections);
             if (mShowAntigenicMaps) {
-                switch (aTree.settings().draw_tree.hz_line_sections.mode) {
-                  case HzLineSections::ColoredGrid:
+                switch (aTree.settings().antigenic_maps.mode) {
+                  case SettingsAntigenicMaps::ColoredGrid:
                       std::cout << "ColoredGrid mode" << std::endl;
                       mAntigenicMaps = new AntigenicMapsColoredGrid();
                       break;
-                  case HzLineSections::BWVpos:
+                  case SettingsAntigenicMaps::BWVpos:
                       std::cout << "BWVpos mode" << std::endl;
                       mAntigenicMaps = new AntigenicMapsVpos();
                       break;
-                  case HzLineSections::NamedGrid:
+                  case SettingsAntigenicMaps::NamedGrid:
                       std::cout << "NamedGrid mode" << std::endl;
                       mAntigenicMaps = new AntigenicMapsNamedGrid();
                       break;
