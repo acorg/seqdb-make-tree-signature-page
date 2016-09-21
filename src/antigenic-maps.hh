@@ -42,7 +42,7 @@ class AntigenicMaps
 
 // ----------------------------------------------------------------------
 
-class AntigenicMapsGrid : public AntigenicMaps
+class AntigenicMapsColoredGrid : public AntigenicMaps
 {
  public:
     virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const
@@ -50,7 +50,7 @@ class AntigenicMapsGrid : public AntigenicMaps
             return Size(mCellSize.width * mGridWidth + gap_between_maps() * (mGridWidth - 1) + left_offset(), aPageArea.size.height);
         }
 
-    virtual AntigenicMapsGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+    virtual AntigenicMapsColoredGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
     virtual void calculate_viewports(Tree& aTree, Chart* aChart, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
     virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
 
@@ -63,7 +63,7 @@ class AntigenicMapsGrid : public AntigenicMaps
 
     std::pair<size_t, size_t> grid() const;
 
-}; // class AntigenicMapsGrid
+}; // class AntigenicMapsColoredGrid
 
 // ----------------------------------------------------------------------
 
@@ -85,6 +85,31 @@ class AntigenicMapsVpos : public AntigenicMaps
     double mCellHeight;
 
 }; // class AntigenicMapsVpos
+
+// ----------------------------------------------------------------------
+
+class AntigenicMapsNamedGrid : public AntigenicMaps
+{
+ public:
+    virtual inline Size size(const Viewport& aPageArea, const SettingsAntigenicMaps& /*aSettings*/) const
+        {
+            return Size(mCellSize.width * mGridWidth + gap_between_maps() * (mGridWidth - 1) + left_offset(), aPageArea.size.height);
+        }
+
+    virtual AntigenicMapsNamedGrid& prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+    virtual void calculate_viewports(Tree& aTree, Chart* aChart, const Viewport& aViewport, const Viewport& aPageArea, const DrawTree& aDrawTree, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings);
+    virtual Viewport viewport_of(const Viewport& aViewport, size_t map_no) const;
+
+ protected:
+    virtual Color section_color(const HzLineSections& aSections, size_t section_no) const;
+
+ private:
+    size_t mGridWidth, mGridHeight;
+    Size mCellSize;
+
+    std::pair<size_t, size_t> grid() const;
+
+}; // class AntigenicMapsNamedGrid
 
 // ----------------------------------------------------------------------
 /// Local Variables:

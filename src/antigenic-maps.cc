@@ -59,7 +59,7 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
 
 // ----------------------------------------------------------------------
 
-AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
+AntigenicMapsColoredGrid& AntigenicMapsColoredGrid::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
 {
     AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
 
@@ -67,32 +67,32 @@ AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport&
 
     return *this;
 
-} // AntigenicMapsGrid::prepare
+} // AntigenicMapsColoredGrid::prepare
 
 // ----------------------------------------------------------------------
 
-void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, Chart* /*aChart*/, const Viewport& aViewport, const Viewport& /*aPageArea*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
+void AntigenicMapsColoredGrid::calculate_viewports(Tree& /*aTree*/, Chart* /*aChart*/, const Viewport& aViewport, const Viewport& /*aPageArea*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
 {
     if (float_equal(mCellSize.width, 0.0)) {
         const double size = (aViewport.size.height - gap_between_maps() * (mGridHeight - 1)) / mGridHeight;
         mCellSize.set(size, size);
     }
 
-} // AntigenicMapsGrid::calculate_viewports
+} // AntigenicMapsColoredGrid::calculate_viewports
 
 // ----------------------------------------------------------------------
 
-Viewport AntigenicMapsGrid::viewport_of(const Viewport& aViewport, size_t map_no) const
+Viewport AntigenicMapsColoredGrid::viewport_of(const Viewport& aViewport, size_t map_no) const
 {
     const size_t cell_x = map_no % mGridWidth;
     const size_t cell_y = map_no / mGridWidth;
     return Viewport(Location(aViewport.origin.x + left_offset() + (mCellSize.width + gap_between_maps()) * cell_x, aViewport.origin.y + (mCellSize.height + gap_between_maps()) * cell_y), mCellSize);
 
-} // AntigenicMapsGrid::viewport_of
+} // AntigenicMapsColoredGrid::viewport_of
 
 // ----------------------------------------------------------------------
 
-std::pair<size_t, size_t> AntigenicMapsGrid::grid() const
+std::pair<size_t, size_t> AntigenicMapsColoredGrid::grid() const
 {
     size_t grid_w, grid_h;
     switch (names_per_map().size()) {
@@ -110,15 +110,15 @@ std::pair<size_t, size_t> AntigenicMapsGrid::grid() const
 
     return std::make_pair(grid_w, grid_h);
 
-} // AntigenicMapsGrid::grid
+} // AntigenicMapsColoredGrid::grid
 
 // ----------------------------------------------------------------------
 
-Color AntigenicMapsGrid::section_color(const HzLineSections& aSections, size_t section_no) const
+Color AntigenicMapsColoredGrid::section_color(const HzLineSections& aSections, size_t section_no) const
 {
     return aSections[section_no].color;
 
-} // AntigenicMapsGrid::section_color
+} // AntigenicMapsColoredGrid::section_color
 
 // ----------------------------------------------------------------------
 
@@ -236,6 +236,69 @@ Color AntigenicMapsVpos::section_color(const HzLineSections& aSections, size_t /
     return aSections.this_section_antigen_color;
 
 } // AntigenicMapsVpos::section_color
+
+// ----------------------------------------------------------------------
+
+AntigenicMapsNamedGrid& AntigenicMapsNamedGrid::prepare(const Tree& aTree, const Viewport& aPageArea, Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings)
+{
+    AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
+
+    std::tie(mGridWidth, mGridHeight) = grid();
+
+    return *this;
+
+} // AntigenicMapsNamedGrid::prepare
+
+// ----------------------------------------------------------------------
+
+void AntigenicMapsNamedGrid::calculate_viewports(Tree& /*aTree*/, Chart* /*aChart*/, const Viewport& aViewport, const Viewport& /*aPageArea*/, const DrawTree& /*aDrawTree*/, const HzLineSections& /*aSections*/, const SettingsAntigenicMaps& /*aSettings*/)
+{
+    if (float_equal(mCellSize.width, 0.0)) {
+        const double size = (aViewport.size.height - gap_between_maps() * (mGridHeight - 1)) / mGridHeight;
+        mCellSize.set(size, size);
+    }
+
+} // AntigenicMapsNamedGrid::calculate_viewports
+
+// ----------------------------------------------------------------------
+
+Viewport AntigenicMapsNamedGrid::viewport_of(const Viewport& aViewport, size_t map_no) const
+{
+    const size_t cell_x = map_no % mGridWidth;
+    const size_t cell_y = map_no / mGridWidth;
+    return Viewport(Location(aViewport.origin.x + left_offset() + (mCellSize.width + gap_between_maps()) * cell_x, aViewport.origin.y + (mCellSize.height + gap_between_maps()) * cell_y), mCellSize);
+
+} // AntigenicMapsNamedGrid::viewport_of
+
+// ----------------------------------------------------------------------
+
+std::pair<size_t, size_t> AntigenicMapsNamedGrid::grid() const
+{
+    size_t grid_w, grid_h;
+    switch (names_per_map().size()) {
+      case 1: grid_w = grid_h = 1; break;
+      case 2: grid_w = 1; grid_h = 2; break;
+      case 3: grid_w = 2; grid_h = 2; break;
+      case 4: grid_w = 2; grid_h = 2; break;
+      case 5: grid_w = 2; grid_h = 3; break;
+      case 6: grid_w = 2; grid_h = 3; break;
+      case 7: grid_w = 3; grid_h = 3; break;
+      case 8: grid_w = 3; grid_h = 3; break;
+      case 9: grid_w = 3; grid_h = 3; break;
+      default: throw std::runtime_error("AntigenicMaps: unsupported number of maps: " + std::to_string(names_per_map().size()));
+    }
+
+    return std::make_pair(grid_w, grid_h);
+
+} // AntigenicMapsNamedGrid::grid
+
+// ----------------------------------------------------------------------
+
+Color AntigenicMapsNamedGrid::section_color(const HzLineSections& aSections, size_t /*section_no*/) const
+{
+    return aSections.this_section_antigen_color;
+
+} // AntigenicMapsNamedGrid::section_color
 
 // ----------------------------------------------------------------------
 /// Local Variables:

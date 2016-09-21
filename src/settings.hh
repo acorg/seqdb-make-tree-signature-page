@@ -182,7 +182,7 @@ class HzLineSection
 class HzLineSections : public std::vector<HzLineSection>
 {
  public:
-    enum Mode { ColoredGrid, BWVpos };
+    enum Mode { ColoredGrid, BWVpos, NamedGrid };
 
     inline HzLineSections() : mode(BWVpos), hz_line_width(0.5), hz_line_color(GREY),
                               sequenced_antigen_line_show(true), sequenced_antigen_line_width(0.5), sequenced_antigen_line_length(5), sequenced_antigen_line_color(GREY),
@@ -212,15 +212,17 @@ class HzLineSections : public std::vector<HzLineSection>
             switch (*a) {
               case ColoredGrid: return "colored_grid";
               case BWVpos: return "bw_vpos";
+              case NamedGrid: return "named_grid";
             }
-            return "colored_grid";            // to shut compiler up
+            return "named_grid";            // to shut compiler up
         }
 
     inline static void mode_from_string(Mode* target, std::string source)
         {
             if (source == "colored_grid" || source == "colored-grid") *target = ColoredGrid;
             else if (source == "bw_vpos" || source == "bw-vpos" || source == "bwvpos") *target = BWVpos;
-            else throw std::invalid_argument("cannot parse hz line section mode from \"" + source + "\", supported values: \"colored_grid\", \"bw_vpos\"");
+            else if (source == "named_grid" || source == "named-grid") *target = NamedGrid;
+            else throw std::invalid_argument("cannot parse hz line section mode from \"" + source + "\", supported values: \"colored_grid\", \"bw_vpos\", \"named_grid\"");
         }
 
     friend inline auto json_fields(HzLineSections& a)
