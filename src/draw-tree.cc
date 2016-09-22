@@ -145,7 +145,7 @@ void DrawTree::draw_aa_transition(const Node& aNode, Surface& aSurface, const Vi
                 origin.y += longest_label_size.height * branch_settings.interline;
             }
             if (distance(connection_line_start, connection_line_end) > 10) {
-                aSurface.line(connection_line_start, connection_line_end, BLACK, 1);
+                aSurface.line(connection_line_start, connection_line_end, branch_settings.label_connection_line_color, mLineWidth /*branch_settings.label_connection_line_width*/);
             }
 
             std::cout << "AA transitions: ";

@@ -17,7 +17,9 @@ class SettingsAATransition
     class TransitionData
     {
      public:
-        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("Courier New"), interline(empty ? -1 : 1.2), label_offset_x(empty ? 0 : 0), label_offset_y(empty ? 0 : 0) {}
+        inline TransitionData(bool empty = true)
+            : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("Courier New"), interline(empty ? -1 : 1.2),
+              label_offset_x(empty ? 0 : -40), label_offset_y(empty ? 0 : 20), label_connection_line_width(0.1), label_connection_line_color(BLACK) {}
         inline TransitionData(std::string aBranchId, std::vector<std::string>&& aLabels) : TransitionData(true) { branch_id = aBranchId; labels = std::move(aLabels); }
 
         double size;
@@ -27,6 +29,8 @@ class SettingsAATransition
         std::string branch_id;
         std::vector<std::string> labels;
         double label_offset_x, label_offset_y;
+        double label_connection_line_width;
+        Color label_connection_line_color;
 
         inline void update(const TransitionData& source)
             {
@@ -44,6 +48,8 @@ class SettingsAATransition
         friend inline auto json_fields(TransitionData& a)
         {
             return std::make_tuple(
+                "label_connection_line_color", json::field(&a.label_connection_line_color, &Color::to_string, &Color::from_string, json::output_if_true),
+                "label_connection_line_width", &a.label_connection_line_width,
                 "branch_id", &a.branch_id,
                 "labels", &a.labels,
                 "size", &a.size,
