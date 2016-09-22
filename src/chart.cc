@@ -141,7 +141,7 @@ std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aL
 
 // ----------------------------------------------------------------------
 
-size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& /*aSettings*/) const
+size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const
 {
     size_t tracked = 0;
     mDrawTrackedAntigen.color(aFillColor);
@@ -151,6 +151,14 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
         if (p != mPointByName.end()) {
             mDrawPoints[p->second] = &mDrawTrackedAntigen;
             ++tracked;
+
+            if (aSettings.show_tracked_homologous_sera) {
+                  // find homologous serum
+                for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
+                    if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == p->second)
+                        mDrawPoints[point_no] = &mDrawTrackedSerum;
+                }
+            }
         }
         else {
             const std::string prefix(name, 0, name.find(1, ' '));
@@ -215,11 +223,19 @@ void DrawSerum::draw(Surface& aSurface, const Point& aPoint, const PointStyle& a
 {
     const double size = aSettings.serum_scale * aObjectScale;
     if (!aPoint.coordinates.isnan()) {
-        aSurface.rectangle_filled(aPoint.coordinates, {size * aspect(aPoint, aStyle, aSettings), size}, aSettings.serum_outline_color,
+        aSurface.rectangle_filled(aPoint.coordinates, {size * aspect(aPoint, aStyle, aSettings), size}, outline_color(aPoint, aStyle, aSettings),
                                   aSettings.serum_outline_width * aObjectScale, TRANSPARENT);
     }
 
 } // DrawSerum::draw
+
+// ----------------------------------------------------------------------
+
+Color DrawSerum::outline_color(const Point& /*aPoint*/, const PointStyle& /*aStyle*/, const SettingsAntigenicMaps& aSettings) const
+{
+    return aSettings.serum_outline_color;
+
+} // DrawSerum::outline_color
 
 // ----------------------------------------------------------------------
 
@@ -329,6 +345,8 @@ static inline void make_PointAntigenDeserializer(bool* antigen, std::string& sou
 inline auto json_fields(PointAttributes& a)
 {
     return std::make_tuple(
+        "ht", &a.homologous_titer,
+        "h", &a.homologous_antigen,
         "t", json::field(&a.antigen, &make_PointAntigenSerializer, &make_PointAntigenDeserializer),
         "v", &a.vaccine,
         "r", &a.reassortant,

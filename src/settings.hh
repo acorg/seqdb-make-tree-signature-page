@@ -612,7 +612,7 @@ class SettingsAntigenicMaps
           tracked_antigen_outline_color(WHITE),
           egg_antigen_aspect(0.75), reassortant_rotation(0.5 /* M_PI / 6.0 */), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false),
           max_number_columns(100), grid_width(0), bracket_border_color(BLACK), bracket_background_color(TRANSPARENT), bracket_border_width(1),
-          map_label_color(BLACK), map_label_offset_x(2), map_label_offset_y(10), map_label_size(10)
+          map_label_color(BLACK), map_label_offset_x(2), map_label_offset_y(10), map_label_size(10), show_tracked_homologous_sera(false)
         {}
 
     Mode mode;
@@ -637,6 +637,7 @@ class SettingsAntigenicMaps
     double bracket_border_width;
     Color map_label_color;
     double map_label_offset_x, map_label_offset_y, map_label_size;
+    bool show_tracked_homologous_sera;
 
  private:
     inline static std::string mode_to_string(const Mode* a)
@@ -664,6 +665,7 @@ class SettingsAntigenicMaps
                 "gap_between_maps", &a.gap_between_maps,
                 "max_number_columns", &a.max_number_columns,
                 "maps_for_sections_without_antigens", &a.maps_for_sections_without_antigens,
+                "show_tracked_homologous_sera", &a.show_tracked_homologous_sera,
                 "border_width", &a.border_width, // object_double_non_negative_value
                 "border_color", json::field(&a.border_color, &Color::to_string, &Color::from_string),
                 "grid_line_width", &a.grid_line_width, // object_double_non_negative_value
