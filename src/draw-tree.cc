@@ -310,14 +310,14 @@ void DrawHzLines::draw(Surface& aSurface, const Viewport& aTimeSeriesViewport, c
                       break;
                   case SettingsAntigenicMaps::BWVpos: {
                         // draw section direction lines
-                      const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, section_no);
+                      const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, aSections, section_no);
                       if (map_viewport.size.width > 0) { // map viewport with zero size means that map has no tracked antigens and must not be shown according to settings (maps_for_sections_without_antigens)
                           (this->*draw_section_lines)(aSurface, aTimeSeriesViewport, aAntigenicMapsViewport, map_viewport, aAntigenicMapsSettings, first_y, last_y, vertical_step, aSections);
                       }
                   }
                       break;
                   case SettingsAntigenicMaps::NamedGrid:
-                      const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, section_no);
+                      const Viewport map_viewport = aAntigenicMaps->viewport_of(aAntigenicMapsViewport, aSections, section_no);
                       if (map_viewport.size.width > 0) { // map viewport with zero size means that map has no tracked antigens and must not be shown according to settings (maps_for_sections_without_antigens)
                           draw_section_bracket(aSurface, aTimeSeriesViewport, aAntigenicMapsSettings, first_y, last_y, vertical_step, aSections);
                           draw_section_label(aSurface, aTimeSeriesViewport, line_y, last_y, aSections, section_no);
@@ -427,11 +427,16 @@ void DrawHzLines::draw_section_bracket(Surface& aSurface, const Viewport& aTimeS
 
 // ----------------------------------------------------------------------
 
-std::string DrawHzLines::section_label(const HzLineSections& aSections, size_t aSectionNo)
+std::string DrawHzLines::section_label(const HzLineSections& aSections, size_t aSectionNo, bool aJustIndex)
 {
-    std::string label = aSections[aSectionNo].label;
-    if (label.empty()) {
-        label = std::string(1, static_cast<char>(aSectionNo) + 'A');
+      // not all sections show maps, enumerate showing map sections to find index to display
+    std::string label;
+    if (aSections[aSectionNo].show_map) {
+        label.append(1, section_index(aSections, aSectionNo, 'A'));
+        if (!aJustIndex && !aSections[aSectionNo].label.empty()) {
+            label.append(". ");
+            label.append(aSections[aSectionNo].label);
+        }
     }
     return label;
 
@@ -442,9 +447,9 @@ std::string DrawHzLines::section_label(const HzLineSections& aSections, size_t a
 void DrawHzLines::draw_section_label(Surface& aSurface, const Viewport& aTimeSeriesViewport, double first_y, double last_y, const HzLineSections& aSections, size_t aSectionNo) const
 {
     Surface::PushContext pc(aSurface);
-    std::string label = section_label(aSections, aSectionNo);
+    std::string label = section_label(aSections, aSectionNo, true);
     TextStyle label_style;
-    const Size text_size = aSurface.text_size(label, aSections.section_label_size, label_style);
+    const Size text_size = aSurface.text_size("C", aSections.section_label_size, label_style);
     Location label_location((aSections.section_label_offset_x >= 0 ? aTimeSeriesViewport.origin.x : (aTimeSeriesViewport.right() - text_size.width)) + aSections.section_label_offset_x,
                             (aSections.section_label_offset_y >= 0 ? (first_y + text_size.height) : last_y) + aSections.section_label_offset_y);
     aSurface.text(label_location, label, aSections.section_label_color, aSections.section_label_size, label_style);

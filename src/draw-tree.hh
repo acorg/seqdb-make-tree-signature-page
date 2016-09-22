@@ -80,7 +80,16 @@ class DrawHzLines
     DrawHzLines& prepare(Tree& aTree, HzLineSections& aSections);
     void draw(Surface& aSurface, const Viewport& aTimeSeries, const Viewport& aAntigenicMapsViewport, const DrawTree& aDrawTree, const AntigenicMaps* aAntigenicMaps, const SettingsAntigenicMaps& aAntigenicMapsSettings, const HzLineSections& aSections, SettingsSignaturePage::Layout aLayout) const;
 
-    static std::string section_label(const HzLineSections& aSections, size_t aSectionNo);
+    static std::string section_label(const HzLineSections& aSections, size_t aSectionNo, bool aJustIndex);
+
+    template <typename Index> static inline Index section_index(const HzLineSections& aSections, size_t aSectionNo, Index aStart)
+        {
+            for (size_t no = 0; no < aSectionNo; ++no) {
+                if (aSections[no].show_map)
+                    ++aStart;
+            }
+            return aStart;
+        }
 
  private:
     void draw_section_lines_right(Surface& aSurface, const Viewport& aTimeSeriesViewport, const Viewport& aAntigenicMapsViewport, const Viewport& aMapViewport, const SettingsAntigenicMaps& aAntigenicMapsSettings, double first_y, double last_y, double vertical_step, const HzLineSections& aSections) const;

@@ -159,11 +159,11 @@ class HzLineSection
     constexpr static size_t LINE_NOT_SET = static_cast<size_t>(-1);
 
  public:
-    inline HzLineSection() : first_line(LINE_NOT_SET), color(COLOR_NOT_SET), line_width(2) {}
+    inline HzLineSection() : first_line(LINE_NOT_SET), color(COLOR_NOT_SET), line_width(2), show_map(true) {}
     // inline HzLineSection(std::string aFirstName, size_t aFirstLine, Color aColor = COLOR_NOT_SET)
     //     : first_name(aFirstName), first_line(aFirstLine), color(aColor), line_width(2) {}
     inline HzLineSection(std::string aFirstName, Color aColor = COLOR_NOT_SET)
-        : first_name(aFirstName), first_line(LINE_NOT_SET), color(aColor), line_width(2) {}
+        : first_name(aFirstName), first_line(LINE_NOT_SET), color(aColor), line_width(2), show_map(true) {}
     HzLineSection(const Node& aNode, Color aColor = COLOR_NOT_SET);
 
     std::string first_name;
@@ -171,6 +171,7 @@ class HzLineSection
     Color color;
     double line_width;
     std::string label;          // for named_grid mode, empty to set automatically
+    bool show_map;              // show antigenic map for this section, used to disable showing some maps
 
     friend inline auto json_fields(HzLineSection& a)
         {
@@ -178,6 +179,7 @@ class HzLineSection
                 "first_name", &a.first_name,
                   // "first_line", &a.first_line,
                 "line_width", &a.line_width,
+                "show_map", &a.show_map,
                 "label", &a.label,
                 "color", json::field(&a.color, &Color::to_string, &Color::from_string)
                                    );

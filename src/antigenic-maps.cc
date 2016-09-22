@@ -28,10 +28,23 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageAr
 
 // ----------------------------------------------------------------------
 
+size_t AntigenicMaps::number_of_shown_maps(const HzLineSections& aSections) const
+{
+    size_t shown_maps = 0;
+    for (const auto& section: aSections) {
+        if (section.show_map)
+            ++shown_maps;
+    }
+    return shown_maps;
+
+} // AntigenicMaps::number_of_shown_maps
+
+// ----------------------------------------------------------------------
+
 void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Chart* aChart, const HzLineSections& aSections, const SettingsAntigenicMaps& aSettings) const
 {
     for (size_t section_no = 0; section_no < number_of_maps(); ++section_no) {
-        const Viewport map_viewport = viewport_of(aViewport, section_no);
+        const Viewport map_viewport = viewport_of(aViewport, aSections, section_no);
         if (map_viewport.size.width > 0) {
 
             Surface::PushContext pc(aSurface);
@@ -63,7 +76,7 @@ AntigenicMapsGrid& AntigenicMapsGrid::prepare(const Tree& aTree, const Viewport&
 {
     AntigenicMaps::prepare(aTree, aPageArea, aChart, aSections, aSettings);
 
-    std::tie(mGridWidth, mGridHeight) = grid(aSettings);
+    std::tie(mGridWidth, mGridHeight) = grid(aSettings, aSections);
 
     return *this;
 
@@ -82,20 +95,25 @@ void AntigenicMapsGrid::calculate_viewports(Tree& /*aTree*/, Chart* /*aChart*/, 
 
 // ----------------------------------------------------------------------
 
-Viewport AntigenicMapsGrid::viewport_of(const Viewport& aViewport, size_t map_no) const
+Viewport AntigenicMapsGrid::viewport_of(const Viewport& aViewport, const HzLineSections& aSections, size_t map_no) const
 {
-    const size_t cell_x = map_no % mGridWidth;
-    const size_t cell_y = map_no / mGridWidth;
-    return Viewport(Location(aViewport.origin.x + left_offset() + (mCellSize.width + gap_between_maps()) * cell_x, aViewport.origin.y + (mCellSize.height + gap_between_maps()) * cell_y), mCellSize);
+    Viewport viewport;
+    if (aSections[map_no].show_map) {
+        size_t index = DrawHzLines::section_index(aSections, map_no, size_t(0));
+        const size_t cell_x = index % mGridWidth;
+        const size_t cell_y = index / mGridWidth;
+        viewport.set(Location(aViewport.origin.x + left_offset() + (mCellSize.width + gap_between_maps()) * cell_x, aViewport.origin.y + (mCellSize.height + gap_between_maps()) * cell_y), mCellSize);
+    }
+    return viewport;
 
 } // AntigenicMapsGrid::viewport_of
 
 // ----------------------------------------------------------------------
 
-std::pair<size_t, size_t> AntigenicMapsGrid::grid(const SettingsAntigenicMaps& aSettings) const
+std::pair<size_t, size_t> AntigenicMapsGrid::grid(const SettingsAntigenicMaps& aSettings, const HzLineSections& aSections) const
 {
     size_t grid_width = aSettings.grid_width;
-    const size_t nm = number_of_maps();
+    const size_t nm = number_of_shown_maps(aSections);
     if (grid_width == 0) {
         if (nm < 4)
             grid_width = 1;
@@ -146,12 +164,9 @@ void AntigenicMapsNamedGrid::draw(Surface& aSurface, const Viewport& aViewport, 
 
       // Draw section label
     for (size_t section_no = 0; section_no < number_of_maps(); ++section_no) {
-        const Viewport map_viewport = viewport_of(aViewport, section_no);
+        const Viewport map_viewport = viewport_of(aViewport, aSections, section_no);
         if (map_viewport.size.width > 0) {
-            std::string label = DrawHzLines::section_label(aSections, section_no);
-            if (label.size() == 1) {
-                label.append(1, '.');
-            }
+            std::string label = DrawHzLines::section_label(aSections, section_no, false);
             Surface::PushContext pc(aSurface);
             aSurface.text(map_viewport.origin + Size(aSettings.map_label_offset_x, aSettings.map_label_offset_y), label, aSettings.map_label_color, aSettings.map_label_size);
         }
@@ -250,7 +265,7 @@ void AntigenicMapsVpos::calculate_viewports(Tree& aTree, Chart* aChart, const Vi
 
 // ----------------------------------------------------------------------
 
-Viewport AntigenicMapsVpos::viewport_of(const Viewport& aViewport, size_t map_no) const
+Viewport AntigenicMapsVpos::viewport_of(const Viewport& aViewport, const HzLineSections& /*aSections*/, size_t map_no) const
 {
     const Viewport& viewport = mViewports[map_no];
     return Viewport(aViewport.origin + viewport.origin, viewport.size);
@@ -265,7 +280,7 @@ void AntigenicMapsVpos::draw(Surface& aSurface, const Viewport& aViewport, const
 
       // breaking the antigenic map box outline where section connecting lines meet the box
     for (size_t section_no = 0; section_no < number_of_maps(); ++section_no) {
-        const Viewport map_viewport = viewport_of(aViewport, section_no);
+        const Viewport map_viewport = viewport_of(aViewport, aSections, section_no);
         if (map_viewport.size.width > 0) {
             const double gap = aViewport.size.height * 0.01;
             const double top_y = map_viewport.center().y - gap;
