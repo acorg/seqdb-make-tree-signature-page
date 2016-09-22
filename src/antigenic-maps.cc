@@ -46,6 +46,8 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
     for (size_t section_no = 0; section_no < number_of_maps(); ++section_no) {
         const Viewport map_viewport = viewport_of(aViewport, aSections, section_no);
         if (map_viewport.size.width > 0) {
+            std::cout << "Drawing map for section " << DrawHzLines::section_label(aSections, section_no, true) << " "
+                      << "line:" << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << std::endl;
 
             Surface::PushContext pc(aSurface);
             aSurface.rectangle_filled(map_viewport, aSettings.border_color, aSettings.border_width, aSettings.background_color);
@@ -61,7 +63,8 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
             const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], section_color(aSections, section_no), aSettings);
             aChart->marked_antigens(aSettings.mark_antigens, names_per_map()[section_no], section_no, aSettings);
             aChart->draw(aSurface, scale, aSettings);
-            std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << " names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
+            std::cout << "    Names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
+              // std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << " names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
         }
         else {
             std::cout << "Section " << aSections[section_no].first_line << " " << aSections[section_no].first_name << " " << section_color(aSections, section_no) << " names: " << names_per_map()[section_no].size() << " no tracked antigens" << std::endl;

@@ -146,6 +146,9 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
     size_t tracked = 0;
     mDrawTrackedAntigen.color(aFillColor);
 
+    mDrawTrackedSera.clear();
+    mDrawTrackedSera.reserve(aNames.size()); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
+
     for (const auto& name: aNames) {
         const auto p = mPointByName.find(name);
         if (p != mPointByName.end()) {
@@ -155,8 +158,10 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
             if (aSettings.show_tracked_homologous_sera) {
                   // find homologous serum
                 for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
-                    if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == p->second)
-                        mDrawPoints[point_no] = &mDrawTrackedSerum;
+                    if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == p->second) {
+                        mDrawTrackedSera.emplace_back(BLACK);
+                        mDrawPoints[point_no] = &mDrawTrackedSera[mDrawTrackedSera.size() - 1];
+                    }
                 }
             }
         }
@@ -236,6 +241,16 @@ Color DrawSerum::outline_color(const Point& /*aPoint*/, const PointStyle& /*aSty
     return aSettings.serum_outline_color;
 
 } // DrawSerum::outline_color
+
+// ----------------------------------------------------------------------
+
+void DrawTrackedSerum::draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
+{
+    DrawSerum::draw(aSurface, aPoint, aStyle, aObjectScale, aSettings);
+    std::cout << "    Tracked serum " << aPoint.name << " radius:" << aPoint.attributes.serum_circle_radius << std::endl;
+    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0, outline_color(aPoint, aStyle, aSettings), 1 * aObjectScale);
+
+} // DrawTrackedSerum::draw
 
 // ----------------------------------------------------------------------
 
@@ -346,7 +361,8 @@ inline auto json_fields(PointAttributes& a)
 {
     return std::make_tuple(
         "ht", &a.homologous_titer,
-        "h", &a.homologous_antigen,
+        "ha", &a.homologous_antigen,
+        "ra", &a.serum_circle_radius,
         "t", json::field(&a.antigen, &make_PointAntigenSerializer, &make_PointAntigenDeserializer),
         "v", &a.vaccine,
         "r", &a.reassortant,
@@ -436,3 +452,6 @@ Chart Chart::from_json(std::string data)
 } // Chart::from_json
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

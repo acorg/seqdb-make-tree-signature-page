@@ -165,6 +165,21 @@ void Surface::triangle_filled(const Location& aCenter, double aSide, double aAsp
 
 // ----------------------------------------------------------------------
 
+void Surface::circle(const Location& aCenter, double aDiameter, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth)
+{
+    PushContext pc(*this);
+    cairo_set_line_width(mContext, aOutlineWidth);
+    cairo_translate(mContext, aCenter.x, aCenter.y);
+    cairo_rotate(mContext, aAngle);
+    cairo_scale(mContext, aAspect, 1.0);
+    cairo_arc(mContext, 0, 0, aDiameter / 2, 0.0, 2.0 * M_PI);
+    set_source_rgba(aOutlineColor);
+    cairo_stroke(mContext);
+
+} // Surface::circle
+
+// ----------------------------------------------------------------------
+
 void Surface::circle_filled(const Location& aCenter, double aDiameter, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor)
 {
     PushContext pc(*this);

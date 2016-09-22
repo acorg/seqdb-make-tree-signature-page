@@ -80,8 +80,9 @@ class DrawTrackedAntigen : public DrawAntigen
 class DrawTrackedSerum : public DrawSerum
 {
  public:
-    inline DrawTrackedSerum() : mOutlineColor(BLACK) {}
+    inline DrawTrackedSerum(Color aOutlineColor) : mOutlineColor(aOutlineColor) {}
 
+    virtual void draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
     virtual inline size_t level() const { return 6; }
     virtual inline Color outline_color(const Point& /*aPoint*/, const PointStyle& /*aStyle*/, const SettingsAntigenicMaps& /*aSettings*/) const { return mOutlineColor; }
 
@@ -124,7 +125,7 @@ class DrawMarkedAntigen : public DrawAntigen
 class PointAttributes
 {
  public:
-    inline PointAttributes() : antigen(true), egg(false), reassortant(false), reference(false), vaccine(false), homologous_antigen(-1) {}
+    inline PointAttributes() : antigen(true), egg(false), reassortant(false), reference(false), vaccine(false), homologous_antigen(-1), serum_circle_radius(-1) {}
 
     bool antigen;
     bool egg;
@@ -134,6 +135,7 @@ class PointAttributes
     bool vaccine;
     int homologous_antigen;
     std::string homologous_titer;
+    double serum_circle_radius;
 };
 
 class Point
@@ -262,13 +264,13 @@ class Chart
     std::set<size_t> mSequencedAntigens;
     mutable std::vector<const DrawPoint*> mDrawPoints;
     DrawSerum mDrawSerum;
-    DrawTrackedSerum mDrawTrackedSerum;
     DrawReferenceAntigen mDrawReferenceAntigen;
     DrawTestAntigen mDrawTestAntigen;
     DrawSequencedAntigen mDrawSequencedAntigen;
     mutable DrawTrackedAntigen mDrawTrackedAntigen;
     DrawVaccineAntigen mDrawVaccineAntigen;
     mutable std::vector<DrawMarkedAntigen> mDrawMarkedAntigens;
+    mutable std::vector<DrawTrackedSerum> mDrawTrackedSera;
 
     Viewport mViewport;
 

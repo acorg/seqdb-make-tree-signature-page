@@ -380,6 +380,7 @@ class Surface
     inline void rectangle_filled(const Viewport& v, Color aOutlineColor, double aWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT) { rectangle_filled(v.origin, v.size, aOutlineColor, aWidth, aFillColor, aLineCap); }
     void square_filled(const Location& aCenter, double aSide, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
     void triangle_filled(const Location& aCenter, double aSide, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor, cairo_line_cap_t aLineCap = CAIRO_LINE_CAP_BUTT);
+    void circle(const Location& aCenter, double aDiameter, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth);
     void circle_filled(const Location& aCenter, double aDiameter, double aAspect, double aAngle, Color aOutlineColor, double aOutlineWidth, Color aFillColor);
     void double_arrow(const Location& a, const Location& b, Color aColor, double aLineWidth, double aArrowWidth);
     void text(const Location& a, std::string aText, Color aColor, double aSize, const TextStyle& aTextStyle = TextStyle(), double aRotation = 0);
