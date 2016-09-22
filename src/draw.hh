@@ -108,6 +108,12 @@ inline Location operator - (const Location& a, const Size& s)
     return {a.x - s.width, a.y - s.height};
 }
 
+double inline distance(const Location& a, const Location& b)
+{
+    const double dx = a.x - b.x, dy = a.y - b.y;
+    return sqrt(dx * dx + dy * dy);
+}
+
 inline Size operator - (const Location& a, const Location& b)
 {
     return {a.x - b.x, a.y - b.y};
@@ -164,6 +170,7 @@ class Viewport
     inline Location bottom_right() const { return origin + size; }
     inline Location bottom_left() const { return origin + Size(0, size.height); }
     inline Location center() const { return origin + size * 0.5; }
+    inline Location top_center() const { return origin + Size(size.width / 2, 0); }
 
     Location origin;
     Size size;

@@ -17,7 +17,7 @@ class SettingsAATransition
     class TransitionData
     {
      public:
-        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("Courier New"), interline(empty ? -1 : 1.2), label_offset_x(empty ? 0 : -20), label_offset_y(empty ? 0 : 40) {}
+        inline TransitionData(bool empty = true) : size(empty ? -1 : 8), color(empty ? COLOR_NOT_SET : BLACK), style("Courier New"), interline(empty ? -1 : 1.2), label_offset_x(empty ? 0 : 0), label_offset_y(empty ? 0 : 0) {}
         inline TransitionData(std::string aBranchId, std::vector<std::string>&& aLabels) : TransitionData(true) { branch_id = aBranchId; labels = std::move(aLabels); }
 
         double size;
