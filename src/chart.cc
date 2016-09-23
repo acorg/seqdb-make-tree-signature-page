@@ -248,7 +248,7 @@ void DrawTrackedSerum::draw(Surface& aSurface, const Point& aPoint, const PointS
 {
     DrawSerum::draw(aSurface, aPoint, aStyle, aObjectScale, aSettings);
     std::cout << "    Tracked serum " << aPoint.name << " radius:" << aPoint.attributes.serum_circle_radius << std::endl;
-    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0, outline_color(aPoint, aStyle, aSettings), 1 * aObjectScale);
+    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0, outline_color(aPoint, aStyle, aSettings), 0.5 * aObjectScale);
 
 } // DrawTrackedSerum::draw
 

@@ -25,11 +25,29 @@ def main(args):
     if args.command[0] == "list":
         # list names in the tree
         if args.cumulative_edge_length:
-            print("\n".join("{:14.12f} {}".format(node.cumulative_edge_length, node.name) for node in tree.leaf_nodes_sorted_by_cumulative_edge_length()))
+            sorted_nodes = tree.leaf_nodes_sorted_by_cumulative_edge_length()
+            if args.cumulative_edge_length_relative:
+                shortest = sorted_nodes[-1]
+                if args.branch_id:
+                    longest_branch_id = max(len(node.branch_id) for node in sorted_nodes)
+                    print("\n".join("{:16.12f} {:{}s} {}".format(node.cumulative_edge_length / shortest.cumulative_edge_length, node.branch_id, longest_branch_id, node.name) for node in sorted_nodes))
+                elif args.hamming_distance_to_shortest_branch:
+                    print("\n".join("{:16.12f} {:4d} {}".format(node.cumulative_edge_length / shortest.cumulative_edge_length, hamming_distance(node.aa, shortest.aa), node.name) for node in sorted_nodes))
+                else:
+                    print("\n".join("{:16.12f} {}".format(node.cumulative_edge_length / shortest.cumulative_edge_length, node.name) for node in sorted_nodes))
+            else:
+                print("\n".join("{:16.12f} {}".format(node.cumulative_edge_length, node.name) for node in sorted_nodes))
         else:
             print("\n".join(tree.names()))
     else:
         raise ValueError("Unrecognized command: " + args.command[0])
+
+# ----------------------------------------------------------------------
+
+def hamming_distance(s1, s2):
+    l = min(len(s1), len(s2))
+    hd = sum(1 for pos in range(l) if s1[pos] != s2[pos])
+    return hd
 
 # ----------------------------------------------------------------------
 
@@ -42,7 +60,10 @@ with seqdb.timeit(sys.argv[0]):
         parser.add_argument('input', nargs=1, help='source tree.')
         parser.add_argument('command', nargs=1, help='command to execute: list.')
 
-        parser.add_argument('--cumulative-edge-length', action='store_true', dest='cumulative_edge_length', default=False, help='Report cumulative_edge_length and sort by it.')
+        parser.add_argument('--cumulative-edge-length', action='store_true', dest='cumulative_edge_length', default=False, help='Report cumulative_edge_length and sort by it (desc).')
+        parser.add_argument('--relative', action='store_true', dest='cumulative_edge_length_relative', default=False, help='Report cumulative_edge_length relative to shortest, sort by it (desc).')
+        parser.add_argument('--branch-id', action='store_true', dest='branch_id', default=False, help='Report branch_id.')
+        parser.add_argument('--hamming-distance-to-shortest-branch', action='store_true', dest='hamming_distance_to_shortest_branch', default=False, help='Report hamming distance.')
 
         parser.add_argument('--db', action='store', dest='path_to_seqdb', default=None, help='Path to sequence database (to match tree leaves with seqdb entries).')
         # parser.add_argument('--email', action='store', dest='email', default="eu@antigenic-cartography.org", help='Email to report status of the tasks running in the cluster.')

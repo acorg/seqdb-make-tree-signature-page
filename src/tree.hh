@@ -215,7 +215,7 @@ class Tree : public Node
     inline std::vector<const Node*> leaf_nodes_sorted_by_cumulative_edge_length() const
         {
             compute_cumulative_edge_length();
-            return leaf_nodes_sorted_by([](const Node* a, const Node* b) -> bool { return a->cumulative_edge_length < b->cumulative_edge_length; });
+            return leaf_nodes_sorted_by([](const Node* a, const Node* b) -> bool { return a->cumulative_edge_length > b->cumulative_edge_length; });
         }
 
       // returns list of aa and its number of occurences at each pos found in the sequences of the tree

@@ -209,6 +209,9 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def_readonly("name", &Node::name)
             .def_readonly("edge_length", &Node::edge_length)
             .def_readonly("cumulative_edge_length", &Node::cumulative_edge_length)
+            .def_readonly("line_no", &Node::line_no)
+            .def_readonly("branch_id", &Node::branch_id)
+            .def_readonly("aa", &Node::aa)
             ;
 
     py::enum_<Node::LadderizeMethod>(m, "LadderizeMethod")
