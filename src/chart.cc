@@ -58,7 +58,7 @@ void Chart::apply_transformation(const SettingsAntigenicMaps& aSettings)
 {
     Transformation t = mTransformation;
     t.multiplyBy(aSettings.map_transformation);
-      // std::cerr << "transformation: " << *t << std::endl;
+    std::cout << "transformation: " << t << std::endl;
     for (auto& p: mPoints) {
         if (!p.coordinates.isnan()) {
             p.coordinates.x = p.coordinates.x * t[0][0] + p.coordinates.y * t[1][0];
