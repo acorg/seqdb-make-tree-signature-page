@@ -40,7 +40,8 @@ void Chart::preprocess(const SettingsAntigenicMaps& aSettings)
       // build point by name index
     mPointByName.clear();
     for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
-        mPointByName[mPoints[point_no].name] = point_no;
+        mPointByName.emplace(mPoints[point_no].name, point_no);
+          // mPointByName[mPoints[point_no].name] = point_no;
     }
 
     draw_points_reset(aSettings);
@@ -159,7 +160,7 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
                   // find homologous serum
                 for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
                     if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == p->second) {
-                        mDrawTrackedSera.emplace_back(BLACK);
+                        mDrawTrackedSera.emplace_back(0x40000000);
                         mDrawPoints[point_no] = &mDrawTrackedSera[mDrawTrackedSera.size() - 1];
                     }
                 }
@@ -187,6 +188,7 @@ size_t Chart::marked_antigens(const SettingsMarkAntigens& aData, const std::vect
         if (aSettings.marked_antigens_on_all_maps || tracked || (entry.show_on_map >= 0  && static_cast<size_t>(entry.show_on_map) == aSectionNo)) {
             const auto p = mPointByName.find(entry.id);
             if (p != mPointByName.end()) {
+                std::cout << aSectionNo << " marking antigen " << p->second << " " << p->first << std::endl;
                 mDrawMarkedAntigens.emplace_back(entry);
                 mDrawPoints[p->second] = &mDrawMarkedAntigens[mDrawMarkedAntigens.size() - 1];
             }
@@ -248,7 +250,7 @@ void DrawTrackedSerum::draw(Surface& aSurface, const Point& aPoint, const PointS
 {
     DrawSerum::draw(aSurface, aPoint, aStyle, aObjectScale, aSettings);
     std::cout << "    Tracked serum " << aPoint.name << " radius:" << aPoint.attributes.serum_circle_radius << std::endl;
-    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0, outline_color(aPoint, aStyle, aSettings), 0.5 * aObjectScale);
+    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0, outline_color(aPoint, aStyle, aSettings), 0.25 * aObjectScale);
 
 } // DrawTrackedSerum::draw
 
@@ -305,6 +307,7 @@ void DrawTrackedAntigen::draw(Surface& aSurface, const Point& aPoint, const Poin
 void DrawVaccineAntigen::draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const
 {
     if (!aPoint.coordinates.isnan()) {
+        std::cout << "Vaccine " << aPoint.name << " " << fill_color(aPoint, aStyle, aSettings) << std::endl;
         aSurface.circle_filled(aPoint.coordinates, aSettings.vaccine_antigen_scale * aObjectScale, aspect(aPoint, aStyle, aSettings), rotation(aPoint, aStyle, aSettings),
                                aSettings.vaccine_antigen_outline_color, // aPoint.attributes.vaccine.outline_color,
                                aSettings.vaccine_antigen_outline_width * aObjectScale,
