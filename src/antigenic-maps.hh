@@ -5,6 +5,7 @@
 
 // ----------------------------------------------------------------------
 
+class Node;
 class Tree;
 class Chart;
 class DrawTree;
@@ -39,6 +40,7 @@ class AntigenicMaps
     double mLeftOffset;
     std::vector<size_t> mLinesOfSequencedAntigensInChart;
     double mGap;
+    std::map<std::string, const Node*> mNodeByName;
 
 }; // class AntigenicMaps
 

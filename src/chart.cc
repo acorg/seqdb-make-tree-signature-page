@@ -144,27 +144,16 @@ std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aL
 
 size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const
 {
+    init_tracked_sera(aNames.size(), aSettings);
     size_t tracked = 0;
     mDrawTrackedAntigen.color(aFillColor);
-
-    mDrawTrackedSera.clear();
-    mDrawTrackedSera.reserve(aNames.size()); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
 
     for (const auto& name: aNames) {
         const auto p = mPointByName.find(name);
         if (p != mPointByName.end()) {
             mDrawPoints[p->second] = &mDrawTrackedAntigen;
             ++tracked;
-
-            if (aSettings.show_tracked_homologous_sera) {
-                  // find homologous serum
-                for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
-                    if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == p->second) {
-                        mDrawTrackedSera.emplace_back(0x40000000);
-                        mDrawPoints[point_no] = &mDrawTrackedSera[mDrawTrackedSera.size() - 1];
-                    }
-                }
-            }
+            add_tracked_serum(p->second, aSettings);
         }
         else {
             const std::string prefix(name, 0, name.find(1, ' '));
@@ -175,6 +164,91 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
     return tracked;
 
 } // Chart::tracked_antigens
+
+// ----------------------------------------------------------------------
+
+size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& aNames, const std::map<std::string, const Node*>& aNodeByName, const SettingsAntigenicMaps& aSettings) const
+{
+    init_tracked_sera(aNames.size(), aSettings);
+    size_t tracked = 0;
+    mDrawTrackedAntigensColoredByClade.clear();
+    mDrawTrackedAntigensColoredByClade.reserve(aNames.size()); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
+    for (const auto& name: aNames) {
+        const auto p = mPointByName.find(name);
+        if (p != mPointByName.end()) {
+            Color fill_color = 0xFF000000;
+            const auto node = aNodeByName.find(name);
+            if (node != aNodeByName.end()) {
+                for (const auto& clade: node->second->clades) {
+                    if (clade == "3C3b") {
+                        fill_color = 0x0000FF;
+                        break;
+                    }
+                    else if (clade == "3C3a") {
+                        fill_color = 0x00FF00;
+                        break;
+                    }
+                    else if (clade == "3C2a") {
+                        fill_color = 0xFF0000;
+                        break;
+                    }
+                    else if (clade == "3C3") {
+                        fill_color = 0x6495ED;
+                        break;
+                    }
+                }
+            }
+            if (fill_color == Color(0xFF000000)) {
+                if (node != aNodeByName.end()) {
+                    std::cerr << "no colored clade " << name << " [";
+                    std::copy(node->second->clades.begin(), node->second->clades.end(), std::ostream_iterator<std::string>(std::cerr, " "));
+                    std::cerr << "]" << std::endl;
+                }
+                else {
+                    std::cerr << "no clade " << name << std::endl;
+                }
+            }
+            mDrawTrackedAntigensColoredByClade.emplace_back(fill_color);
+            mDrawPoints[p->second] = &mDrawTrackedAntigensColoredByClade.back();
+            ++tracked;
+            add_tracked_serum(p->second, aSettings);
+        }
+        else {
+            const std::string prefix(name, 0, name.find(1, ' '));
+            if (mPrefixName.find(prefix) != mPrefixName.end())
+                std::cerr << "Error: cannot find chart antigen by name: " << name << std::endl;
+        }
+    }
+    return tracked;
+
+} // Chart::tracked_antigens_colored_by_clade
+
+// ----------------------------------------------------------------------
+
+void Chart::init_tracked_sera(size_t aSize, const SettingsAntigenicMaps& aSettings) const
+{
+    if (aSettings.show_tracked_homologous_sera) {
+        mDrawTrackedSera.clear();
+        mDrawTrackedSera.reserve(aSize); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
+    }
+
+} // Chart::init_tracked_sera
+
+// ----------------------------------------------------------------------
+
+void Chart::add_tracked_serum(size_t aAntigenNo, const SettingsAntigenicMaps& aSettings) const
+{
+    if (aSettings.show_tracked_homologous_sera) {
+          // find homologous serum
+        for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
+            if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == aAntigenNo) {
+                mDrawTrackedSera.emplace_back(0x40000000);
+                mDrawPoints[point_no] = &mDrawTrackedSera.back();
+            }
+        }
+    }
+
+} // Chart::add_tracked_serum
 
 // ----------------------------------------------------------------------
 
@@ -190,7 +264,7 @@ size_t Chart::marked_antigens(const SettingsMarkAntigens& aData, const std::vect
             if (p != mPointByName.end()) {
                 std::cout << aSectionNo << " marking antigen " << p->second << " " << p->first << std::endl;
                 mDrawMarkedAntigens.emplace_back(entry);
-                mDrawPoints[p->second] = &mDrawMarkedAntigens[mDrawMarkedAntigens.size() - 1];
+                mDrawPoints[p->second] = &mDrawMarkedAntigens.back();
             }
             else {
                 const std::string prefix(entry.id, 0, entry.id.find(1, ' '));

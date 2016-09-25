@@ -67,7 +67,7 @@ class DrawSequencedAntigen : public DrawAntigen
 class DrawTrackedAntigen : public DrawAntigen
 {
  public:
-    inline DrawTrackedAntigen() : mColor(0xFFC0CB) {}
+    inline DrawTrackedAntigen(Color aFillColor = 0xFFC0CB) : mColor(aFillColor) {}
 
     virtual void draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
     virtual inline size_t level() const { return 5; }
@@ -241,6 +241,7 @@ class Chart
 
       // returns number of antigens from aNames list found in the chart
     size_t tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const;
+    size_t tracked_antigens_colored_by_clade(const std::vector<std::string>& aNames, const std::map<std::string, const Node*>& aNodeByName, const SettingsAntigenicMaps& aSettings) const;
       // returns line_no for each antigen from aLeaves found in the chart
     std::vector<size_t> sequenced_antigens(const std::vector<const Node*>& aLeaves);
     size_t marked_antigens(const SettingsMarkAntigens& aData, const std::vector<std::string>& aTrackedNames, size_t aSectionNo, const SettingsAntigenicMaps& aSettings) const;
@@ -268,6 +269,7 @@ class Chart
     DrawTestAntigen mDrawTestAntigen;
     DrawSequencedAntigen mDrawSequencedAntigen;
     mutable DrawTrackedAntigen mDrawTrackedAntigen;
+    mutable std::vector<DrawTrackedAntigen> mDrawTrackedAntigensColoredByClade;
     DrawVaccineAntigen mDrawVaccineAntigen;
     mutable std::vector<DrawMarkedAntigen> mDrawMarkedAntigens;
     mutable std::vector<DrawTrackedSerum> mDrawTrackedSera;
@@ -281,6 +283,8 @@ class Chart
 
     void apply_transformation(const SettingsAntigenicMaps& aSettings);
     Viewport bounding_rectangle() const;
+    void init_tracked_sera(size_t aSize, const SettingsAntigenicMaps& aSettings) const;
+    void add_tracked_serum(size_t aAntigenNo, const SettingsAntigenicMaps& aSettings) const;
 
     friend auto json_fields(Chart& a);
 

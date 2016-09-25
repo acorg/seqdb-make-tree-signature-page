@@ -22,6 +22,8 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageAr
     mLeftOffset = aSections.empty() ? 0.0 : aSections[0].line_width * 2.0;
     mGap = aSettings.gap_between_maps * aPageArea.size.width;
 
+    iterate_leaf(aTree, [this](const Node& aNode) { for (const auto& hi_name: aNode.hi_names) { mNodeByName.emplace(hi_name, &aNode); } });
+
     return *this;
 
 } // AntigenicMaps::prepare
@@ -60,7 +62,11 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
             aSurface.grid(chart_viewport, 1, aSettings.grid_color, aSettings.grid_line_width * scale);
 
             aChart->draw_points_reset(aSettings);
-            const auto num_antigens = aChart->tracked_antigens(names_per_map()[section_no], section_color(aSections, section_no), aSettings);
+            size_t num_antigens;
+            if (aSettings.tracked_antigen_colored_by_clade)
+                num_antigens = aChart->tracked_antigens_colored_by_clade(names_per_map()[section_no], mNodeByName, aSettings);
+            else
+                num_antigens = aChart->tracked_antigens(names_per_map()[section_no], section_color(aSections, section_no), aSettings);
             aChart->marked_antigens(aSettings.mark_antigens, names_per_map()[section_no], section_no, aSettings);
             aChart->draw(aSurface, scale, aSettings);
             std::cout << "    Names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;

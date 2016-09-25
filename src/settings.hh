@@ -609,7 +609,7 @@ class SettingsAntigenicMaps
           sequenced_antigen_outline_width(0.5), tracked_antigen_outline_width(0.5),
           serum_outline_color(LIGHT_GREY), reference_antigen_outline_color(LIGHT_GREY), test_antigen_outline_color(LIGHT_GREY),
           test_antigen_fill_color(LIGHT_GREY), vaccine_antigen_outline_color(WHITE), sequenced_antigen_outline_color(WHITE), sequenced_antigen_fill_color(0xA0A0A0),
-          tracked_antigen_outline_color(WHITE),
+          tracked_antigen_outline_color(WHITE), tracked_antigen_colored_by_clade(false),
           egg_antigen_aspect(0.75), reassortant_rotation(0.5 /* M_PI / 6.0 */), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false),
           max_number_columns(100), grid_width(0), bracket_border_color(BLACK), bracket_background_color(TRANSPARENT), bracket_border_width(1),
           map_label_color(BLACK), map_label_offset_x(2), map_label_offset_y(10), map_label_size(10), show_tracked_homologous_sera(false)
@@ -624,6 +624,7 @@ class SettingsAntigenicMaps
     double serum_scale, reference_antigen_scale, test_antigen_scale, vaccine_antigen_scale, tracked_antigen_scale;
     double serum_outline_width, reference_antigen_outline_width, test_antigen_outline_width, vaccine_antigen_outline_width, sequenced_antigen_outline_width, tracked_antigen_outline_width;
     Color serum_outline_color, reference_antigen_outline_color, test_antigen_outline_color, test_antigen_fill_color, vaccine_antigen_outline_color, sequenced_antigen_outline_color, sequenced_antigen_fill_color, tracked_antigen_outline_color;
+    bool tracked_antigen_colored_by_clade;
     double egg_antigen_aspect, reassortant_rotation;
     bool maps_for_sections_without_antigens; // draw maps for sections having no tracked antigens
     Transformation map_transformation;
@@ -694,6 +695,7 @@ class SettingsAntigenicMaps
                 "test_antigen_fill_color", json::field(&a.test_antigen_fill_color, &Color::to_string, &Color::from_string),
                 "vaccine_antigen_outline_color", json::field(&a.vaccine_antigen_outline_color, &Color::to_string, &Color::from_string),
                 "tracked_antigen_outline_color", json::field(&a.tracked_antigen_outline_color, &Color::to_string, &Color::from_string),
+                "tracked_antigen_colored_by_clade", &a.tracked_antigen_colored_by_clade,
                 "sequenced_antigen_outline_width", &a.sequenced_antigen_outline_width,
                 "sequenced_antigen_outline_color", json::field(&a.sequenced_antigen_outline_color, &Color::to_string, &Color::from_string),
                 "sequenced_antigen_fill_color", json::field(&a.sequenced_antigen_fill_color, &Color::to_string, &Color::from_string),
