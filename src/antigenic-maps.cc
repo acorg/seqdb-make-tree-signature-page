@@ -10,9 +10,9 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageAr
 {
     if (!aSections.empty()) {
         for (size_t section_no = 0; section_no < (aSections.size() - 1); ++section_no) {
-            mNamesPerMap.push_back(aTree.names_between(aSections[section_no].first_name, aSections[section_no + 1].first_name));
+            mNamesPerMap.push_back(aTree.names_between(aSections[section_no].first_name, aSections[section_no + 1].first_name, aSettings.tracked_antigen_isolated_after));
         }
-        mNamesPerMap.push_back(aTree.names_between(aSections.back().first_name, "after-the-last-name"));
+        mNamesPerMap.push_back(aTree.names_between(aSections.back().first_name, "after-the-last-name", aSettings.tracked_antigen_isolated_after));
     }
     else {
         mNamesPerMap.push_back(aTree.names());

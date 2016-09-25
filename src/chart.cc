@@ -173,6 +173,9 @@ size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& 
     size_t tracked = 0;
     mDrawTrackedAntigensColoredByClade.clear();
     mDrawTrackedAntigensColoredByClade.reserve(aNames.size()); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
+
+      // std::set<size_t> antigens_on_this_map;
+
     for (const auto& name: aNames) {
         const auto p = mPointByName.find(name);
         if (p != mPointByName.end()) {
@@ -200,9 +203,9 @@ size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& 
             }
             if (fill_color == Color(0xFF000000)) {
                 if (node != aNodeByName.end()) {
-                    std::cerr << "no colored clade " << name << " [";
-                    std::copy(node->second->clades.begin(), node->second->clades.end(), std::ostream_iterator<std::string>(std::cerr, " "));
-                    std::cerr << "]" << std::endl;
+                    // std::cerr << "no colored clade " << name << " [";
+                    // std::copy(node->second->clades.begin(), node->second->clades.end(), std::ostream_iterator<std::string>(std::cerr, " "));
+                    // std::cerr << "]" << std::endl;
                 }
                 else {
                     std::cerr << "no clade " << name << std::endl;
@@ -210,6 +213,7 @@ size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& 
             }
             mDrawTrackedAntigensColoredByClade.emplace_back(fill_color);
             mDrawPoints[p->second] = &mDrawTrackedAntigensColoredByClade.back();
+              // antigens_on_this_map.insert(static_cast<size_t>(p->second));
             ++tracked;
             add_tracked_serum(p->second, aSettings);
         }
@@ -219,6 +223,32 @@ size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& 
                 std::cerr << "Error: cannot find chart antigen by name: " << name << std::endl;
         }
     }
+
+    // std::map<size_t, std::vector<size_t>> antigen_to_homologous_serum;
+    // for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
+    //     if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0) {
+    //         antigen_to_homologous_serum.emplace(mPoints[point_no].attributes.homologous_antigen, std::vector<size_t>());
+    //         antigen_to_homologous_serum[static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen)].push_back(point_no);
+    //     }
+    // }
+    // std::cerr << "antigen_to_homologous_serum " << antigen_to_homologous_serum.size() << std::endl;
+    // for (auto& ag_to_sr: antigen_to_homologous_serum) {
+    //     auto name = mPoints[ag_to_sr.first].name;
+    //     auto in_names = std::find(aNames.begin(), aNames.end(), name) != aNames.end();
+    //     std::cerr << "antigen_to_homologous_serum " << (in_names ? "in" : "NO") << " names " << name << " " << ag_to_sr.first << " ";
+    //     std::copy(ag_to_sr.second.begin(), ag_to_sr.second.end(), std::ostream_iterator<size_t>(std::cerr, " "));
+    //     std::cerr << std::endl;
+    // }
+
+    // // for (size_t ag: antigens_on_this_map) {
+    // //     auto p = antigen_to_homologous_serum.find(ag);
+    // //     if (p != antigen_to_homologous_serum.end()) {
+    // //         std::cerr << "homologous ag:" << ag << " [";
+    // //         std::copy(p->second.begin(), p->second.end(), std::ostream_iterator<size_t>(std::cerr, " "));
+    // //         std::cerr << "]" << std::endl;
+    // //     }
+    // // }
+
     return tracked;
 
 } // Chart::tracked_antigens_colored_by_clade

@@ -642,6 +642,7 @@ class SettingsAntigenicMaps
     bool show_tracked_homologous_sera;
     Color serum_circle_color;
     double serum_circle_thickness;
+    std::string tracked_antigen_isolated_after;
 
  private:
     inline static std::string mode_to_string(const Mode* a)
@@ -694,6 +695,7 @@ class SettingsAntigenicMaps
                 "test_antigen_outline_width", &a.test_antigen_outline_width,
                 "vaccine_antigen_outline_width", &a.vaccine_antigen_outline_width,
                 "tracked_antigen_outline_width", &a.tracked_antigen_outline_width,
+                "tracked_antigen_isolated_after", &a.tracked_antigen_isolated_after,
                 "serum_outline_color", json::field(&a.serum_outline_color, &Color::to_string, &Color::from_string),
                 "reference_antigen_outline_color", json::field(&a.reference_antigen_outline_color, &Color::to_string, &Color::from_string),
                 "test_antigen_outline_color", json::field(&a.test_antigen_outline_color, &Color::to_string, &Color::from_string),

@@ -396,10 +396,11 @@ std::vector<std::string> Tree::names() const
 
 // ----------------------------------------------------------------------
 
-std::vector<std::string> Tree::names_between(std::string first, std::string last) const
+std::vector<std::string> Tree::names_between(std::string first, std::string last, std::string isolated_after) const
 {
     std::vector<std::string> names;
     bool collect = false;
+    Date isolated_after_d(isolated_after);
     auto get_name = [&](const Node& aNode) {
         if (!collect && aNode.name == first)
             collect = true;
@@ -408,10 +409,12 @@ std::vector<std::string> Tree::names_between(std::string first, std::string last
                 collect = false;
             }
             else {
-                names.push_back(aNode.name);
-                for (const std::string& hi_name: aNode.hi_names) {
-                    if (hi_name != aNode.name)
-                        names.push_back(hi_name);
+                if (aNode.date >= isolated_after_d) {
+                    names.push_back(aNode.name);
+                    for (const std::string& hi_name: aNode.hi_names) {
+                        if (hi_name != aNode.name)
+                            names.push_back(hi_name);
+                    }
                 }
             }
         }

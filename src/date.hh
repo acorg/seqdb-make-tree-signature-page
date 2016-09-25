@@ -18,6 +18,7 @@ class Date
 
     inline bool operator < (const Date& d) const { return year() == d.year() ? (month() == d.month() ? day() < d.day() : month() < d.month()) : year() < d.year(); }
     inline bool operator == (const Date& d) const { return year() == d.year() && month() == d.month() && day() == d.day(); }
+    inline bool operator >= (const Date& d) const { return operator==(d) || !operator<(d); }
 
     inline bool empty() const { return mTime.tm_year == 0; }
     inline operator bool() const { return !operator==(Date()); }

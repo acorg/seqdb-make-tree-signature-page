@@ -206,7 +206,7 @@ class Tree : public Node
     void clade_setup();         // updates mSettings.clades with clade data from tree
 
     std::vector<std::string> names() const;
-    std::vector<std::string> names_between(std::string first, std::string last) const;
+    std::vector<std::string> names_between(std::string first, std::string last, std::string isolated_after = std::string()) const;
     std::vector<const Node*> leaves() const;
 
       // aa transitions
