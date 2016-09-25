@@ -612,7 +612,8 @@ class SettingsAntigenicMaps
           tracked_antigen_outline_color(WHITE), tracked_antigen_colored_by_clade(false),
           egg_antigen_aspect(0.75), reassortant_rotation(0.5 /* M_PI / 6.0 */), maps_for_sections_without_antigens(false), marked_antigens_on_all_maps(false),
           max_number_columns(100), grid_width(0), bracket_border_color(BLACK), bracket_background_color(TRANSPARENT), bracket_border_width(1),
-          map_label_color(BLACK), map_label_offset_x(2), map_label_offset_y(10), map_label_size(10), show_tracked_homologous_sera(false)
+          map_label_color(BLACK), map_label_offset_x(2), map_label_offset_y(10), map_label_size(10),
+          show_tracked_homologous_sera(false), serum_circle_color(BLACK), serum_circle_thickness(1)
         {}
 
     Mode mode;
@@ -639,6 +640,8 @@ class SettingsAntigenicMaps
     Color map_label_color;
     double map_label_offset_x, map_label_offset_y, map_label_size;
     bool show_tracked_homologous_sera;
+    Color serum_circle_color;
+    double serum_circle_thickness;
 
  private:
     inline static std::string mode_to_string(const Mode* a)
@@ -667,6 +670,8 @@ class SettingsAntigenicMaps
                 "max_number_columns", &a.max_number_columns,
                 "maps_for_sections_without_antigens", &a.maps_for_sections_without_antigens,
                 "show_tracked_homologous_sera", &a.show_tracked_homologous_sera,
+                "serum_circle_color", json::field(&a.serum_circle_color, &Color::to_string, &Color::from_string),
+                "serum_circle_thickness", &a.serum_circle_thickness,
                 "border_width", &a.border_width, // object_double_non_negative_value
                 "border_color", json::field(&a.border_color, &Color::to_string, &Color::from_string),
                 "grid_line_width", &a.grid_line_width, // object_double_non_negative_value

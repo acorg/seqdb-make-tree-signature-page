@@ -80,7 +80,7 @@ class DrawTrackedAntigen : public DrawAntigen
 class DrawTrackedSerum : public DrawSerum
 {
  public:
-    inline DrawTrackedSerum(Color aOutlineColor) : mOutlineColor(aOutlineColor) {}
+    inline DrawTrackedSerum(Color aOutlineColor = 0) : mOutlineColor(aOutlineColor) {}
 
     virtual void draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
     virtual inline size_t level() const { return 6; }
@@ -265,6 +265,7 @@ class Chart
     std::set<size_t> mSequencedAntigens;
     mutable std::vector<const DrawPoint*> mDrawPoints;
     DrawSerum mDrawSerum;
+    DrawTrackedSerum mDrawTrackedSerum;
     DrawReferenceAntigen mDrawReferenceAntigen;
     DrawTestAntigen mDrawTestAntigen;
     DrawSequencedAntigen mDrawSequencedAntigen;
@@ -272,7 +273,7 @@ class Chart
     mutable std::vector<DrawTrackedAntigen> mDrawTrackedAntigensColoredByClade;
     DrawVaccineAntigen mDrawVaccineAntigen;
     mutable std::vector<DrawMarkedAntigen> mDrawMarkedAntigens;
-    mutable std::vector<DrawTrackedSerum> mDrawTrackedSera;
+      // mutable std::vector<DrawTrackedSerum> mDrawTrackedSera;
 
     Viewport mViewport;
 

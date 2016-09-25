@@ -225,12 +225,12 @@ size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& 
 
 // ----------------------------------------------------------------------
 
-void Chart::init_tracked_sera(size_t aSize, const SettingsAntigenicMaps& aSettings) const
+void Chart::init_tracked_sera(size_t /*aSize*/, const SettingsAntigenicMaps& /*aSettings*/) const
 {
-    if (aSettings.show_tracked_homologous_sera) {
-        mDrawTrackedSera.clear();
-        mDrawTrackedSera.reserve(aSize); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
-    }
+    // if (aSettings.show_tracked_homologous_sera) {
+    //     mDrawTrackedSera.clear();
+    //     mDrawTrackedSera.reserve(aSize); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
+    // }
 
 } // Chart::init_tracked_sera
 
@@ -242,8 +242,9 @@ void Chart::add_tracked_serum(size_t aAntigenNo, const SettingsAntigenicMaps& aS
           // find homologous serum
         for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
             if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == aAntigenNo) {
-                mDrawTrackedSera.emplace_back(0x40000000);
-                mDrawPoints[point_no] = &mDrawTrackedSera.back();
+                // mDrawTrackedSera.emplace_back(0x40000000);
+                // mDrawPoints[point_no] = &mDrawTrackedSera.back();
+                mDrawPoints[point_no] = &mDrawTrackedSerum;
             }
         }
     }
@@ -324,7 +325,7 @@ void DrawTrackedSerum::draw(Surface& aSurface, const Point& aPoint, const PointS
 {
     DrawSerum::draw(aSurface, aPoint, aStyle, aObjectScale, aSettings);
     std::cout << "    Tracked serum " << aPoint.name << " radius:" << aPoint.attributes.serum_circle_radius << std::endl;
-    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0, outline_color(aPoint, aStyle, aSettings), 0.25 * aObjectScale);
+    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0, aSettings.serum_circle_color, aSettings.serum_circle_thickness * aObjectScale);
 
 } // DrawTrackedSerum::draw
 
