@@ -35,6 +35,7 @@ class DrawSerum : public DrawPoint
     virtual void draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
     virtual inline size_t level() const { return 1; }
     virtual Color outline_color(const Point& aPoint, const PointStyle& aStyle, const SettingsAntigenicMaps& aSettings) const;
+    virtual double outline_width(const Point& aPoint, const PointStyle& aStyle, const SettingsAntigenicMaps& aSettings) const;
 };
 
 class DrawAntigen : public DrawPoint
@@ -80,14 +81,16 @@ class DrawTrackedAntigen : public DrawAntigen
 class DrawTrackedSerum : public DrawSerum
 {
  public:
-    inline DrawTrackedSerum(Color aOutlineColor = 0) : mOutlineColor(aOutlineColor) {}
+    inline DrawTrackedSerum(Color aOutlineColor = 0, double aOutlineWidth = 1) : mOutlineColor(aOutlineColor), mOutlineWidth(aOutlineWidth) {}
 
     virtual void draw(Surface& aSurface, const Point& aPoint, const PointStyle& aStyle, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
     virtual inline size_t level() const { return 6; }
     virtual inline Color outline_color(const Point& /*aPoint*/, const PointStyle& /*aStyle*/, const SettingsAntigenicMaps& /*aSettings*/) const { return mOutlineColor; }
+    virtual double outline_width(const Point& /*aPoint*/, const PointStyle& /*aStyle*/, const SettingsAntigenicMaps& /*aSettings*/) const { return mOutlineWidth; }
 
  private:
     Color mOutlineColor;
+    double mOutlineWidth;
 };
 
 class DrawVaccineAntigen : public DrawAntigen
@@ -141,12 +144,13 @@ class PointAttributes
 class Point
 {
  public:
-    inline Point() {}
+    inline Point() : section_for_serum_circle(-1) {}
 
     std::string name;
     Location coordinates;
     std::string lab_id;
     PointAttributes attributes;
+    int section_for_serum_circle; // -1 means null
 
 }; // class Point
 
@@ -245,9 +249,13 @@ class Chart
       // returns line_no for each antigen from aLeaves found in the chart
     std::vector<size_t> sequenced_antigens(const std::vector<const Node*>& aLeaves);
     size_t marked_antigens(const SettingsMarkAntigens& aData, const std::vector<std::string>& aTrackedNames, size_t aSectionNo, const SettingsAntigenicMaps& aSettings) const;
+    void tracked_sera(size_t aSectionNo, const SettingsAntigenicMaps& aSettings) const;
 
     const Viewport& viewport() const { return mViewport; }
     void draw(Surface& aSurface, double aObjectScale, const SettingsAntigenicMaps& aSettings) const;
+
+    inline const std::vector<Point>& points() const { return mPoints; }
+    inline std::vector<Point>& points() { return mPoints; }
 
     static Chart from_json(std::string data);
 
@@ -284,8 +292,8 @@ class Chart
 
     void apply_transformation(const SettingsAntigenicMaps& aSettings);
     Viewport bounding_rectangle() const;
-    void init_tracked_sera(size_t aSize, const SettingsAntigenicMaps& aSettings) const;
-    void add_tracked_serum(size_t aAntigenNo, const SettingsAntigenicMaps& aSettings) const;
+    // void init_tracked_sera(size_t aSize, const SettingsAntigenicMaps& aSettings) const;
+    // void add_tracked_serum(size_t aSectionNo, size_t aAntigenNo, const SettingsAntigenicMaps& aSettings) const;
 
     friend auto json_fields(Chart& a);
 

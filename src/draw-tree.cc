@@ -150,7 +150,7 @@ void DrawTree::draw_aa_transition(const Node& aNode, Surface& aSurface, const Vi
 
             std::cout << "AA transitions: ";
             std::transform(labels.begin(), labels.end(), std::ostream_iterator<std::string>(std::cout, " "), [](const auto& e) -> std::string { return e.first; });
-            std::cout << " --> " << aNode.branch_id << std::endl;
+            std::cout << " --> " << aNode.branch_id << " number_strains: " << aNode.number_strains << std::endl;
         }
     }
 

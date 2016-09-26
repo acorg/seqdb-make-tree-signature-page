@@ -495,16 +495,29 @@ void Tree::make_aa_transitions(const std::vector<size_t>& aPositions)
     auto add_left_part = [&](Node& aNode) {
         if (!aNode.aa_transitions.empty()) {
             const auto node_left_edge = aNode.cumulative_edge_length - aNode.edge_length;
-            const auto lb = std::lower_bound(leaf_nodes.begin(), leaf_nodes.end(), node_left_edge, [](const Node* a, double b) { return a->cumulative_edge_length < b; });
+
+              // ??? lower bound does not work for sig page
+              // const auto lb = std::lower_bound(leaf_nodes.begin(), leaf_nodes.end(), node_left_edge, [](const Node* a, double b) { return a->cumulative_edge_length < b; });
+
+            auto lb = leaf_nodes.begin();
+            for (auto ln = leaf_nodes.begin() + 1; ln != leaf_nodes.end(); ++ln) {
+                if ((*ln)->cumulative_edge_length < node_left_edge) {
+                    lb = ln;
+                    break;
+                }
+            }
+
             const Node* node_for_left = lb == leaf_nodes.begin() ? nullptr : *(lb - 1);
             for (auto& transition: aNode.aa_transitions) {
                 if (node_for_left and node_for_left->aa.size() > transition.pos) { // node_for_left can have shorter aa
                     transition.left = node_for_left->aa[transition.pos];
                     transition.for_left = node_for_left;
-                      // std::cout << transition << ' ' << node_left_edge << "   " << node_for_left->display_name() << " " << node_for_left->cumulative_edge_length << std::endl;
+                    // if (transition.pos == 488 && aNode.branch_id == "3:2:2")
+                    //     std::cout << transition << ' ' << node_left_edge << "   " << node_for_left->display_name() << " " << node_for_left->cumulative_edge_length << std::endl;
                 }
                 // else {
-                //     std::cout << transition << ' ' << node_left_edge << "   no left node" << std::endl;
+                //     if (transition.pos == 488 && aNode.branch_id == "3:2:2")
+                //         std::cout << transition << ' ' << node_left_edge << "   no left node " << aNode.branch_id << std::endl;
                 // }
             }
         }

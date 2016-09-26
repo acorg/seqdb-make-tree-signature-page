@@ -142,9 +142,9 @@ std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aL
 
 // ----------------------------------------------------------------------
 
-size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& aSettings) const
+size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFillColor, const SettingsAntigenicMaps& /*aSettings*/) const
 {
-    init_tracked_sera(aNames.size(), aSettings);
+      // init_tracked_sera(aNames.size(), aSettings);
     size_t tracked = 0;
     mDrawTrackedAntigen.color(aFillColor);
 
@@ -153,7 +153,7 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
         if (p != mPointByName.end()) {
             mDrawPoints[p->second] = &mDrawTrackedAntigen;
             ++tracked;
-            add_tracked_serum(p->second, aSettings);
+              // add_tracked_serum(p->second, aSettings);
         }
         else {
             const std::string prefix(name, 0, name.find(1, ' '));
@@ -167,9 +167,9 @@ size_t Chart::tracked_antigens(const std::vector<std::string>& aNames, Color aFi
 
 // ----------------------------------------------------------------------
 
-size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& aNames, const std::map<std::string, const Node*>& aNodeByName, const SettingsAntigenicMaps& aSettings) const
+size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& aNames, const std::map<std::string, const Node*>& aNodeByName, const SettingsAntigenicMaps& /*aSettings*/) const
 {
-    init_tracked_sera(aNames.size(), aSettings);
+    // init_tracked_sera(aNames.size(), aSettings);
     size_t tracked = 0;
     mDrawTrackedAntigensColoredByClade.clear();
     mDrawTrackedAntigensColoredByClade.reserve(aNames.size()); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
@@ -215,7 +215,7 @@ size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& 
             mDrawPoints[p->second] = &mDrawTrackedAntigensColoredByClade.back();
               // antigens_on_this_map.insert(static_cast<size_t>(p->second));
             ++tracked;
-            add_tracked_serum(p->second, aSettings);
+            // add_tracked_serum(aSectionNo, p->second, aSettings);
         }
         else {
             const std::string prefix(name, 0, name.find(1, ' '));
@@ -255,23 +255,44 @@ size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& 
 
 // ----------------------------------------------------------------------
 
-void Chart::init_tracked_sera(size_t /*aSize*/, const SettingsAntigenicMaps& /*aSettings*/) const
-{
-    // if (aSettings.show_tracked_homologous_sera) {
-    //     mDrawTrackedSera.clear();
-    //     mDrawTrackedSera.reserve(aSize); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
-    // }
+// void Chart::init_tracked_sera(size_t /*aSize*/, const SettingsAntigenicMaps& /*aSettings*/) const
+// {
+//     // if (aSettings.show_tracked_homologous_sera) {
+//     //     mDrawTrackedSera.clear();
+//     //     mDrawTrackedSera.reserve(aSize); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
+//     // }
 
-} // Chart::init_tracked_sera
+// } // Chart::init_tracked_sera
+
+// // ----------------------------------------------------------------------
+
+// void Chart::add_tracked_serum(size_t aSectionNo, size_t aAntigenNo, const SettingsAntigenicMaps& aSettings) const
+// {
+//     if (aSettings.show_tracked_homologous_sera) {
+//           // find homologous serum
+//         for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
+//             if (!mPoints[point_no].attributes.antigen
+//                 && mPoints[point_no].attributes.homologous_antigen >= 0
+//                 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == aAntigenNo
+//                 && mPoints[point_no].section_for_serum_circle == static_cast<int>(aSectionNo)) {
+//                 // mDrawTrackedSera.emplace_back(0x40000000);
+//                 // mDrawPoints[point_no] = &mDrawTrackedSera.back();
+//                 mDrawPoints[point_no] = &mDrawTrackedSerum;
+//             }
+//         }
+//     }
+
+// } // Chart::add_tracked_serum
 
 // ----------------------------------------------------------------------
 
-void Chart::add_tracked_serum(size_t aAntigenNo, const SettingsAntigenicMaps& aSettings) const
+void Chart::tracked_sera(size_t aSectionNo, const SettingsAntigenicMaps& aSettings) const
 {
     if (aSettings.show_tracked_homologous_sera) {
-          // find homologous serum
         for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
-            if (!mPoints[point_no].attributes.antigen && mPoints[point_no].attributes.homologous_antigen >= 0 && static_cast<size_t>(mPoints[point_no].attributes.homologous_antigen) == aAntigenNo) {
+            if (!mPoints[point_no].attributes.antigen
+                && mPoints[point_no].attributes.homologous_antigen >= 0
+                && mPoints[point_no].section_for_serum_circle == static_cast<int>(aSectionNo)) {
                 // mDrawTrackedSera.emplace_back(0x40000000);
                 // mDrawPoints[point_no] = &mDrawTrackedSera.back();
                 mDrawPoints[point_no] = &mDrawTrackedSerum;
@@ -279,7 +300,7 @@ void Chart::add_tracked_serum(size_t aAntigenNo, const SettingsAntigenicMaps& aS
         }
     }
 
-} // Chart::add_tracked_serum
+} // Chart::tracked_sera
 
 // ----------------------------------------------------------------------
 
@@ -336,10 +357,18 @@ void DrawSerum::draw(Surface& aSurface, const Point& aPoint, const PointStyle& a
     const double size = aSettings.serum_scale * aObjectScale;
     if (!aPoint.coordinates.isnan()) {
         aSurface.rectangle_filled(aPoint.coordinates, {size * aspect(aPoint, aStyle, aSettings), size}, outline_color(aPoint, aStyle, aSettings),
-                                  aSettings.serum_outline_width * aObjectScale, TRANSPARENT);
+                                  outline_width(aPoint, aStyle, aSettings) * aObjectScale, TRANSPARENT);
     }
 
 } // DrawSerum::draw
+
+// ----------------------------------------------------------------------
+
+double DrawSerum::outline_width(const Point& /*aPoint*/, const PointStyle& /*aStyle*/, const SettingsAntigenicMaps& aSettings) const
+{
+    return aSettings.serum_outline_width;
+
+} // DrawSerum::outline_width
 
 // ----------------------------------------------------------------------
 

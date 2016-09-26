@@ -1,3 +1,5 @@
+#include <regex>
+
 #include "antigenic-maps.hh"
 #include "tree.hh"
 #include "draw-tree.hh"
@@ -23,6 +25,44 @@ AntigenicMaps& AntigenicMaps::prepare(const Tree& aTree, const Viewport& aPageAr
     mGap = aSettings.gap_between_maps * aPageArea.size.width;
 
     iterate_leaf(aTree, [this](const Node& aNode) { for (const auto& hi_name: aNode.hi_names) { mNodeByName.emplace(hi_name, &aNode); } });
+
+      // ---------------
+      // for each serum in the chart that has homologous antigen, find section having strain with that name
+    if (aChart) {
+        auto& points = aChart->points();
+        for (auto& point: points) {
+            if (!point.attributes.antigen && point.attributes.homologous_antigen >= 0) {
+                  // drop passage and serum id from the name -> just_name
+                std::regex space_in_name("[0-9] ");
+                std::smatch match;
+                std::string just_name;
+                if (std::regex_search(point.name, match, space_in_name)) {
+                    just_name = point.name.substr(0, static_cast<std::string::size_type>(match.position()) + 1);
+                }
+                else {
+                    just_name = point.name;
+                }
+                  // find strains in mNamesPerMap prefixed with just_name
+                std::set<size_t> sections;
+                for (size_t section_no = 0; section_no < mNamesPerMap.size(); ++section_no) {
+                    for (const auto& strain_name: mNamesPerMap[section_no]) {
+                        if (strain_name.substr(0, just_name.size()) == just_name) {
+                            sections.insert(section_no);
+                            break;
+                        }
+                    }
+                }
+                if (sections.size() == 1) {
+                    point.section_for_serum_circle = static_cast<int>(*sections.begin());
+                }
+                else if (!sections.empty()) {
+                    std::cout << point.name << " :: " << (sections.size() > 1 ? '!' : ' ') << ' ';
+                    std::copy(sections.begin(), sections.end(), std::ostream_iterator<size_t>(std::cout, " "));
+                    std::cout << std::endl;
+                }
+            }
+        }
+    }
 
     return *this;
 
@@ -67,6 +107,7 @@ void AntigenicMaps::draw(Surface& aSurface, const Viewport& aViewport, const Cha
                 num_antigens = aChart->tracked_antigens_colored_by_clade(names_per_map()[section_no], mNodeByName, aSettings);
             else
                 num_antigens = aChart->tracked_antigens(names_per_map()[section_no], section_color(aSections, section_no), aSettings);
+            aChart->tracked_sera(section_no, aSettings);
             aChart->marked_antigens(aSettings.mark_antigens, names_per_map()[section_no], section_no, aSettings);
             aChart->draw(aSurface, scale, aSettings);
             std::cout << "    Names: " << names_per_map()[section_no].size() << " antigens: " << num_antigens << std::endl;
