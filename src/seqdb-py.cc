@@ -308,6 +308,7 @@ PYBIND11_PLUGIN(seqdb_backend)
 
     py::class_<Settings>(m, "Settings")
             .def_readwrite("draw_tree", &Settings::draw_tree)
+            .def_readwrite("legend", &Settings::legend)
             .def_readwrite("signature_page", &Settings::signature_page)
             ;
 
@@ -316,10 +317,17 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def_readwrite("aa_transition", &SettingsDrawTree::aa_transition)
             ;
 
+    py::class_<SettingsLegend>(m, "SettingsLegend")
+            .def_readwrite("offset_x", &SettingsLegend::offset_x)
+            .def_readwrite("offset_y", &SettingsLegend::offset_y)
+            .def_readwrite("geographic_map_fraction", &SettingsLegend::geographic_map_fraction)
+            ;
+
     py::class_<SettingsAATransition>(m, "SettingsAATransition")
             .def_readwrite("show_node_for_left_line", &SettingsAATransition::show_node_for_left_line)
             .def_readwrite("show_empty_left", &SettingsAATransition::show_empty_left)
             .def_readwrite("number_strains_threshold", &SettingsAATransition::number_strains_threshold)
+            .def_readwrite("show", &SettingsAATransition::show)
             ;
 
     py::class_<SettingsSignaturePage>(m, "SettingsSignaturePage")

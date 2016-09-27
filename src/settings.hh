@@ -61,7 +61,7 @@ class SettingsAATransition
     };
 
     inline SettingsAATransition()
-        : data(false), show_empty_left(false), show_node_for_left_line(false),
+        : show(true), data(false), show_empty_left(false), show_node_for_left_line(false),
           node_for_left_line_color(0x00FF00), node_for_left_line_width(1), number_strains_threshold(20)
         {}
 
@@ -83,6 +83,7 @@ class SettingsAATransition
             return r;
         }
 
+    bool show;                  // show aa-transition labels in the tree
     TransitionData data;
     std::vector<TransitionData> per_branch;
     bool show_empty_left;
@@ -106,7 +107,8 @@ class SettingsAATransition
                 "interline", &a.data.interline,
                 "size", &a.data.size,
                 "color", json::field(&a.data.color, &Color::to_string, &Color::from_string),
-                "style", &a.data.style
+                "style", &a.data.style,
+                "show", &a.show
                                    );
         }
 

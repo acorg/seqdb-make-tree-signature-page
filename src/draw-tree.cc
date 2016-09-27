@@ -120,7 +120,7 @@ void DrawTree::mark_nodes(Surface& aSurface)
 
 void DrawTree::draw_aa_transition(const Node& aNode, Surface& aSurface, const Viewport& aViewport, const SettingsAATransition& aSettings)
 {
-    if (!aNode.aa_transitions.empty() && aNode.number_strains >= aSettings.number_strains_threshold) {
+    if (aSettings.show && !aNode.aa_transitions.empty() && aNode.number_strains >= aSettings.number_strains_threshold) {
         auto labels = aNode.aa_transitions.make_labels(aSettings.show_empty_left);
         auto branch_settings = aSettings.for_branch(aNode.branch_id);
         if (!labels.empty()) {
