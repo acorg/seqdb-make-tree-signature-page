@@ -273,7 +273,7 @@ class Chart
     std::set<size_t> mSequencedAntigens;
     mutable std::vector<const DrawPoint*> mDrawPoints;
     DrawSerum mDrawSerum;
-    DrawTrackedSerum mDrawTrackedSerum;
+      // DrawTrackedSerum mDrawTrackedSerum;
     DrawReferenceAntigen mDrawReferenceAntigen;
     DrawTestAntigen mDrawTestAntigen;
     DrawSequencedAntigen mDrawSequencedAntigen;
@@ -281,7 +281,7 @@ class Chart
     mutable std::vector<DrawTrackedAntigen> mDrawTrackedAntigensColoredByClade;
     DrawVaccineAntigen mDrawVaccineAntigen;
     mutable std::vector<DrawMarkedAntigen> mDrawMarkedAntigens;
-      // mutable std::vector<DrawTrackedSerum> mDrawTrackedSera;
+    mutable std::vector<DrawTrackedSerum> mDrawTrackedSera;
 
     Viewport mViewport;
 

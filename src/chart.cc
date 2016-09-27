@@ -289,13 +289,42 @@ size_t Chart::tracked_antigens_colored_by_clade(const std::vector<std::string>& 
 void Chart::tracked_sera(size_t aSectionNo, const SettingsAntigenicMaps& aSettings) const
 {
     if (aSettings.show_tracked_homologous_sera) {
+        std::vector<std::pair<std::string, size_t>> infix_colors = {
+            {"NEBRASKA/19/2015", 0x00A0A0},
+            {"NEVADA/22/2016", 0xA0A000},
+            {"MONTANA/28/2015", 0x00A0A0},
+            {"ONTARIO/RV2414/2015", 0x00A0A0},
+            {"ALASKA/232/2015 CDC 2016-083 SIAT4", 0xA0A000},
+              // MELB
+            {"HONG KONG/4801/2014 F3419-14D E?", 0xFF0000},
+            {"HONG KONG/4801/2014 F3491-14D MDCK?", 0x00A000},
+            {"ALASKA/232/2015 F3698-13D", 0x00A0A0},
+            {"SRI LANKA/61/2015", 0xA0A000},
+              // NIID
+            {"SAPPORO/71/2015", 0x00A0A0},
+              // NIMR
+            {"HONG KONG/4801/2014 F12/15", 0xFFA000},
+              // common
+            {"HONG KONG/4801/2014", 0xFF0000},
+            {"SAITAMA/103/2014", 0xA000A0},
+        };
+        mDrawTrackedSera.clear();
+        mDrawTrackedSera.reserve(mPoints.size()); // to avoid copying entries during emplace_back and loosing pointer for mDrawPoints
         for (size_t point_no = 0; point_no < mPoints.size(); ++point_no) {
             if (!mPoints[point_no].attributes.antigen
                 && mPoints[point_no].attributes.homologous_antigen >= 0
                 && mPoints[point_no].section_for_serum_circle == static_cast<int>(aSectionNo)) {
-                // mDrawTrackedSera.emplace_back(0x40000000);
-                // mDrawPoints[point_no] = &mDrawTrackedSera.back();
-                mDrawPoints[point_no] = &mDrawTrackedSerum;
+                  // std::cout << "tracked serum " << mPoints[point_no].name << std::endl;
+                size_t color = 0;
+                for (const auto& entry: infix_colors) {
+                    if (mPoints[point_no].name.find(entry.first) != std::string::npos) {
+                        color = entry.second;
+                        break;
+                    }
+                }
+                mDrawTrackedSera.emplace_back(color);
+                mDrawPoints[point_no] = &mDrawTrackedSera.back();
+                //mDrawPoints[point_no] = &mDrawTrackedSerum;
             }
         }
     }
@@ -384,7 +413,9 @@ void DrawTrackedSerum::draw(Surface& aSurface, const Point& aPoint, const PointS
 {
     DrawSerum::draw(aSurface, aPoint, aStyle, aObjectScale, aSettings);
     std::cout << "    Tracked serum " << aPoint.name << " radius:" << aPoint.attributes.serum_circle_radius << std::endl;
-    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0, aSettings.serum_circle_color, aSettings.serum_circle_thickness * aObjectScale);
+    aSurface.circle(aPoint.coordinates, aPoint.attributes.serum_circle_radius * 2, 1, 0,
+                    outline_color(aPoint, aStyle, aSettings), // aSettings.serum_circle_color,
+                    aSettings.serum_circle_thickness * aObjectScale);
 
 } // DrawTrackedSerum::draw
 
