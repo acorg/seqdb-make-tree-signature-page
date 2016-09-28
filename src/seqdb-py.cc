@@ -316,6 +316,8 @@ PYBIND11_PLUGIN(seqdb_backend)
     py::class_<SettingsDrawTree>(m, "SettingsDrawTree")
             .def_readwrite("grid_step", &SettingsDrawTree::grid_step)
             .def_readwrite("aa_transition", &SettingsDrawTree::aa_transition)
+            .def_readwrite("line_width", &SettingsDrawTree::line_width)
+            .def_readwrite("force_line_width", &SettingsDrawTree::force_line_width)
             ;
 
     py::class_<SettingsLegend>(m, "SettingsLegend")

@@ -254,12 +254,13 @@ class SettingsDrawTree
 {
  public:
     inline SettingsDrawTree()
-        : root_edge(0), line_color(0), line_width(1), label_style("Helvetica Neue"), name_offset(0.2), grid_step(0), grid_color(0x80000000), grid_width(0.3)
+        : root_edge(0), line_color(0), line_width(1), force_line_width(false), label_style("Helvetica Neue"), name_offset(0.2), grid_step(0), grid_color(0x80000000), grid_width(0.3)
            {}
 
     double root_edge;
     Color line_color;
     double line_width;
+    bool force_line_width;      // use line_width settings, ignore vertical_step adjustment
     TextStyle label_style;
     double name_offset;
     SettingsAATransition aa_transition;
@@ -274,6 +275,7 @@ class SettingsDrawTree
             return std::make_tuple(
                 "root_edge", &a.root_edge, // object_double_non_negative_value
                 "line_color", json::field(&a.line_color, &Color::to_string, &Color::from_string),
+                "force_line_width", &a.force_line_width,
                 "line_width", &a.line_width, // object_double_non_negative_value
                 "name_offset", &a.name_offset,
                 "label_style", &a.label_style,

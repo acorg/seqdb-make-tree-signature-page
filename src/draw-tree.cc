@@ -51,7 +51,7 @@ void DrawTree::calculate_viewports(const Tree& aTree, const Viewport& aViewport)
 
 void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewport, const SettingsDrawTree& aSettings)
 {
-    mLineWidth = std::min(aSettings.line_width, mVerticalStep * 0.5);
+    mLineWidth = aSettings.force_line_width ? aSettings.line_width : std::min(aSettings.line_width, mVerticalStep * 0.5);
     std::cout << "Tree line width: " << mLineWidth << "  Settings: " << aSettings.line_width << "  vertical_step/2: " << mVerticalStep * 0.5 << std::endl;
     set_label_scale(aSurface, aTree, aViewport, aSettings);
     set_horizontal_step(aSurface, aTree, aViewport, aSettings);
