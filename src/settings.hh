@@ -414,6 +414,9 @@ class SettingsTimeSeries
     double month_width;
     double month_year_to_timeseries_gap;
 
+    inline void set_begin(std::string aBegin) { begin.parse(aBegin); }
+    inline void set_end(std::string aEnd) { end.parse(aEnd); }
+
     friend inline auto json_fields(SettingsTimeSeries& a)
         {
             return std::make_tuple(

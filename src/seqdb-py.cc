@@ -310,6 +310,7 @@ PYBIND11_PLUGIN(seqdb_backend)
             .def_readwrite("draw_tree", &Settings::draw_tree)
             .def_readwrite("legend", &Settings::legend)
             .def_readwrite("signature_page", &Settings::signature_page)
+            .def_readwrite("time_series", &Settings::time_series)
             ;
 
     py::class_<SettingsDrawTree>(m, "SettingsDrawTree")
@@ -333,6 +334,11 @@ PYBIND11_PLUGIN(seqdb_backend)
     py::class_<SettingsSignaturePage>(m, "SettingsSignaturePage")
             .def_readwrite("pdf_height", &SettingsSignaturePage::pdf_height)
             .def_readwrite("pdf_aspect_ratio", &SettingsSignaturePage::pdf_aspect_ratio)
+            ;
+
+    py::class_<SettingsTimeSeries>(m, "SettingsTimeSeries")
+            .def("set_begin", &SettingsTimeSeries::set_begin)
+            .def("set_end", &SettingsTimeSeries::set_end)
             ;
 
       // ----------------------------------------------------------------------
