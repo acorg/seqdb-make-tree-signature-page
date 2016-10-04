@@ -68,9 +68,7 @@ void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewp
 
 void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& aOrigin, const SettingsDrawTree& aSettings, double aEdgeLength)
 {
-      // find if any of the child leaf nodes are shown
-    auto child_shown = [](const Node& aChild) -> bool { return !aChild.hidden; };
-    if (iterate_leaf_stop(aNode, child_shown)) {
+    if (!aNode.hidden) {
         const Viewport viewport(Location(aOrigin.x, aOrigin.y + mVerticalStep * aNode.middle()),
                                 Size((aEdgeLength < 0.0 ? aNode.edge_length : aEdgeLength) * mHorizontalStep, 0));
 
@@ -233,6 +231,9 @@ void DrawTree::set_horizontal_step(Surface& aSurface, const Tree& aTree, const V
 
 double DrawTree::tree_width(Surface& aSurface, const Node& aNode, const SettingsDrawTree& aSettings, double aEdgeLength) const
 {
+    if (aNode.hidden)
+        return 0;
+
     double r = 0;
     const double right = (aEdgeLength < 0.0 ? aNode.edge_length : aEdgeLength) * mHorizontalStep;
     if (aNode.is_leaf()) {
