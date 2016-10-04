@@ -126,11 +126,17 @@ std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aL
             if (p == mPointByName.end()) {
                 for (const std::string& hi_name: leaf->hi_names) {
                     p = mPointByName.find(hi_name);
-                    if (p != mPointByName.end())
+                    if (p != mPointByName.end()) {
+                        // std::cout << "Sequenced2 " << hi_name << std::endl;
                         break;
+                    }
                 }
+                // std::cout << "Sequenced? " << leaf->name << " ";
+                // std::copy(leaf->hi_names.begin(), leaf->hi_names.end(), std::ostream_iterator<std::string>(std::cout, " "));
+                // std::cout << std::endl;
             }
             if (p != mPointByName.end()) {
+                // std::cout << "Sequenced " << leaf->name << std::endl;
                 mSequencedAntigens.insert(p->second);
                 lines.push_back(leaf->line_no);
             }
