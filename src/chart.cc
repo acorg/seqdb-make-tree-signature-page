@@ -120,18 +120,20 @@ std::vector<size_t> Chart::sequenced_antigens(const std::vector<const Node*>& aL
     std::vector<size_t> lines;
     size_t number_of_leaves = 0;
     for (const auto& leaf: aLeaves) {
-        ++number_of_leaves;
-        auto p = mPointByName.find(leaf->name);
-        if (p == mPointByName.end()) {
-            for (const std::string& hi_name: leaf->hi_names) {
-                p = mPointByName.find(hi_name);
-                if (p != mPointByName.end())
-                    break;
+        if (!leaf->hidden) {
+            ++number_of_leaves;
+            auto p = mPointByName.find(leaf->name);
+            if (p == mPointByName.end()) {
+                for (const std::string& hi_name: leaf->hi_names) {
+                    p = mPointByName.find(hi_name);
+                    if (p != mPointByName.end())
+                        break;
+                }
             }
-        }
-        if (p != mPointByName.end()) {
-            mSequencedAntigens.insert(p->second);
-            lines.push_back(leaf->line_no);
+            if (p != mPointByName.end()) {
+                mSequencedAntigens.insert(p->second);
+                lines.push_back(leaf->line_no);
+            }
         }
     }
     std::cout << lines.size() << " sequenced antigens found in the chart" << std::endl;

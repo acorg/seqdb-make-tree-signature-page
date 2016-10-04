@@ -9,7 +9,7 @@
 DrawTree& DrawTree::prepare(Tree& aTree, const SettingsDrawTree& aSettings)
 {
     add_hz_line_sections_gap(aTree, aSettings.hz_line_sections);
-    aTree.prepare_for_drawing();
+    aTree.prepare_for_drawing(aSettings);
     mNumberOfLines = aTree.height();
 
     mNodesToMark.clear();
@@ -68,32 +68,38 @@ void DrawTree::draw(const Tree& aTree, Surface& aSurface, const Viewport& aViewp
 
 void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& aOrigin, const SettingsDrawTree& aSettings, double aEdgeLength)
 {
-    const Viewport viewport(Location(aOrigin.x, aOrigin.y + mVerticalStep * aNode.middle()),
-                            Size((aEdgeLength < 0.0 ? aNode.edge_length : aEdgeLength) * mHorizontalStep, 0));
+      // find if any of the child leaf nodes are shown
+    auto child_shown = [](const Node& aChild) -> bool { return !aChild.hidden; };
+    if (iterate_leaf_stop(aNode, child_shown)) {
+        const Viewport viewport(Location(aOrigin.x, aOrigin.y + mVerticalStep * aNode.middle()),
+                                Size((aEdgeLength < 0.0 ? aNode.edge_length : aEdgeLength) * mHorizontalStep, 0));
 
-    aSurface.line(viewport.origin, viewport.top_right(), aSettings.line_color, mLineWidth);
-    draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
-    if (aNode.is_leaf()) {
-        const std::string text = aNode.display_name();
-        const auto font_size = mVerticalStep * mLabelScale;
-        const auto tsize = aSurface.text_size(text, font_size, aSettings.label_style);
-        const auto text_origin = viewport.top_right() + Size(aSettings.name_offset, tsize.height / 2);
-        aSurface.text(text_origin, text, mColoring->color(aNode), font_size, aSettings.label_style);
-        auto mark_node = mNodesToMark.find(aNode.name);
-        if (mark_node != mNodesToMark.end())
-            mark_node->second.set(text_origin, aNode);
-    }
-    else {
-        // if (aShowBranchIds && !aNode.branch_id.empty()) {
-        //     show_branch_id(aSurface, aNode.branch_id, aLeft, y);
-        // }
-        // if (!aNode.name.empty() && aNode.number_strains > aNumberStrainsThreshold) {
-        //     show_branch_annotation(aSurface, aNode.branch_id, aNode.name, aLeft, right, y);
-        // }
-        aSurface.line({viewport.right(), aOrigin.y + mVerticalStep * aNode.top}, {viewport.right(), aOrigin.y + mVerticalStep * aNode.bottom}, aSettings.line_color, mLineWidth);
-          // draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
-        for (auto node = aNode.subtree.begin(); node != aNode.subtree.end(); ++node) {
-            draw_node(*node, aSurface, Location(viewport.right(), aOrigin.y), aSettings);
+        aSurface.line(viewport.origin, viewport.top_right(), aSettings.line_color, mLineWidth);
+        draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
+        if (aNode.is_leaf()) {
+            if (!aNode.hidden) {
+                const std::string text = aNode.display_name();
+                const auto font_size = mVerticalStep * mLabelScale;
+                const auto tsize = aSurface.text_size(text, font_size, aSettings.label_style);
+                const auto text_origin = viewport.top_right() + Size(aSettings.name_offset, tsize.height / 2);
+                aSurface.text(text_origin, text, mColoring->color(aNode), font_size, aSettings.label_style);
+                auto mark_node = mNodesToMark.find(aNode.name);
+                if (mark_node != mNodesToMark.end())
+                    mark_node->second.set(text_origin, aNode);
+            }
+        }
+        else {
+              // if (aShowBranchIds && !aNode.branch_id.empty()) {
+              //     show_branch_id(aSurface, aNode.branch_id, aLeft, y);
+              // }
+              // if (!aNode.name.empty() && aNode.number_strains > aNumberStrainsThreshold) {
+              //     show_branch_annotation(aSurface, aNode.branch_id, aNode.name, aLeft, right, y);
+              // }
+            aSurface.line({viewport.right(), aOrigin.y + mVerticalStep * aNode.top}, {viewport.right(), aOrigin.y + mVerticalStep * aNode.bottom}, aSettings.line_color, mLineWidth);
+              // draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
+            for (auto node = aNode.subtree.begin(); node != aNode.subtree.end(); ++node) {
+                draw_node(*node, aSurface, Location(viewport.right(), aOrigin.y), aSettings);
+            }
         }
     }
 

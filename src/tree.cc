@@ -18,6 +18,7 @@
 #include "string.hh"
 #include "stream.hh"
 #include "draw-clades.hh"
+#include "settings.hh"
 
 // ----------------------------------------------------------------------
 
@@ -175,13 +176,32 @@ void Tree::set_line_no()
 {
     size_t current_line = 0;
     auto set_line_no = [&current_line](Node& aNode) {
-        current_line += aNode.vertical_gap_before;
-        aNode.line_no = current_line;
-        ++current_line;
+        if (aNode.hidden) {
+            aNode.line_no = current_line > 0 ? current_line - 1 : 0;
+            current_line += aNode.vertical_gap_before;
+        //     std::cout << "Hidden " << aNode.display_name() << std::endl;
+        }
+        else {
+            current_line += aNode.vertical_gap_before;
+            aNode.line_no = current_line;
+            ++current_line;
+        }
     };
     iterate_leaf(*this, set_line_no);
+    std::cout << "Lines: " << current_line << std::endl;
 
 } // Tree::set_line_no
+
+// ----------------------------------------------------------------------
+
+void Tree::hide_leaves(const SettingsDrawTree& aSettings)
+{
+    auto hide_show_leaf = [&aSettings](Node& aNode) {
+        aNode.hidden = aNode.date < aSettings.hide_isolated_before || aNode.cumulative_edge_length > aSettings.hide_if_cumulative_edge_length_bigger_than;
+    };
+    iterate_leaf(*this, hide_show_leaf);
+
+} // Tree::hide_leaves
 
 // ----------------------------------------------------------------------
 
@@ -231,7 +251,7 @@ std::map<Date, size_t> Tree::sequences_per_month() const
 {
     std::map<Date, size_t> result;
     auto worker = [&result](const Node& aNode) -> void {
-        if (!aNode.date.empty()) {
+        if (!aNode.date.empty() && !aNode.hidden) {
             ++result[aNode.date.remove_day()];
         }
     };
@@ -340,8 +360,9 @@ void Tree::fix_labels()
 
 // ----------------------------------------------------------------------
 
-void Tree::prepare_for_drawing()
+void Tree::prepare_for_drawing(const SettingsDrawTree& aSettings)
 {
+    hide_leaves(aSettings);
     set_line_no();
     set_top_bottom();
 

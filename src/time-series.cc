@@ -123,10 +123,12 @@ void TimeSeries::draw_dashes(Surface& aSurface, const Viewport& aViewport, const
     const auto& coloring = aDrawTree.coloring();
 
     auto draw_dash = [&](const Node& aNode) {
-        const int month_no = aNode.months_from(mBegin);
-        if (month_no >= 0) {
-            const Location a(base_x + aSettings.month_width * month_no, aViewport.origin.y + vertical_step * aNode.line_no);
-            aSurface.line(a, {a.x + aSettings.month_width * aSettings.dash_width, a.y}, coloring.color(aNode), aSettings.dash_line_width, CAIRO_LINE_CAP_ROUND);
+        if (!aNode.hidden) {
+            const int month_no = aNode.months_from(mBegin);
+            if (month_no >= 0) {
+                const Location a(base_x + aSettings.month_width * month_no, aViewport.origin.y + vertical_step * aNode.line_no);
+                aSurface.line(a, {a.x + aSettings.month_width * aSettings.dash_width, a.y}, coloring.color(aNode), aSettings.dash_line_width, CAIRO_LINE_CAP_ROUND);
+            }
         }
     };
     iterate_leaf(aTree, draw_dash);

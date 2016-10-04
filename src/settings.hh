@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include "json-struct.hh"
 #include "draw.hh"
 #include "date.hh"
@@ -254,7 +256,9 @@ class SettingsDrawTree
 {
  public:
     inline SettingsDrawTree()
-        : root_edge(0), line_color(0), line_width(1), force_line_width(false), label_style("Helvetica Neue"), name_offset(0.2), grid_step(0), grid_color(0x80000000), grid_width(0.3)
+        : root_edge(0), line_color(0), line_width(1), force_line_width(false), label_style("Helvetica Neue"), name_offset(0.2),
+          grid_step(0), grid_color(0x80000000), grid_width(0.3),
+          hide_if_cumulative_edge_length_bigger_than(std::numeric_limits<double>::max())
            {}
 
     double root_edge;
@@ -269,10 +273,14 @@ class SettingsDrawTree
     Color grid_color;
     double grid_width;
     HzLineSections hz_line_sections;
+    Date hide_isolated_before;
+    double hide_if_cumulative_edge_length_bigger_than;
 
     friend inline auto json_fields(SettingsDrawTree& a)
         {
             return std::make_tuple(
+                "hide_if_cumulative_edge_length_bigger_than", &a.hide_if_cumulative_edge_length_bigger_than,
+                "hide_isolated_before", json::field(&a.hide_isolated_before, &Date::display, &Date::parse, json::output_if_true),
                 "root_edge", &a.root_edge, // object_double_non_negative_value
                 "line_color", json::field(&a.line_color, &Color::to_string, &Color::from_string),
                 "force_line_width", &a.force_line_width,

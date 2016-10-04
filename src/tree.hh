@@ -11,6 +11,7 @@
 
 class Seqdb;
 class Node;
+class SettingsDrawTree;
 
 // ----------------------------------------------------------------------
 
@@ -99,8 +100,8 @@ class Node
     typedef std::vector<Node> Subtree;
     enum class LadderizeMethod { MaxEdgeLength, NumberOfLeaves };
 
-    inline Node() : edge_length(0), line_no(0), number_strains(1), vertical_gap_before(0) {}
-    inline Node(std::string aName, double aEdgeLength, const Date& aDate = Date()) : edge_length(aEdgeLength), name(aName), date(aDate), line_no(0), number_strains(1), vertical_gap_before(0) {}
+    inline Node() : edge_length(0), line_no(0), number_strains(1), vertical_gap_before(0), hidden(false) {}
+    inline Node(std::string aName, double aEdgeLength, const Date& aDate = Date()) : edge_length(aEdgeLength), name(aName), date(aDate), line_no(0), number_strains(1), vertical_gap_before(0), hidden(false) {}
     // inline Node(Node&&) = default;
     // inline Node(const Node&) = default;
     // inline Node& operator=(Node&&) = default; // needed for swap needed for sort
@@ -129,6 +130,7 @@ class Node
     int months_from(const Date& aStart) const; // returns negative if date of the node is earlier than aStart
 
     std::string display_name() const;
+    inline std::string date_as_string() const { return date; }
 
       // aa transitions
     AA_Transitions aa_transitions;
@@ -147,6 +149,9 @@ class Node
 
       // for matching hi names for signature page
     std::vector<std::string> hi_names;
+
+      // to hide leaves isolated before or having too big cumulative_edge_length
+    bool hidden;
 
     inline Node* find_path_to_first_leaf(std::vector<std::pair<size_t, Node*>>& path)
         {
@@ -212,16 +217,22 @@ class Tree : public Node
       // aa transitions
     void make_aa_transitions();
     void make_aa_transitions(const std::vector<size_t>& aPositions);
+
     inline std::vector<const Node*> leaf_nodes_sorted_by_cumulative_edge_length() const
         {
             compute_cumulative_edge_length();
             return leaf_nodes_sorted_by([](const Node* a, const Node* b) -> bool { return a->cumulative_edge_length > b->cumulative_edge_length; });
         }
 
+    inline std::vector<const Node*> leaf_nodes_sorted_by_date() const
+        {
+            return leaf_nodes_sorted_by([](const Node* a, const Node* b) -> bool { return a->date < b->date; });
+        }
+
       // returns list of aa and its number of occurences at each pos found in the sequences of the tree
     std::vector<std::map<char, size_t>> aa_per_pos() const;
 
-    void prepare_for_drawing();
+    void prepare_for_drawing(const SettingsDrawTree& aSettings);
 
     inline const Settings& settings() const { return mSettings; }
     inline Settings& settings() { return mSettings; }
@@ -271,6 +282,7 @@ class Tree : public Node
     void set_line_no();
     void set_top_bottom();
     void init_hz_line_sections(bool reset = false);
+    void hide_leaves(const SettingsDrawTree& aSettings);
 
     inline std::pair<Node*, std::vector<std::pair<size_t, Node*>>> find_path_to_first_leaf()
         {
@@ -314,6 +326,22 @@ template <typename N, typename F1> inline void iterate_leaf(N& aNode, F1 f_name)
             iterate_leaf(node, f_name);
         }
     }
+}
+
+// stops iterating if f_name returns true
+template <typename N, typename F1> inline bool iterate_leaf_stop(N& aNode, F1 f_name)
+{
+    bool stop = false;
+    if (aNode.is_leaf()) {
+        stop = f_name(aNode);
+    }
+    else {
+        for (auto& node: aNode.subtree) {
+            if ((stop = iterate_leaf_stop(node, f_name)))
+                break;
+        }
+    }
+    return stop;
 }
 
 template <typename N, typename F1, typename F3> inline void iterate_leaf_post(N& aNode, F1 f_name, F3 f_subtree_post)
