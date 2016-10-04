@@ -176,13 +176,8 @@ void Tree::set_line_no()
 {
     size_t current_line = 0;
     auto set_line_no = [&current_line](Node& aNode) {
-        if (aNode.hidden) {
-            aNode.line_no = current_line > 0 ? current_line - 1 : 0;
-            current_line += aNode.vertical_gap_before;
-        //     std::cout << "Hidden " << aNode.display_name() << std::endl;
-        }
-        else {
-            current_line += aNode.vertical_gap_before;
+        current_line += aNode.vertical_gap_before;
+        if (!aNode.hidden) {
             aNode.line_no = current_line;
             ++current_line;
         }
@@ -194,12 +189,43 @@ void Tree::set_line_no()
 
 // ----------------------------------------------------------------------
 
+void Tree::set_top_bottom()
+{
+    auto set_top_bottom = [](Node& aNode) {
+        if (!aNode.hidden) {
+            aNode.top = -1;
+            for (const auto& node: aNode.subtree) {
+                if (!node.hidden) {
+                    aNode.bottom = node.middle();
+                    if (aNode.top < 0)
+                        aNode.top = aNode.bottom;
+                }
+            }
+        }
+    };
+    iterate_post(*this, set_top_bottom);
+
+} // Tree::set_top_bottom
+
+// ----------------------------------------------------------------------
+
 void Tree::hide_leaves(const SettingsDrawTree& aSettings)
 {
     auto hide_show_leaf = [&aSettings](Node& aNode) {
         aNode.hidden = aNode.date < aSettings.hide_isolated_before || aNode.cumulative_edge_length > aSettings.hide_if_cumulative_edge_length_bigger_than;
     };
-    iterate_leaf(*this, hide_show_leaf);
+
+    auto hide_show_branch = [](Node& aNode) {
+        aNode.hidden = true;
+        for (const auto& node: aNode.subtree) {
+            if (!node.hidden) {
+                aNode.hidden = false;
+                break;
+            }
+        }
+    };
+
+    iterate_leaf_post(*this, hide_show_leaf, hide_show_branch);
 
 } // Tree::hide_leaves
 
@@ -214,18 +240,6 @@ size_t Tree::height() const
     return height;
 
 } // Tree::height
-
-// ----------------------------------------------------------------------
-
-void Tree::set_top_bottom()
-{
-    auto set_top_bottom = [](Node& aNode) {
-        aNode.top = aNode.subtree.begin()->middle();
-        aNode.bottom = aNode.subtree.rbegin()->middle();
-    };
-    iterate_post(*this, set_top_bottom);
-
-} // Tree::set_top_bottom
 
 // ----------------------------------------------------------------------
 

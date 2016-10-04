@@ -76,8 +76,8 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
 
         aSurface.line(viewport.origin, viewport.top_right(), aSettings.line_color, mLineWidth);
         draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
-        if (aNode.is_leaf()) {
-            if (!aNode.hidden) {
+        if (!aNode.hidden) {
+            if (aNode.is_leaf()) {
                 const std::string text = aNode.display_name();
                 const auto font_size = mVerticalStep * mLabelScale;
                 const auto tsize = aSurface.text_size(text, font_size, aSettings.label_style);
@@ -87,18 +87,18 @@ void DrawTree::draw_node(const Node& aNode, Surface& aSurface, const Location& a
                 if (mark_node != mNodesToMark.end())
                     mark_node->second.set(text_origin, aNode);
             }
-        }
-        else {
-              // if (aShowBranchIds && !aNode.branch_id.empty()) {
-              //     show_branch_id(aSurface, aNode.branch_id, aLeft, y);
-              // }
-              // if (!aNode.name.empty() && aNode.number_strains > aNumberStrainsThreshold) {
-              //     show_branch_annotation(aSurface, aNode.branch_id, aNode.name, aLeft, right, y);
-              // }
-            aSurface.line({viewport.right(), aOrigin.y + mVerticalStep * aNode.top}, {viewport.right(), aOrigin.y + mVerticalStep * aNode.bottom}, aSettings.line_color, mLineWidth);
-              // draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
-            for (auto node = aNode.subtree.begin(); node != aNode.subtree.end(); ++node) {
-                draw_node(*node, aSurface, Location(viewport.right(), aOrigin.y), aSettings);
+            else {
+                  // if (aShowBranchIds && !aNode.branch_id.empty()) {
+                  //     show_branch_id(aSurface, aNode.branch_id, aLeft, y);
+                  // }
+                  // if (!aNode.name.empty() && aNode.number_strains > aNumberStrainsThreshold) {
+                  //     show_branch_annotation(aSurface, aNode.branch_id, aNode.name, aLeft, right, y);
+                  // }
+                aSurface.line({viewport.right(), aOrigin.y + mVerticalStep * aNode.top}, {viewport.right(), aOrigin.y + mVerticalStep * aNode.bottom}, aSettings.line_color, mLineWidth);
+                  // draw_aa_transition(aNode, aSurface, viewport, aSettings.aa_transition);
+                for (auto node = aNode.subtree.begin(); node != aNode.subtree.end(); ++node) {
+                    draw_node(*node, aSurface, Location(viewport.right(), aOrigin.y), aSettings);
+                }
             }
         }
     }
