@@ -96,6 +96,8 @@ class SeqdbUpdater:
 
     def _match_hidb(self, seqdb_entry):
         hi_entry = self.hidb.find_antigen_by_name(seqdb_entry.name, virus_type=seqdb_entry.virus_type)
+        # if "3000384319" in seqdb_entry.cdcids():
+        #     module_logger.debug('M1 {} {} -> {}'.format(seqdb_entry.name, seqdb_entry.cdcids(), hi_entry))
         if not hi_entry: # and seqdb_member.seq.has_lab("CDC"):
             # module_logger.debug('find by cdcid {} {}'.format(seqdb_entry.name, seqdb_entry.cdcids()))
             for cdcid in seqdb_entry.cdcids():
@@ -113,7 +115,7 @@ class SeqdbUpdater:
                 module_logger.error('hi_entry {}'.format(hi_entry))
                 #module_logger.error('e2l {}'.format(e2l))
                 raise
-            # if "TEXAS/88/2016" in seqdb_entry.name: # "RV2366" in name:
+            # if "B/INDIANA/25/2015" in seqdb_entry.name: # "RV2366" in name:
             #     module_logger.debug('{}\n{}\nseq_passages_reassortant:{}\nhi_entry:{}\n'.format(seqdb_entry.name, pprint.pformat(matches), pprint.pformat([{"p": seq.passages or [""], "r": seq.reassortant or [""]} for seq in seqdb_entry]), pprint.pformat(hi_entry, width=200)))
             if matches:
                 self._apply_matches(matches, seqdb_entry.name, seqdb_entry, hi_entry)
@@ -121,7 +123,7 @@ class SeqdbUpdater:
     def _apply_matches(self, matches, name, seqdb_entry, hi_entry):
         # matches is list of dicts {"s": seq_passage, "r": seq_reassortant, "h": hi_variant}
         for m in matches:
-            for hi_name in (self._make_hi_name(name, m["h"]), self._make_hi_name(hi_entry["N"], m["h"])):
+            for hi_name in [self._make_hi_name(name, m["h"]), self._make_hi_name(hi_entry["N"], m["h"])] + [self._make_hi_name(other_name, m["h"]) for other_name in hi_entry.get("o", [])]:
                 # if "TEXAS/88/2016" in name:
                 #     module_logger.debug('{} hi_name: {} hi-entry: {}\n{}'.format(name, hi_name, hi_entry["N"], m))
                 if hi_name not in self.hidb_already_matched:
