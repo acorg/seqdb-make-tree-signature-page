@@ -92,3 +92,6 @@ std::string xz_compress(std::string input)
 } // xz_compress
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

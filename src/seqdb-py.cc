@@ -382,3 +382,6 @@ PYBIND11_PLUGIN(seqdb_backend)
 }
 
 // ----------------------------------------------------------------------
+/// Local Variables:
+/// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
+/// End:

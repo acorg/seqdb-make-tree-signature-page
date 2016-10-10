@@ -17,7 +17,7 @@ Chart import_chart(std::string buffer)
         buffer = read_file(buffer);
     if (xz_compressed(buffer))
         buffer = xz_decompress(buffer);
-    else if (buffer[0] == '{')
+    if (buffer[0] == '{')
         chart = Chart::from_json(buffer);
     else
         throw std::runtime_error("cannot import chart: unrecognized source format");
