@@ -54,6 +54,8 @@ DIST = dist
 
 all: $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX) $(DIST)/test-cairo
 
+install: $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX)
+
 -include $(BUILD)/*.d
 
 # ----------------------------------------------------------------------
