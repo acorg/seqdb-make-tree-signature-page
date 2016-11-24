@@ -13,7 +13,6 @@
 
 #include "tree.hh"
 #include "seqdb.hh"
-#include "xz.hh"
 #include "float.hh"
 #include "string.hh"
 #include "stream.hh"

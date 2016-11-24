@@ -9,14 +9,11 @@ MAKEFLAGS = -w
 
 # ----------------------------------------------------------------------
 
-SOURCES_DIR = src
-
 # TEST_SOURCES = test.cc seqdb.cc seqdb-json.cc read-file.cc xz.cc
 SEQDB_SOURCES = seqdb.cc seqdb-py.cc amino-acids.cc clades.cc \
 		tree.cc tree-import.cc newick.cc settings.cc chart.cc \
 		draw.cc coloring.cc geographic-map.cc continent-map.cc \
-		signature-page.cc draw-tree.cc time-series.cc draw-clades.cc antigenic-maps.cc \
-		read-file.cc xz.cc
+		signature-page.cc draw-tree.cc time-series.cc draw-clades.cc antigenic-maps.cc
 
 TEST_CAIRO_SOURCES = test-cairo.cc draw.cc
 
@@ -39,7 +36,7 @@ PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 
 # -fvisibility=hidden and -flto make resulting lib smaller (pybind11) but linking is much slower
 OPTIMIZATION = -O3 #-fvisibility=hidden -flto
-CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
+CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include -I$(ACMACSD_ROOT)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
 LDFLAGS =
 TEST_CAIRO_LDLIBS = $$(pkg-config --libs cairo)
 SEQDB_LDLIBS = $$(pkg-config --libs cairo) $$(pkg-config --libs liblzma) $$($(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
@@ -52,9 +49,9 @@ PKG_INCLUDES = $$(pkg-config --cflags cairo) $$(pkg-config --cflags liblzma) $$(
 BUILD = build
 DIST = dist
 
-all: $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX) $(DIST)/test-cairo
+all: check-acmacsd-root $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX) $(DIST)/test-cairo
 
-install: $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX)
+install: check-acmacsd-root $(DIST)/seqdb_backend$(PYTHON_MODULE_SUFFIX)
 
 -include $(BUILD)/*.d
 
@@ -78,7 +75,7 @@ distclean: clean
 
 # ----------------------------------------------------------------------
 
-$(BUILD)/%.o: $(SOURCES_DIR)/%.cc | $(BUILD) $(BUILD)/submodules
+$(BUILD)/%.o: cc/%.cc | $(BUILD) $(BUILD)/submodules
 	@echo $<
 	@g++ $(CXXFLAGS) -c -o $@ $<
 
@@ -92,11 +89,18 @@ $(BUILD)/submodules:
 
 # ----------------------------------------------------------------------
 
+check-acmacsd-root:
+ifndef ACMACSD_ROOT
+	$(error ACMACSD_ROOT is not set)
+endif
+
 $(DIST):
 	mkdir -p $(DIST)
 
 $(BUILD):
 	mkdir -p $(BUILD)
+
+.PHONY: check-acmacsd-root
 
 # ======================================================================
 ### Local Variables:

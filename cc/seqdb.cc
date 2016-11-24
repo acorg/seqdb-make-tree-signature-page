@@ -3,7 +3,7 @@
 #include "seqdb.hh"
 #include "clades.hh"
 #include "string.hh"
-#include "read-file.hh"
+#include "acmacs-base/read-file.hh"
 
 // ----------------------------------------------------------------------
 
@@ -504,7 +504,7 @@ void Seqdb::load(std::string filename)
     // if (filename.empty()) {
     //     filename = std::string(getenv("HOME")) + "/WHO/seqdb.json.xz";
     // }
-    from_json(read_file(filename));
+    from_json(acmacs_base::read_file(filename));
 
 } // Seqdb::from_json_file
 
@@ -515,7 +515,7 @@ void Seqdb::save(std::string filename, size_t indent) const
     // if (filename.empty()) {
     //     filename = std::string(getenv("HOME")) + "/WHO/seqdb.json.xz";
     // }
-    write_file(filename, to_json(indent));
+    acmacs_base::write_file(filename, to_json(indent));
 
 } // Seqdb::save
 

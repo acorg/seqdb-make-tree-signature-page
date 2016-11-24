@@ -1,8 +1,7 @@
 #include "tree-import.hh"
 
-#include "read-file.hh"
+#include "acmacs-base/read-file.hh"
 #include "newick.hh"
-#include "xz.hh"
 
 // ----------------------------------------------------------------------
 
@@ -10,11 +9,9 @@ Tree* import_tree(std::string buffer)
 {
     Tree* tree = nullptr;
     if (buffer == "-")
-        buffer = read_stdin();
+        buffer = acmacs_base::read_stdin();
     else // if (file_exists(buffer))
-        buffer = read_file(buffer);
-    if (xz_compressed(buffer))
-        buffer = xz_decompress(buffer);
+        buffer = acmacs_base::read_file(buffer);
     if (buffer[0] == '(') {
         tree = parse_newick(buffer);
         tree->preprocess_upon_importing_from_external_format();

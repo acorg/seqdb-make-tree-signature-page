@@ -2,8 +2,7 @@
 
 #include "chart.hh"
 #include "tree.hh"
-#include "read-file.hh"
-#include "xz.hh"
+#include "acmacs-base/read-file.hh"
 #include "json-struct.hh"
 
 // ----------------------------------------------------------------------
@@ -12,11 +11,9 @@ Chart import_chart(std::string buffer)
 {
     Chart chart;
     if (buffer == "-")
-        buffer = read_stdin();
+        buffer = acmacs_base::read_stdin();
     else
-        buffer = read_file(buffer);
-    if (xz_compressed(buffer))
-        buffer = xz_decompress(buffer);
+        buffer = acmacs_base::read_file(buffer);
     if (buffer[0] == '{')
         chart = Chart::from_json(buffer);
     else

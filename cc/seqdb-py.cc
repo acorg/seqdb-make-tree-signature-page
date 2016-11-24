@@ -8,6 +8,11 @@
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wdeprecated"
 #pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wexit-time-destructors"
+#pragma GCC diagnostic ignored "-Wcovered-switch-default"
+#pragma GCC diagnostic ignored "-Wundef"
+#pragma GCC diagnostic ignored "-Wrange-loop-analysis"
+#pragma GCC diagnostic ignored "-Wdocumentation"
 #endif
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -221,7 +226,7 @@ PYBIND11_PLUGIN(seqdb_backend)
             .export_values()
             ;
 
-    py::class_<Tree>(m, "Tree", py::base<Node>())
+    py::class_<Tree, Node>(m, "Tree")
               //.def("json", static_cast<std::string (Tree::*)(int) const>(&Tree::json), py::arg("indent") = 0)
             .def("json", &Tree::json, py::arg("indent") = size_t(0))
             .def("ladderize", &Tree::ladderize, py::arg("method") = Node::LadderizeMethod::NumberOfLeaves)
@@ -356,7 +361,7 @@ PYBIND11_PLUGIN(seqdb_backend)
             ;
 
 
-    py::enum_<int>(m, "Show")
+    py::enum_<SignaturePage::Parts>(m, "Show")
             .value("Title", SignaturePage::ShowTitle)
             .value("Tree", SignaturePage::ShowTree)
             .value("Legend", SignaturePage::ShowLegend)
