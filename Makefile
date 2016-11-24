@@ -24,10 +24,12 @@ ifeq ($(CLANG),Y)
   WEVERYTHING = -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
   WARNINGS = -Wno-weak-vtables # -Wno-padded
   STD = c++14
+  CXXFLAGS_EXTRA =
 else
   WEVERYTHING = -Wall -Wextra
   WARNINGS =
   STD = c++14
+  CXXFLAGS_EXTRA = -ftemplate-depth=2000 # cc/seqdb-py.cc
 endif
 
 PYTHON_VERSION = $(shell python3 -c 'import sys; print("{0.major}.{0.minor}".format(sys.version_info))')
@@ -36,7 +38,7 @@ PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 
 # -fvisibility=hidden and -flto make resulting lib smaller (pybind11) but linking is much slower
 OPTIMIZATION = -O3 #-fvisibility=hidden -flto
-CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include -I$(ACMACSD_ROOT)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
+CXXFLAGS = -MMD -g $(OPTIMIZATION) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include -I$(ACMACSD_ROOT)/include $(PKG_INCLUDES) $(MODULES_INCLUDE) $(CXXFLAGS_EXTRA)
 LDFLAGS =
 TEST_CAIRO_LDLIBS = $$(pkg-config --libs cairo)
 SEQDB_LDLIBS = $$(pkg-config --libs cairo) $$(pkg-config --libs liblzma) $$($(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
