@@ -1,5 +1,7 @@
-# seqdb
-Set of tools to build, query sequence database and to generate phylogenetic trees.
+# Obsolete!
+
+# seqdb-make-tree-signature-page
+Set of tools to build, query sequence database and to generate phylogenetic trees and signature pages. To be split into separate packages.
 
 ## Requirements:
 
